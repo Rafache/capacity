@@ -1,14 +1,6 @@
-# Contribuer à Ma capacité
+# Contribuer
 
-Merci de contribuer à **Ma capacité**. L’application est volontairement simple : elle fonctionne entièrement dans le navigateur et est publiée automatiquement sur GitHub Pages.
-
-## Principes du projet
-
-- Ne pas ajouter de compte, d’authentification, de serveur, de base de données ou de suivi analytique.
-- Les données de l’utilisateur doivent rester dans `localStorage`.
-- L’import et l’export CSV doivent rester fonctionnels et compatibles avec les données déjà enregistrées.
-- Préserver une interface utilisable sur mobile.
-- Les jours ouvrés correspondent aux jours du lundi au vendredi, hors jours fériés.
+L’application est volontairement simple : elle fonctionne entièrement dans le navigateur et est publiée automatiquement sur GitHub Pages.
 
 ## Pré-requis
 
@@ -23,8 +15,6 @@ cd capacity
 npm install
 npm run dev
 ```
-
-Vite affiche ensuite une adresse locale à ouvrir dans le navigateur.
 
 ## Vérifier une modification
 
@@ -53,7 +43,7 @@ Testez également, dans le navigateur :
 - `src/types.ts` : types partagés ;
 - `src/styles.css` : styles de l’application.
 
-Gardez les changements ciblés : évitez les dépendances et les refontes non nécessaires. Formatez le JSX sur plusieurs lignes, avec une indentation lisible, en suivant le style des fichiers existants.
+Gardez les changements ciblés : évitez les dépendances et les refontes non nécessaires.
 
 ## Proposer une modification
 
