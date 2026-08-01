@@ -11,13 +11,19 @@
   -webkit-backdrop-filter: blur(14px);
 }
 
+.summary-main {
+  min-width: 0;
+}
+
 .summary-main > strong,
 .summary-stat > strong {
   display: flex;
   align-items: baseline;
   gap: 4px;
+  min-width: 0;
   font-size: inherit;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .summary-stat > strong {
@@ -25,20 +31,19 @@
 }
 
 .summary-value {
+  flex: 0 0 auto;
   font-size: 24px;
   font-weight: 850;
   letter-spacing: -0.04em;
 }
 
 .summary-unit {
+  flex: 0 0 auto;
   font-size: 12px;
   font-weight: 750;
   letter-spacing: -0.01em;
   line-height: 1.05;
-}
-
-.summary-main .summary-unit {
-  max-width: 48px;
+  white-space: nowrap;
 }
 
 .summary-main small {
@@ -262,7 +267,7 @@
   }
 
   .summary-unit {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .action-menu-trigger {
@@ -288,6 +293,6 @@
   }
 
   .summary-unit {
-    font-size: 10px;
+    font-size: 9px;
   }
 }
