@@ -1,6 +1,23 @@
 "use client";
 
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowUpDown,
+  BriefcaseBusiness,
+  CalendarDays,
+  CalendarRange,
+  CalendarX2,
+  ChartNoAxesColumnIncreasing,
+  ChevronLeft,
+  ChevronRight,
+  CircleCheckBig,
+  Clock3,
+  Coffee,
+  Gauge,
+  Palmtree,
+  Sun,
+  type LucideIcon,
+} from "lucide-react";
 
 type Zone = "A" | "B" | "C";
 type SegmentKey = "available" | "leave" | "rtt" | "other" | "holidays" | "nonWorked";
@@ -23,13 +40,13 @@ const MONTHS_SHORT = ["Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc.", "Janv.
 const MONTHS_LONG = ["Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin"];
 const WEEKDAY = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 
-const SEGMENTS: Array<{ key: SegmentKey; label: string; short: string }> = [
-  { key: "available", label: "Disponible", short: "Disponible" },
-  { key: "leave", label: "Congés payés", short: "Congés" },
-  { key: "rtt", label: "RTT", short: "RTT" },
-  { key: "other", label: "Autres", short: "Autres" },
-  { key: "holidays", label: "Jours fériés", short: "Jours fériés" },
-  { key: "nonWorked", label: "Temps non travaillé", short: "Non travaillé" },
+const SEGMENTS: Array<{ key: SegmentKey; label: string; short: string; table: string }> = [
+  { key: "available", label: "Disponible", short: "Disponible", table: "Dispo" },
+  { key: "leave", label: "Congés payés", short: "Congés", table: "CP" },
+  { key: "rtt", label: "RTT", short: "RTT", table: "RTT" },
+  { key: "other", label: "Autres", short: "Autres", table: "Autres" },
+  { key: "holidays", label: "Jours fériés", short: "Jours fériés", table: "Fériés" },
+  { key: "nonWorked", label: "Temps non travaillé", short: "Non travaillé", table: "Non trav." },
 ];
 
 const SCHOOL_BREAKS: Record<string, Record<Zone, SchoolBreak[]>> = {
@@ -195,8 +212,6 @@ export default function Home() {
   const [tab, setTab] = useState<"monthly" | "annual">("monthly");
   const [startYear, setStartYear] = useState(2026);
   const [monthIndex, setMonthIndex] = useState(4);
-  const [detailMonth, setDetailMonth] = useState(4);
-  const [selectedSegment, setSelectedSegment] = useState<SegmentKey>("leave");
   const [zone, setZone] = useState<Zone>("C");
   const [allEntries, setAllEntries] = useState<Record<string, Entry[]>>(() => ({ "2026": defaultEntries(), "2027": defaultEntries(), "2028": defaultEntries() }));
   const [csvOpen, setCsvOpen] = useState(false);
@@ -297,31 +312,22 @@ export default function Home() {
     setCsvOpen(false);
   }
 
-  function segmentValue(item: ReturnType<typeof getMonthStats>, key: SegmentKey) {
-    return item[key];
-  }
-
-  function chooseSegment(index: number, key: SegmentKey) {
-    setDetailMonth(index);
-    setSelectedSegment(key);
-  }
-
   return (
     <main className="app-shell">
       <section className="app-card" aria-label="Gestion de capacité">
         <header className="topbar">
-          <div className="brand"><span className="brand-mark" aria-hidden="true">▥</span><span>Ma capacité</span></div>
+          <div className="brand"><span className="brand-mark" aria-hidden="true"><ChartNoAxesColumnIncreasing /></span><span>Ma capacité</span></div>
           <div className="top-actions">
             <label className="year-select">
               <span className="sr-only">Année budgétaire</span>
-              <select value={startYear} onChange={(event) => { setStartYear(Number(event.target.value)); setMonthIndex(0); setDetailMonth(0); }}>
+              <select value={startYear} onChange={(event) => { setStartYear(Number(event.target.value)); setMonthIndex(0); }}>
                 <option value={2026}>2026 — 2027</option>
                 <option value={2027}>2027 — 2028</option>
                 <option value={2028}>2028 — 2029</option>
               </select>
             </label>
             <div className="csv-wrap">
-              <button className="csv-button" onClick={() => setCsvOpen((open) => !open)} aria-expanded={csvOpen}>⇅ <span>CSV</span></button>
+              <button className="csv-button" onClick={() => setCsvOpen((open) => !open)} aria-expanded={csvOpen}><ArrowUpDown aria-hidden="true" /> <span>CSV</span></button>
               {csvOpen && <div className="csv-menu"><button onClick={() => fileRef.current?.click()}>Importer</button><button onClick={exportCsv}>Exporter</button></div>}
               <input ref={fileRef} className="hidden-input" type="file" accept=".csv,text/csv" onChange={importCsv} />
             </div>
@@ -335,17 +341,17 @@ export default function Home() {
 
         {tab === "monthly" ? (
           <div className="monthly-view">
-            <div className="month-switcher"><button onClick={() => setMonthIndex((value) => (value + 11) % 12)} aria-label="Mois précédent">‹</button><strong>{MONTHS_LONG[monthIndex]} {currentDate.year}</strong><button onClick={() => setMonthIndex((value) => (value + 1) % 12)} aria-label="Mois suivant">›</button></div>
+            <div className="month-switcher"><button onClick={() => setMonthIndex((value) => (value + 11) % 12)} aria-label="Mois précédent"><ChevronLeft /></button><strong>{MONTHS_LONG[monthIndex]} {currentDate.year}</strong><button onClick={() => setMonthIndex((value) => (value + 1) % 12)} aria-label="Mois suivant"><ChevronRight /></button></div>
 
             <section className="summary-card">
-              <span className="summary-icon" aria-hidden="true">▦</span>
+              <span className="summary-icon" aria-hidden="true"><CalendarDays /></span>
               <div className="summary-main"><strong>{currentStats.baseline} jours ouvrés</strong></div>
               <div className="summary-stat available"><strong>{formatNumber(currentStats.available)} jours</strong><span>disponibles</span></div>
               <div className="summary-stat rate"><strong>{Math.round((currentStats.available / currentStats.baseline) * 100)} %</strong><span>de capacité</span></div>
             </section>
 
             <section className="input-row work-row">
-              <span className="row-icon work-icon" aria-hidden="true">◷</span>
+              <span className="row-icon work-icon" aria-hidden="true"><Clock3 /></span>
               <span className="row-copy"><strong>Temps de travail</strong></span>
               <div className="stepper percent-stepper"><button onClick={() => adjust("workRate", -5)} aria-label="Réduire le temps de travail">−</button><output>{currentEntry.workRate} %</output><button className={currentEntry.workRate >= 100 ? "disabled" : ""} onClick={() => adjust("workRate", 5)} aria-label="Augmenter le temps de travail">+</button></div>
             </section>
@@ -354,8 +360,8 @@ export default function Home() {
               <h2>Calendrier du mois</h2>
               <div className="zones" aria-label="Zone scolaire">{(["A", "B", "C"] as Zone[]).map((item) => <button key={item} className={zone === item ? "active" : ""} onClick={() => setZone(item)}>Zone {item}</button>)}</div>
               <div className="calendar-events">
-                {monthHolidays.map((item) => <div className="calendar-event" key={item.name}><span className="event-icon holiday">☀</span><span>{item.name} · {formatDate(item.date)}</span></div>)}
-                {schoolBreaks.map((item) => <div className="calendar-event" key={`${item.name}-${item.start}`}><span className="event-icon school">▦</span><span>{formatRange(item)}</span></div>)}
+                {monthHolidays.map((item) => <div className="calendar-event" key={item.name}><span className="event-icon holiday"><Sun /></span><span>{item.name} · {formatDate(item.date)}</span></div>)}
+                {schoolBreaks.map((item) => <div className="calendar-event" key={`${item.name}-${item.start}`}><span className="event-icon school"><CalendarRange /></span><span>{formatRange(item)}</span></div>)}
                 {!monthHolidays.length && !schoolBreaks.length && <p className="empty-calendar">Aucun jour férié ni vacances scolaires ce mois-ci.</p>}
                 {!SCHOOL_BREAKS[String(startYear)]?.[zone]?.length && <p className="empty-calendar">Les dates scolaires de cette année ne sont pas encore publiées.</p>}
               </div>
@@ -363,38 +369,32 @@ export default function Home() {
 
             <section className="absence-section">
               <h2>Mes absences</h2>
-              <InputRow icon="♧" iconClass="leave-icon" label="Congés payés" value={currentEntry.leave} onMinus={() => adjust("leave", -0.5)} onPlus={() => adjust("leave", 0.5)} />
-              <InputRow icon="◷" iconClass="rtt-icon" label="RTT" value={currentEntry.rtt} onMinus={() => adjust("rtt", -0.5)} onPlus={() => adjust("rtt", 0.5)} />
-              <InputRow icon="◆" iconClass="other-icon" label="Autres" sublabel="Formation, mandat…" value={currentEntry.other} onMinus={() => adjust("other", -0.5)} onPlus={() => adjust("other", 0.5)} />
+              <InputRow icon={Palmtree} iconClass="leave-icon" label="Congés payés" value={currentEntry.leave} onMinus={() => adjust("leave", -0.5)} onPlus={() => adjust("leave", 0.5)} />
+              <InputRow icon={Coffee} iconClass="rtt-icon" label="RTT" value={currentEntry.rtt} onMinus={() => adjust("rtt", -0.5)} onPlus={() => adjust("rtt", 0.5)} />
+              <InputRow icon={BriefcaseBusiness} iconClass="other-icon" label="Autres" sublabel="Formation, mandat…" value={currentEntry.other} onMinus={() => adjust("other", -0.5)} onPlus={() => adjust("other", 0.5)} />
             </section>
 
           </div>
         ) : (
           <div className="annual-view">
             <section className="kpis">
-              <article><span className="kpi-icon available-icon">▦</span><strong>{formatNumber(annualAvailable)} j</strong><small>Disponibles</small></article>
-              <article><span className="kpi-icon unavailable-icon">◉</span><strong>{formatNumber(annualUnavailable)} j</strong><small>Indisponibilités</small></article>
-              <article><span className="kpi-icon rate-icon">◕</span><strong>{annualRate} %</strong><small>Capacité</small></article>
+              <article><span className="kpi-icon available-icon"><CircleCheckBig /></span><strong>{formatNumber(annualAvailable)} j</strong><small>Disponibles</small></article>
+              <article><span className="kpi-icon unavailable-icon"><CalendarX2 /></span><strong>{formatNumber(annualUnavailable)} j</strong><small>Indisponibilités</small></article>
+              <article><span className="kpi-icon rate-icon"><Gauge /></span><strong>{annualRate} %</strong><small>Capacité</small></article>
             </section>
 
             <section className="monthly-bars">
-              <h2>Capacité par mois</h2>
-              {stats.map((item, index) => (
-                <div className={`month-block ${detailMonth === index ? "selected" : ""}`} key={MONTHS_SHORT[index]}>
-                  <div className="month-bar-row">
-                    <button className="month-name" onClick={() => setDetailMonth(index)}>{MONTHS_SHORT[index]}</button>
-                    <StackedBar stats={item} onSelect={(key) => chooseSegment(index, key)} compact />
-                    <span className="baseline">{item.baseline} j</span>
-                  </div>
-                  {detailMonth === index && (
-                    <div className="month-detail">
-                      <h3>Détail · {MONTHS_LONG[index]}</h3>
-                      <StackedBar stats={item} onSelect={(key) => chooseSegment(index, key)} selected={selectedSegment} />
-                      <div className="detail-legend">{SEGMENTS.map((segment) => <button key={segment.key} onClick={() => chooseSegment(index, segment.key)}><i className={`dot ${segment.key}`} />{segment.short}<strong>{formatNumber(segmentValue(item, segment.key))} j</strong></button>)}</div>
-                    </div>
-                  )}
+              <h2>Capacité par mois <small>en jours</small></h2>
+              <div className="annual-table" role="table" aria-label="Capacité mensuelle en jours">
+                <div className="annual-table-header" role="row">
+                  <span role="columnheader">Mois</span>
+                  {SEGMENTS.map((segment) => <span key={segment.key} role="columnheader" title={segment.label}><i className={`dot ${segment.key}`} />{segment.table}</span>)}
                 </div>
-              ))}
+                {stats.map((item, index) => <div className="annual-table-row" role="row" key={MONTHS_SHORT[index]}>
+                  <div className="month-cell" role="rowheader"><strong>{MONTHS_SHORT[index]}</strong><small>{item.baseline} ouvrés</small></div>
+                  {SEGMENTS.map((segment) => <span className={`day-cell ${segment.key}`} role="cell" key={segment.key}>{formatNumber(item[segment.key])}<small>j</small></span>)}
+                </div>)}
+              </div>
             </section>
 
             <section className="annual-distribution">
@@ -408,17 +408,8 @@ export default function Home() {
   );
 }
 
-function InputRow({ icon, iconClass, label, sublabel, value, onMinus, onPlus }: { icon: string; iconClass: string; label: string; sublabel?: string; value: number; onMinus: () => void; onPlus: () => void }) {
-  return <div className="input-row"><span className={`row-icon ${iconClass}`}>{icon}</span><span className="row-copy"><strong>{label}</strong>{sublabel && <small>{sublabel}</small>}</span><div className="stepper"><button onClick={onMinus} aria-label={`Réduire ${label}`}>−</button><output>{formatNumber(value)} j</output><button onClick={onPlus} aria-label={`Augmenter ${label}`}>+</button></div></div>;
-}
-
-function StackedBar({ stats, onSelect, compact = false, selected }: { stats: ReturnType<typeof getMonthStats>; onSelect: (key: SegmentKey) => void; compact?: boolean; selected?: SegmentKey }) {
-  return <div className={`stacked-bar ${compact ? "compact" : "expanded"}`}>{SEGMENTS.map((segment) => {
-    const value = stats[segment.key];
-    const percent = stats.baseline ? (value / stats.baseline) * 100 : 0;
-    if (value <= 0 && compact) return null;
-    return <button key={segment.key} className={`segment ${segment.key} ${selected === segment.key ? "active" : ""}`} style={{ width: `${Math.max(value > 0 ? 2 : 0, percent)}%` }} onClick={() => onSelect(segment.key)} aria-label={`${segment.label} : ${formatNumber(value)} jours`}><span>{!compact && value > 0 ? (selected === segment.key ? `${Math.round(percent)} %` : `${formatNumber(value)} j`) : ""}</span></button>;
-  })}</div>;
+function InputRow({ icon: Icon, iconClass, label, sublabel, value, onMinus, onPlus }: { icon: LucideIcon; iconClass: string; label: string; sublabel?: string; value: number; onMinus: () => void; onPlus: () => void }) {
+  return <div className="input-row"><span className={`row-icon ${iconClass}`}><Icon aria-hidden="true" /></span><span className="row-copy"><strong>{label}</strong>{sublabel && <small>{sublabel}</small>}</span><div className="stepper"><button onClick={onMinus} aria-label={`Réduire ${label}`}>−</button><output>{formatNumber(value)} j</output><button onClick={onPlus} aria-label={`Augmenter ${label}`}>+</button></div></div>;
 }
 
 function AnnualPie({ stats, rate }: { stats: ReturnType<typeof getMonthStats>; rate: number }) {
