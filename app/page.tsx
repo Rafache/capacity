@@ -14,18 +14,20 @@ import {
   Clock3,
   Coffee,
   Gauge,
+  GraduationCap,
   Palmtree,
   Sun,
   type LucideIcon,
 } from "lucide-react";
 
 type Zone = "A" | "B" | "C";
-type SegmentKey = "available" | "leave" | "rtt" | "other" | "holidays";
+type SegmentKey = "available" | "leave" | "rtt" | "training" | "other" | "holidays";
 
 type Entry = {
   workRate: number;
   leave: number;
   rtt: number;
+  training: number;
   other: number;
 };
 
@@ -40,12 +42,13 @@ const MONTHS_SHORT = ["Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc.", "Janv.
 const MONTHS_LONG = ["Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin"];
 const WEEKDAY = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 
-const SEGMENTS: Array<{ key: SegmentKey; label: string; short: string; table: string }> = [
-  { key: "available", label: "Disponible", short: "Disponible", table: "Dispo" },
-  { key: "leave", label: "Congés payés", short: "Congés", table: "CP" },
-  { key: "rtt", label: "RTT", short: "RTT", table: "RTT" },
-  { key: "other", label: "Autres", short: "Autres", table: "Autres" },
-  { key: "holidays", label: "Jours fériés", short: "Jours fériés", table: "Fériés" },
+const SEGMENTS: Array<{ key: SegmentKey; label: string; icon: LucideIcon }> = [
+  { key: "available", label: "Disponible", icon: CircleCheckBig },
+  { key: "leave", label: "Congés payés", icon: Palmtree },
+  { key: "rtt", label: "RTT", icon: Coffee },
+  { key: "training", label: "Formation", icon: GraduationCap },
+  { key: "other", label: "Autres", icon: BriefcaseBusiness },
+  { key: "holidays", label: "Jours fériés", icon: Sun },
 ];
 
 const SCHOOL_BREAKS: Record<string, Record<Zone, SchoolBreak[]>> = {
@@ -99,18 +102,18 @@ const SCHOOL_BREAKS: Record<string, Record<Zone, SchoolBreak[]>> = {
 };
 
 const presets: Entry[] = [
-  { workRate: 100, leave: 5, rtt: 1, other: 1 },
-  { workRate: 100, leave: 8, rtt: 1, other: 1 },
-  { workRate: 100, leave: 1, rtt: 1, other: 2 },
-  { workRate: 100, leave: 2, rtt: 1, other: 2 },
-  { workRate: 100, leave: 5, rtt: 2.5, other: 4.5 },
-  { workRate: 100, leave: 5, rtt: 1, other: 2 },
-  { workRate: 100, leave: 2, rtt: 1, other: 2 },
-  { workRate: 80, leave: 1, rtt: 1, other: 1 },
-  { workRate: 100, leave: 1, rtt: 1, other: 2 },
-  { workRate: 100, leave: 3, rtt: 1, other: 1 },
-  { workRate: 90, leave: 2, rtt: 1, other: 1 },
-  { workRate: 100, leave: 1, rtt: 1, other: 2 },
+  { workRate: 100, leave: 5, rtt: 1, training: 0, other: 1 },
+  { workRate: 100, leave: 8, rtt: 1, training: 0, other: 1 },
+  { workRate: 100, leave: 1, rtt: 1, training: 0, other: 2 },
+  { workRate: 100, leave: 2, rtt: 1, training: 0, other: 2 },
+  { workRate: 100, leave: 5, rtt: 2.5, training: 0, other: 4.5 },
+  { workRate: 100, leave: 5, rtt: 1, training: 0, other: 2 },
+  { workRate: 100, leave: 2, rtt: 1, training: 0, other: 2 },
+  { workRate: 80, leave: 1, rtt: 1, training: 0, other: 1 },
+  { workRate: 100, leave: 1, rtt: 1, training: 0, other: 2 },
+  { workRate: 100, leave: 3, rtt: 1, training: 0, other: 1 },
+  { workRate: 90, leave: 2, rtt: 1, training: 0, other: 1 },
+  { workRate: 100, leave: 1, rtt: 1, training: 0, other: 2 },
 ];
 
 function dateUTC(year: number, month: number, day: number) {
@@ -197,14 +200,24 @@ function defaultEntries() {
   return presets.map((item) => ({ ...item }));
 }
 
+function normalizeEntry(item?: Partial<Entry>): Entry {
+  return {
+    workRate: item?.workRate ?? 100,
+    leave: item?.leave ?? 0,
+    rtt: item?.rtt ?? 0,
+    training: item?.training ?? 0,
+    other: item?.other ?? 0,
+  };
+}
+
 function getMonthStats(startYear: number, index: number, entry: Entry) {
   const { year, month } = fiscalMonth(startYear, index);
   const baseline = weekdaysInMonth(year, month);
   const holidays = publicHolidays(year).filter((item) => item.date.getUTCMonth() === month && item.date.getUTCDay() !== 0 && item.date.getUTCDay() !== 6).length;
   const contracted = roundHalf(baseline * (entry.workRate / 100));
   const nonWorked = Math.max(0, baseline - contracted);
-  const available = Math.max(0, roundHalf(contracted - holidays - entry.leave - entry.rtt - entry.other));
-  return { baseline, contracted, holidays, nonWorked, available, leave: entry.leave, rtt: entry.rtt, other: entry.other };
+  const available = Math.max(0, roundHalf(contracted - holidays - entry.leave - entry.rtt - entry.training - entry.other));
+  return { baseline, contracted, holidays, nonWorked, available, leave: entry.leave, rtt: entry.rtt, training: entry.training, other: entry.other };
 }
 
 export default function Home() {
@@ -217,7 +230,7 @@ export default function Home() {
   const fileRef = useRef<HTMLInputElement>(null);
   const storageReady = useRef(false);
 
-  const entries = allEntries[String(startYear)] ?? defaultEntries();
+  const entries = useMemo(() => (allEntries[String(startYear)] ?? defaultEntries()).map(normalizeEntry), [allEntries, startYear]);
   const currentEntry = entries[monthIndex];
   const currentDate = fiscalMonth(startYear, monthIndex);
   const currentStats = getMonthStats(startYear, monthIndex, currentEntry);
@@ -235,17 +248,15 @@ export default function Home() {
   const annualUnavailable = annualBaseline - annualAvailable;
   const annualRate = annualBaseline ? Math.round((annualAvailable / annualBaseline) * 100) : 0;
   const annualContracted = stats.reduce((sum, item) => sum + item.contracted, 0);
+  const annualWorkRate = annualBaseline ? Math.round((annualContracted / annualBaseline) * 100) : 0;
   const annualStats = {
     available: annualAvailable,
     leave: stats.reduce((sum, item) => sum + item.leave, 0),
     rtt: stats.reduce((sum, item) => sum + item.rtt, 0),
+    training: stats.reduce((sum, item) => sum + item.training, 0),
     other: stats.reduce((sum, item) => sum + item.other, 0),
     holidays: stats.reduce((sum, item) => sum + item.holidays, 0),
   };
-
-  function annualPercent(value: number) {
-    return annualBaseline ? Math.round((value / annualBaseline) * 100) : 0;
-  }
 
   useEffect(() => {
     if (!storageReady.current) return;
@@ -273,7 +284,7 @@ export default function Home() {
   function updateEntry(field: keyof Entry, value: number) {
     setAllEntries((previous) => {
       const yearEntries = [...(previous[String(startYear)] ?? defaultEntries())];
-      yearEntries[monthIndex] = { ...yearEntries[monthIndex], [field]: value };
+      yearEntries[monthIndex] = { ...normalizeEntry(yearEntries[monthIndex]), [field]: value };
       return { ...previous, [String(startYear)]: yearEntries };
     });
   }
@@ -286,8 +297,8 @@ export default function Home() {
   }
 
   function exportCsv() {
-    const rows = ["annee_budgetaire;mois;temps_travail;conges;RTT;autres"];
-    entries.forEach((entry, index) => rows.push(`${startYear}-${startYear + 1};${MONTHS_LONG[index]};${entry.workRate};${String(entry.leave).replace(".", ",")};${String(entry.rtt).replace(".", ",")};${String(entry.other).replace(".", ",")}`));
+    const rows = ["annee_budgetaire;mois;temps_travail;conges;RTT;formation;autres"];
+    entries.forEach((entry, index) => rows.push(`${startYear}-${startYear + 1};${MONTHS_LONG[index]};${entry.workRate};${String(entry.leave).replace(".", ",")};${String(entry.rtt).replace(".", ",")};${String(entry.training).replace(".", ",")};${String(entry.other).replace(".", ",")}`));
     const url = URL.createObjectURL(new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -306,7 +317,8 @@ export default function Home() {
       const imported = rows.slice(0, 12).map((row) => {
         const values = row.split(";");
         const num = (value: string) => Number(value.replace(",", ".")) || 0;
-        return { workRate: num(values[2]), leave: num(values[3]), rtt: num(values[4]), other: num(values[5]) };
+        const hasTrainingColumn = values.length >= 7;
+        return { workRate: num(values[2]), leave: num(values[3]), rtt: num(values[4]), training: hasTrainingColumn ? num(values[5]) : 0, other: num(values[hasTrainingColumn ? 6 : 5]) };
       });
       setAllEntries((previous) => ({ ...previous, [String(startYear)]: imported }));
     });
@@ -353,6 +365,14 @@ export default function Home() {
               <div className="stepper percent-stepper"><button onClick={() => adjust("workRate", -5)} aria-label="Réduire le temps de travail">−</button><output>{currentEntry.workRate} %</output><button className={currentEntry.workRate >= 100 ? "disabled" : ""} onClick={() => adjust("workRate", 5)} aria-label="Augmenter le temps de travail">+</button></div>
             </section>
 
+            <section className="absence-section">
+              <h2>Mes absences</h2>
+              <InputRow icon={Palmtree} iconClass="leave-icon" label="Congés payés" value={currentEntry.leave} onMinus={() => adjust("leave", -0.5)} onPlus={() => adjust("leave", 0.5)} />
+              <InputRow icon={Coffee} iconClass="rtt-icon" label="RTT" value={currentEntry.rtt} onMinus={() => adjust("rtt", -0.5)} onPlus={() => adjust("rtt", 0.5)} />
+              <InputRow icon={GraduationCap} iconClass="training-icon" label="Formation" value={currentEntry.training} onMinus={() => adjust("training", -0.5)} onPlus={() => adjust("training", 0.5)} />
+              <InputRow icon={BriefcaseBusiness} iconClass="other-icon" label="Autres" sublabel="Mandat, autre absence…" value={currentEntry.other} onMinus={() => adjust("other", -0.5)} onPlus={() => adjust("other", 0.5)} />
+            </section>
+
             <section className="calendar-card">
               <h2>Calendrier du mois</h2>
               <div className="zones" aria-label="Zone scolaire">{(["A", "B", "C"] as Zone[]).map((item) => <button key={item} className={zone === item ? "active" : ""} onClick={() => setZone(item)}>Zone {item}</button>)}</div>
@@ -362,13 +382,6 @@ export default function Home() {
                 {!monthHolidays.length && !schoolBreaks.length && <p className="empty-calendar">Aucun jour férié ni vacances scolaires ce mois-ci.</p>}
                 {!SCHOOL_BREAKS[String(startYear)]?.[zone]?.length && <p className="empty-calendar">Les dates scolaires de cette année ne sont pas encore publiées.</p>}
               </div>
-            </section>
-
-            <section className="absence-section">
-              <h2>Mes absences</h2>
-              <InputRow icon={Palmtree} iconClass="leave-icon" label="Congés payés" value={currentEntry.leave} onMinus={() => adjust("leave", -0.5)} onPlus={() => adjust("leave", 0.5)} />
-              <InputRow icon={Coffee} iconClass="rtt-icon" label="RTT" value={currentEntry.rtt} onMinus={() => adjust("rtt", -0.5)} onPlus={() => adjust("rtt", 0.5)} />
-              <InputRow icon={BriefcaseBusiness} iconClass="other-icon" label="Autres" sublabel="Formation, mandat…" value={currentEntry.other} onMinus={() => adjust("other", -0.5)} onPlus={() => adjust("other", 0.5)} />
             </section>
 
           </div>
@@ -392,23 +405,18 @@ export default function Home() {
               <div className="annual-table" role="table" aria-label="Capacité mensuelle en jours">
                 <div className="annual-table-header" role="row">
                   <span role="columnheader">Mois</span>
-                  <span role="columnheader" title="Temps de travail"><i className="dot workRate" />Tps travail</span>
-                  {SEGMENTS.map((segment) => <span key={segment.key} role="columnheader" title={segment.label}><i className={`dot ${segment.key}`} />{segment.table}</span>)}
+                  <span className="workRate" role="columnheader" aria-label="Temps de travail" title="Temps de travail"><Clock3 aria-hidden="true" /></span>
+                  {SEGMENTS.map((segment) => { const Icon = segment.icon; return <span className={segment.key} key={segment.key} role="columnheader" aria-label={segment.label} title={segment.label}><Icon aria-hidden="true" /></span>; })}
                 </div>
                 {stats.map((item, index) => <div className="annual-table-row" role="row" key={MONTHS_SHORT[index]}>
                   <div className="month-cell" role="rowheader"><strong>{MONTHS_SHORT[index]}</strong><small>{item.baseline} ouvrés</small></div>
-                  <span className="day-cell workRate" role="cell">{formatNumber(item.contracted)}<small>j</small></span>
+                  <span className="day-cell workRate" role="cell">{formatNumber(entries[index].workRate)}<small>%</small></span>
                   {SEGMENTS.map((segment) => <span className={`day-cell ${segment.key}`} role="cell" key={segment.key}>{formatNumber(item[segment.key])}<small>j</small></span>)}
                 </div>)}
                 <div className="annual-table-row total-row" role="row">
                   <div className="month-cell" role="rowheader"><strong>Total</strong><small>{annualBaseline} ouvrés</small></div>
-                  <span className="day-cell workRate" role="cell">{formatNumber(annualContracted)}<small>j</small></span>
+                  <span className="day-cell workRate" role="cell">{annualWorkRate}<small>%</small></span>
                   {SEGMENTS.map((segment) => <span className={`day-cell ${segment.key}`} role="cell" key={segment.key}>{formatNumber(annualStats[segment.key])}<small>j</small></span>)}
-                </div>
-                <div className="annual-table-row percent-row" role="row">
-                  <div className="month-cell" role="rowheader"><strong>Part</strong><small>de l’année</small></div>
-                  <span className="day-cell workRate" role="cell">{annualPercent(annualContracted)}<small>%</small></span>
-                  {SEGMENTS.map((segment) => <span className={`day-cell ${segment.key}`} role="cell" key={segment.key}>{annualPercent(annualStats[segment.key])}<small>%</small></span>)}
                 </div>
               </div>
             </section>

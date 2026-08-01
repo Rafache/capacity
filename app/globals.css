@@ -11,6 +11,7 @@
   --available: #08a887;
   --leave: #ff6158;
   --rtt: #f44e96;
+  --training: #8b5cf6;
   --other: #f3a814;
   --holidays: #5fa9ef;
   --work-rate: #3b6eea;
@@ -67,6 +68,7 @@ button { color: inherit; }
 .work-icon { color: var(--blue); background: #edf4ff; }
 .leave-icon { color: var(--leave); background: #fff0ee; }
 .rtt-icon { color: var(--rtt); background: #fff0f7; }
+.training-icon { color: var(--training); background: #f4f0ff; }
 .other-icon { color: var(--other); background: #fff7e8; }
 .row-copy { min-width: 0; display: flex; flex-direction: column; }
 .row-copy strong { font-size: 15px; }
@@ -80,7 +82,7 @@ button { color: inherit; }
 .stepper output { display: grid; place-items: center; font-weight: 750; }
 .percent-stepper { grid-template-columns: 36px 72px 36px; }
 
-.calendar-card { margin-top: 10px; border: 1px solid var(--line); border-radius: 13px; padding: 12px; background: #fff; }
+.calendar-card { margin-top: 14px; border: 1px solid var(--line); border-radius: 13px; padding: 12px; background: #fff; }
 .calendar-card h2, .absence-section h2, .monthly-bars h2 { margin: 0 0 9px; font-size: 16px; letter-spacing: -.02em; }
 .zones { display: grid; grid-template-columns: repeat(3,1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .zones button { border: 0; border-right: 1px solid var(--line); background: #fafbfe; padding: 7px; color: var(--muted); cursor: pointer; font-size: 12px; }
@@ -110,10 +112,18 @@ button { color: inherit; }
 .table-heading .csv-button { height: 31px; padding: 0 9px; font-size: 11px; }
 .table-heading .csv-menu { top: 36px; width: 150px; }
 .annual-table { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: white; }
-.annual-table-header, .annual-table-row { display: grid; grid-template-columns: 54px repeat(6, minmax(0, 1fr)); align-items: stretch; }
+.annual-table-header, .annual-table-row { display: grid; grid-template-columns: 54px repeat(7, minmax(0, 1fr)); align-items: stretch; }
 .annual-table-header { min-height: 36px; background: #f5f7fb; border-bottom: 1px solid var(--line); }
-.annual-table-header > span { min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 1px; color: #60708a; font-size: 8px; font-weight: 750; line-height: 1; text-align: center; }
+.annual-table-header > span { min-width: 0; display: flex; align-items: center; justify-content: center; padding: 4px 1px; color: #60708a; text-align: center; }
 .annual-table-header > span:first-child { align-items: flex-start; padding-left: 7px; }
+.annual-table-header > span svg { width: 15px; height: 15px; stroke-width: 2.1; }
+.annual-table-header > span.workRate { color: var(--work-rate); }
+.annual-table-header > span.available { color: var(--available); }
+.annual-table-header > span.leave { color: var(--leave); }
+.annual-table-header > span.rtt { color: var(--rtt); }
+.annual-table-header > span.training { color: var(--training); }
+.annual-table-header > span.other { color: var(--other); }
+.annual-table-header > span.holidays { color: var(--holidays); }
 .annual-table-row { min-height: 39px; border-bottom: 1px solid #ebeff5; }
 .annual-table-row:last-child { border-bottom: 0; }
 .month-cell { min-width: 0; display: flex; flex-direction: column; justify-content: center; padding: 4px 5px 4px 7px; background: #fbfcfe; border-right: 1px solid #ebeff5; }
@@ -126,20 +136,13 @@ button { color: inherit; }
 .day-cell.workRate { color: #275ccf; background: #f2f6ff; }
 .day-cell.leave { color: #df4740; background: #fff7f6; }
 .day-cell.rtt { color: #d7377e; background: #fff7fb; }
+.day-cell.training { color: #7045d8; background: #f8f5ff; }
 .day-cell.other { color: #b67805; background: #fffbf2; }
 .day-cell.holidays { color: #2784d7; background: #f5faff; }
-.dot.workRate { background: var(--work-rate); }
-.dot.available { background: var(--available); }
-.dot.leave { background: var(--leave); }
-.dot.rtt { background: var(--rtt); }
-.dot.other { background: var(--other); }
-.dot.holidays { background: var(--holidays); }
-.dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 2px; }
-.total-row { border-top: 2px solid #b9c5d8; }
-.total-row .month-cell, .total-row .day-cell { font-weight: 850; }
-.percent-row { min-height: 36px; }
-.percent-row .month-cell, .percent-row .day-cell { background: #eef2f8; color: #33445f; }
-.percent-row .day-cell { padding-top: 9px; font-size: 10px; }
+.total-row { min-height: 48px; border-top: 3px solid #47617f; box-shadow: 0 -4px 12px rgba(16,35,75,.08); }
+.total-row .month-cell { background: var(--ink); color: white; }
+.total-row .month-cell small { color: #cbd6e8; }
+.total-row .day-cell { font-size: 13px; font-weight: 900; }
 
 @media (max-width: 450px) {
   .app-shell { padding: 0; display: block; }
@@ -165,8 +168,7 @@ button { color: inherit; }
   .summary-stat.rate { grid-column: 2 / 4; border-left: 0; border-top: 1px solid #d7e0ed; padding-top: 7px; display: flex; justify-content: center; gap: 7px; }
   .input-row { grid-template-columns: 34px minmax(0,1fr) auto; gap: 6px; }
   .row-icon { width: 32px; height: 32px; }
-  .annual-table-header, .annual-table-row { grid-template-columns: 48px repeat(6, minmax(0, 1fr)); }
-  .annual-table-header > span { font-size: 7px; }
+  .annual-table-header, .annual-table-row { grid-template-columns: 48px repeat(7, minmax(0, 1fr)); }
   .day-cell { font-size: 10px; }
   .table-heading .csv-button { padding: 0 7px; font-size: 10px; }
 }
