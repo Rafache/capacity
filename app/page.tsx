@@ -307,9 +307,27 @@ export default function Home() {
   }
 
   function exportCsv() {
-    const rows = ["annee_budgetaire;mois;temps_travail;conges;RTT;formations;autres"];
-    entries.forEach((entry, index) => rows.push(`${startYear}-${startYear + 1};${MONTHS_LONG[index]};${entry.workRate};${String(entry.leave).replace(".", ",")};${String(entry.rtt).replace(".", ",")};${String(entry.training).replace(".", ",")};${String(entry.other).replace(".", ",")}`));
-    const url = URL.createObjectURL(new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" }));
+    const csvNumber = (value: number) => formatNumber(value);
+    const rows = ["Mois;Temps de travail;Disponible;Congés payés;RTT;Formations;Autres"];
+    stats.forEach((item, index) => rows.push([
+      `${MONTHS_SHORT[index]} — ${item.baseline} ouvrés`,
+      `${csvNumber(entries[index].workRate)} %`,
+      `${csvNumber(item.available)} j`,
+      `${csvNumber(item.leave)} j`,
+      `${csvNumber(item.rtt)} j`,
+      `${csvNumber(item.training)} j`,
+      `${csvNumber(item.other)} j`,
+    ].join(";")));
+    rows.push([
+      `Total — ${annualBaseline} ouvrés`,
+      `${annualWorkRate} %`,
+      `${csvNumber(annualStats.available)} j`,
+      `${csvNumber(annualStats.leave)} j`,
+      `${csvNumber(annualStats.rtt)} j`,
+      `${csvNumber(annualStats.training)} j`,
+      `${csvNumber(annualStats.other)} j`,
+    ].join(";"));
+    const url = URL.createObjectURL(new Blob([`\uFEFF${rows.join("\n")}`], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = `capacite-${startYear}-${startYear + 1}.csv`;
@@ -322,11 +340,16 @@ export default function Home() {
     const file = event.target.files?.[0];
     if (!file) return;
     file.text().then((text) => {
-      const rows = text.trim().split(/\r?\n/).slice(1);
+      const lines = text.replace(/^\uFEFF/, "").trim().split(/\r?\n/);
+      const displayedTableFormat = lines[0]?.startsWith("Mois;Temps de travail;Disponible;");
+      const rows = lines.slice(1).filter((row) => !row.startsWith("Total"));
       if (rows.length < 12) return;
       const imported = rows.slice(0, 12).map((row) => {
         const values = row.split(";");
-        const num = (value: string) => Number(value.replace(",", ".")) || 0;
+        const num = (value: string) => Number(value.replace(",", ".").replace(/[^\d.-]/g, "")) || 0;
+        if (displayedTableFormat) {
+          return { workRate: num(values[1]), leave: num(values[3]), rtt: num(values[4]), training: num(values[5]), other: num(values[6]) };
+        }
         const hasTrainingColumn = values.length >= 7;
         return { workRate: num(values[2]), leave: num(values[3]), rtt: num(values[4]), training: hasTrainingColumn ? num(values[5]) : 0, other: num(values[hasTrainingColumn ? 6 : 5]) };
       });
