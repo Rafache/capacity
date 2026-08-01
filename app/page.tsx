@@ -45,7 +45,7 @@ const SEGMENTS: Array<{ key: SegmentKey; label: string; icon: LucideIcon }> = [
   { key: "available", label: "Disponible", icon: CircleCheckBig },
   { key: "leave", label: "Congés payés", icon: CalendarRange },
   { key: "rtt", label: "RTT", icon: Coffee },
-  { key: "training", label: "Formation", icon: GraduationCap },
+  { key: "training", label: "Formations", icon: GraduationCap },
   { key: "other", label: "Autres", icon: BriefcaseBusiness },
 ];
 
@@ -191,7 +191,19 @@ function formatRange(item: SchoolBreak) {
   const start = new Date(`${item.start}T00:00:00Z`);
   const end = new Date(`${item.end}T00:00:00Z`);
   const fmt = (date: Date) => `${date.getUTCDate()} ${new Intl.DateTimeFormat("fr-FR", { month: "short", timeZone: "UTC" }).format(date).replace(".", "")}.`;
-  return `${item.name} · ${fmt(start)} — ${fmt(end)}`;
+  const names: Record<string, string> = {
+    Toussaint: "Vacances de la Toussaint",
+    Noël: "Vacances de Noël",
+    Hiver: "Vacances d’hiver",
+    Printemps: "Vacances de printemps",
+  };
+  return `${names[item.name] ?? item.name} · ${fmt(start)} — ${fmt(end)}`;
+}
+
+function overlapsMonth(item: SchoolBreak, year: number, month: number) {
+  const monthStart = dateUTC(year, month, 1).getTime();
+  const monthEnd = dateUTC(year, month + 1, 0).getTime();
+  return new Date(`${item.start}T00:00:00Z`).getTime() <= monthEnd && new Date(`${item.end}T00:00:00Z`).getTime() >= monthStart;
 }
 
 function defaultEntries() {
@@ -234,11 +246,12 @@ export default function Home() {
   const currentStats = getMonthStats(startYear, monthIndex, currentEntry);
   const stats = useMemo(() => entries.map((entry, index) => getMonthStats(startYear, index, entry)), [entries, startYear]);
 
-  const schoolBreaks = (SCHOOL_BREAKS[String(startYear)]?.[zone] ?? []).filter((item) => {
-    const monthStart = dateUTC(currentDate.year, currentDate.month, 1).getTime();
-    const monthEnd = dateUTC(currentDate.year, currentDate.month + 1, 0).getTime();
-    return new Date(`${item.start}T00:00:00Z`).getTime() <= monthEnd && new Date(`${item.end}T00:00:00Z`).getTime() >= monthStart;
-  });
+  const schoolBreaks = (SCHOOL_BREAKS[String(startYear)]?.[zone] ?? []).filter((item) => overlapsMonth(item, currentDate.year, currentDate.month));
+  const showZoneSelector = (["A", "B", "C"] as Zone[]).some((schoolZone) =>
+    (SCHOOL_BREAKS[String(startYear)]?.[schoolZone] ?? []).some((item) =>
+      (item.name === "Hiver" || item.name === "Printemps") && overlapsMonth(item, currentDate.year, currentDate.month),
+    ),
+  );
   const monthHolidays = publicHolidays(currentDate.year).filter((item) => item.date.getUTCMonth() === currentDate.month);
 
   const annualBaseline = stats.reduce((sum, item) => sum + item.baseline, 0);
@@ -294,7 +307,7 @@ export default function Home() {
   }
 
   function exportCsv() {
-    const rows = ["annee_budgetaire;mois;temps_travail;conges;RTT;formation;autres"];
+    const rows = ["annee_budgetaire;mois;temps_travail;conges;RTT;formations;autres"];
     entries.forEach((entry, index) => rows.push(`${startYear}-${startYear + 1};${MONTHS_LONG[index]};${entry.workRate};${String(entry.leave).replace(".", ",")};${String(entry.rtt).replace(".", ",")};${String(entry.training).replace(".", ",")};${String(entry.other).replace(".", ",")}`));
     const url = URL.createObjectURL(new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a");
@@ -366,13 +379,13 @@ export default function Home() {
               <h2>Mes absences</h2>
               <InputRow icon={CalendarRange} iconClass="leave-icon" label="Congés payés" value={currentEntry.leave} onMinus={() => adjust("leave", -0.5)} onPlus={() => adjust("leave", 0.5)} />
               <InputRow icon={Coffee} iconClass="rtt-icon" label="RTT" value={currentEntry.rtt} onMinus={() => adjust("rtt", -0.5)} onPlus={() => adjust("rtt", 0.5)} />
-              <InputRow icon={GraduationCap} iconClass="training-icon" label="Formation" value={currentEntry.training} onMinus={() => adjust("training", -0.5)} onPlus={() => adjust("training", 0.5)} />
+              <InputRow icon={GraduationCap} iconClass="training-icon" label="Formations" value={currentEntry.training} onMinus={() => adjust("training", -0.5)} onPlus={() => adjust("training", 0.5)} />
               <InputRow icon={BriefcaseBusiness} iconClass="other-icon" label="Autres" value={currentEntry.other} onMinus={() => adjust("other", -0.5)} onPlus={() => adjust("other", 0.5)} />
             </section>
 
             <section className="calendar-card">
               <h2>Calendrier du mois</h2>
-              <div className="zones" aria-label="Zone scolaire">{(["A", "B", "C"] as Zone[]).map((item) => <button key={item} className={zone === item ? "active" : ""} onClick={() => setZone(item)}>Zone {item}</button>)}</div>
+              {showZoneSelector && <div className="zones" aria-label="Zone scolaire">{(["A", "B", "C"] as Zone[]).map((item) => <button key={item} className={zone === item ? "active" : ""} onClick={() => setZone(item)}>Zone {item}</button>)}</div>}
               <div className="calendar-events">
                 {monthHolidays.map((item) => <div className="calendar-event" key={item.name}><span className="event-icon holiday"><Sun /></span><span>{item.name} · {formatDate(item.date)}</span></div>)}
                 {schoolBreaks.map((item) => <div className="calendar-event" key={`${item.name}-${item.start}`}><span className="event-icon school"><CalendarRange /></span><span>{formatRange(item)}</span></div>)}
