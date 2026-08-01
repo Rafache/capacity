@@ -4,10 +4,8 @@ import {
   CalendarRange,
   ChevronLeft,
   ChevronRight,
-  CircleCheckBig,
   Clock3,
   Coffee,
-  Gauge,
   GraduationCap,
   Sun,
 } from "lucide-react";
@@ -107,6 +105,7 @@ export function MonthlyView({
   const capacityRate = stats.baseline
     ? Math.round((stats.available / stats.baseline) * 100)
     : 0;
+  const progressRate = Math.min(100, Math.max(0, capacityRate));
 
   return (
     <div className="monthly-view">
@@ -128,48 +127,49 @@ export function MonthlyView({
         </button>
       </div>
 
-      <section className="monthly-metrics" aria-label="Synthèse du mois">
-        <article className="monthly-metric-card metric-baseline">
-          <span className="monthly-metric-icon" aria-hidden="true">
-            <CalendarDays />
-          </span>
-          <div className="monthly-metric-content">
-            <span className="monthly-metric-label">Jours ouvrés</span>
-            <strong className="monthly-metric-value">
-              {stats.baseline}
-              <small>jours</small>
+      <section className="month-summary" aria-labelledby="month-summary-title">
+        <h2 id="month-summary-title">Résumé du mois</h2>
+        <div className="month-summary-grid">
+          <article
+            className="month-summary-item month-summary-baseline"
+            aria-label={`${stats.baseline} jours ouvrés, calculés à partir de ${weekdays} jours en semaine et ${weekdayHolidays} jour férié déduit`}
+          >
+            <span className="month-summary-label">Jours ouvrés</span>
+            <div className="month-summary-value-row">
+              <span className="month-summary-icon" aria-hidden="true">
+                <CalendarDays />
+              </span>
+              <strong className="month-summary-value">{stats.baseline}</strong>
+            </div>
+            <span className="month-summary-unit">jours</span>
+          </article>
+
+          <article className="month-summary-item month-summary-available">
+            <span className="month-summary-label">Disponibles</span>
+            <strong className="month-summary-value">
+              {formatNumber(stats.available)}
             </strong>
-            <p>
-              {weekdays} jours en semaine · {weekdayHolidays} férié
-              {weekdayHolidays > 1 ? "s" : ""} déduit
-              {weekdayHolidays > 1 ? "s" : ""}
-            </p>
-          </div>
-        </article>
+            <span className="month-summary-unit">jours</span>
+          </article>
 
-        <article className="monthly-metric-card metric-available">
-          <span className="monthly-metric-icon" aria-hidden="true">
-            <CircleCheckBig />
-          </span>
-          <span className="monthly-metric-label">Disponibles</span>
-          <strong className="monthly-metric-value">
-            {formatNumber(stats.available)}
-            <small>jours</small>
-          </strong>
-          <p>Après les absences</p>
-        </article>
-
-        <article className="monthly-metric-card metric-capacity">
-          <span className="monthly-metric-icon" aria-hidden="true">
-            <Gauge />
-          </span>
-          <span className="monthly-metric-label">Capacité</span>
-          <strong className="monthly-metric-value">
-            {capacityRate}
-            <small>%</small>
-          </strong>
-          <p>Sur le mois</p>
-        </article>
+          <article className="month-summary-item month-summary-capacity">
+            <span className="month-summary-label">Capacité</span>
+            <strong className="month-summary-value">
+              {capacityRate}
+              <small>%</small>
+            </strong>
+            <span
+              className="month-summary-progress"
+              role="progressbar"
+              aria-label="Taux de capacité"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progressRate}
+            >
+              <span style={{ width: `${progressRate}%` }} />
+            </span>
+          </article>
+        </div>
       </section>
 
       <section className="input-row work-row">
