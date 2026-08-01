@@ -1,0 +1,19 @@
+{
+  "name": "Ma capacité",
+  "short_name": "Capacité",
+  "description": "Calculez simplement votre capacité mensuelle et annuelle.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1260ef",
+  "icons": [
+    {
+      "src": "apple-touch-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
