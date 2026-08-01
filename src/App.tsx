@@ -40,7 +40,7 @@ const MONTHS_SHORT = [
 
 export default function App() {
   const years = useMemo(() => availableFiscalYears(), []);
-  const [tab, setTab] = useState<"monthly" | "annual">("monthly");
+  const [tab, setTab] = useState<"monthly" | "annual">("annual");
   const [startYear, setStartYear] = useState(years[1]);
   const [monthIndex, setMonthIndex] = useState(0);
   const [data, setData] = useState<CapacityData>(() => emptyData());
