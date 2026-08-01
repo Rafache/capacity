@@ -8,16 +8,24 @@ export type Entry = {
   rtt: number;
   training: number;
   other: number;
+  note: string;
 };
 
 export type MonthStats = {
   baseline: number;
   contracted: number;
+  partTime: number;
   available: number;
   leave: number;
   rtt: number;
   training: number;
   other: number;
+};
+
+export type CapacityData = {
+  version: 2;
+  zone: Zone;
+  entries: Record<string, Entry[]>;
 };
 
 export type SchoolBreak = {
