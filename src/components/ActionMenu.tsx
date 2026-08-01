@@ -11,6 +11,7 @@ import { useEffect, useRef, type ChangeEvent } from "react";
 
 type Props = {
   open: boolean;
+  showCsvActions: boolean;
   showMonthlyActions: boolean;
   onToggle: () => void;
   onClose: () => void;
@@ -24,6 +25,7 @@ type Props = {
 
 export function ActionMenu({
   open,
+  showCsvActions,
   showMonthlyActions,
   onToggle,
   onClose,
@@ -76,28 +78,31 @@ export function ActionMenu({
 
       {open && (
         <div className="action-menu-panel" role="menu" aria-label="Actions">
-          <button
-            className="action-menu-item"
-            type="button"
-            role="menuitem"
-            onClick={() => fileRef.current?.click()}
-          >
-            <Upload aria-hidden="true" />
-            <span>Importer un CSV</span>
-          </button>
-          <button
-            className="action-menu-item"
-            type="button"
-            role="menuitem"
-            onClick={() => runAction(onExport)}
-          >
-            <Download aria-hidden="true" />
-            <span>Exporter en CSV</span>
-          </button>
+          {showCsvActions && (
+            <>
+              <button
+                className="action-menu-item"
+                type="button"
+                role="menuitem"
+                onClick={() => fileRef.current?.click()}
+              >
+                <Upload aria-hidden="true" />
+                <span>Importer un CSV</span>
+              </button>
+              <button
+                className="action-menu-item"
+                type="button"
+                role="menuitem"
+                onClick={() => runAction(onExport)}
+              >
+                <Download aria-hidden="true" />
+                <span>Exporter en CSV</span>
+              </button>
+            </>
+          )}
 
           {showMonthlyActions && (
             <>
-              <div className="action-menu-divider" role="separator" />
               <button
                 className="action-menu-item"
                 type="button"
@@ -141,13 +146,15 @@ export function ActionMenu({
         </div>
       )}
 
-      <input
-        ref={fileRef}
-        className="hidden-input"
-        type="file"
-        accept=".csv,text/csv"
-        onChange={onImport}
-      />
+      {showCsvActions && (
+        <input
+          ref={fileRef}
+          className="hidden-input"
+          type="file"
+          accept=".csv,text/csv"
+          onChange={onImport}
+        />
+      )}
     </div>
   );
 }
