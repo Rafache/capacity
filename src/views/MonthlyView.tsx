@@ -4,8 +4,10 @@ import {
   CalendarRange,
   ChevronLeft,
   ChevronRight,
+  CircleCheckBig,
   Clock3,
   Coffee,
+  Gauge,
   GraduationCap,
   Sun,
 } from "lucide-react";
@@ -126,36 +128,48 @@ export function MonthlyView({
         </button>
       </div>
 
-      <section className="summary-card">
-        <span className="summary-icon" aria-hidden="true">
-          <CalendarDays />
-        </span>
-        <div className="summary-main">
-          <strong>
-            <span className="summary-value">{stats.baseline}</span>
-            <span className="summary-unit">jours ouvrés</span>
+      <section className="monthly-metrics" aria-label="Synthèse du mois">
+        <article className="monthly-metric-card metric-baseline">
+          <span className="monthly-metric-icon" aria-hidden="true">
+            <CalendarDays />
+          </span>
+          <div className="monthly-metric-content">
+            <span className="monthly-metric-label">Jours ouvrés</span>
+            <strong className="monthly-metric-value">
+              {stats.baseline}
+              <small>jours</small>
+            </strong>
+            <p>
+              {weekdays} jours en semaine · {weekdayHolidays} férié
+              {weekdayHolidays > 1 ? "s" : ""} déduit
+              {weekdayHolidays > 1 ? "s" : ""}
+            </p>
+          </div>
+        </article>
+
+        <article className="monthly-metric-card metric-available">
+          <span className="monthly-metric-icon" aria-hidden="true">
+            <CircleCheckBig />
+          </span>
+          <span className="monthly-metric-label">Disponibles</span>
+          <strong className="monthly-metric-value">
+            {formatNumber(stats.available)}
+            <small>jours</small>
           </strong>
-          <small>
-            {weekdays} jours en semaine − {weekdayHolidays} férié
-            {weekdayHolidays > 1 ? "s" : ""}
-          </small>
-        </div>
-        <div className="summary-stat available">
-          <strong>
-            <span className="summary-value">
-              {formatNumber(stats.available)}
-            </span>
-            <span className="summary-unit">jours</span>
+          <p>Après les absences</p>
+        </article>
+
+        <article className="monthly-metric-card metric-capacity">
+          <span className="monthly-metric-icon" aria-hidden="true">
+            <Gauge />
+          </span>
+          <span className="monthly-metric-label">Capacité</span>
+          <strong className="monthly-metric-value">
+            {capacityRate}
+            <small>%</small>
           </strong>
-          <span>disponibles</span>
-        </div>
-        <div className="summary-stat rate">
-          <strong>
-            <span className="summary-value">{capacityRate}</span>
-            <span className="summary-unit">%</span>
-          </strong>
-          <span>de capacité</span>
-        </div>
+          <p>Sur le mois</p>
+        </article>
       </section>
 
       <section className="input-row work-row">
