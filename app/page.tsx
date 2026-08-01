@@ -15,13 +15,12 @@ import {
   Coffee,
   Gauge,
   GraduationCap,
-  Palmtree,
   Sun,
   type LucideIcon,
 } from "lucide-react";
 
 type Zone = "A" | "B" | "C";
-type SegmentKey = "available" | "leave" | "rtt" | "training" | "other" | "holidays";
+type SegmentKey = "available" | "leave" | "rtt" | "training" | "other";
 
 type Entry = {
   workRate: number;
@@ -44,11 +43,10 @@ const WEEKDAY = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 
 const SEGMENTS: Array<{ key: SegmentKey; label: string; icon: LucideIcon }> = [
   { key: "available", label: "Disponible", icon: CircleCheckBig },
-  { key: "leave", label: "Congés payés", icon: Palmtree },
+  { key: "leave", label: "Congés payés", icon: CalendarRange },
   { key: "rtt", label: "RTT", icon: Coffee },
   { key: "training", label: "Formation", icon: GraduationCap },
   { key: "other", label: "Autres", icon: BriefcaseBusiness },
-  { key: "holidays", label: "Jours fériés", icon: Sun },
 ];
 
 const SCHOOL_BREAKS: Record<string, Record<Zone, SchoolBreak[]>> = {
@@ -255,7 +253,6 @@ export default function Home() {
     rtt: stats.reduce((sum, item) => sum + item.rtt, 0),
     training: stats.reduce((sum, item) => sum + item.training, 0),
     other: stats.reduce((sum, item) => sum + item.other, 0),
-    holidays: stats.reduce((sum, item) => sum + item.holidays, 0),
   };
 
   useEffect(() => {
@@ -367,10 +364,10 @@ export default function Home() {
 
             <section className="absence-section">
               <h2>Mes absences</h2>
-              <InputRow icon={Palmtree} iconClass="leave-icon" label="Congés payés" value={currentEntry.leave} onMinus={() => adjust("leave", -0.5)} onPlus={() => adjust("leave", 0.5)} />
+              <InputRow icon={CalendarRange} iconClass="leave-icon" label="Congés payés" value={currentEntry.leave} onMinus={() => adjust("leave", -0.5)} onPlus={() => adjust("leave", 0.5)} />
               <InputRow icon={Coffee} iconClass="rtt-icon" label="RTT" value={currentEntry.rtt} onMinus={() => adjust("rtt", -0.5)} onPlus={() => adjust("rtt", 0.5)} />
               <InputRow icon={GraduationCap} iconClass="training-icon" label="Formation" value={currentEntry.training} onMinus={() => adjust("training", -0.5)} onPlus={() => adjust("training", 0.5)} />
-              <InputRow icon={BriefcaseBusiness} iconClass="other-icon" label="Autres" sublabel="Mandat, autre absence…" value={currentEntry.other} onMinus={() => adjust("other", -0.5)} onPlus={() => adjust("other", 0.5)} />
+              <InputRow icon={BriefcaseBusiness} iconClass="other-icon" label="Autres" value={currentEntry.other} onMinus={() => adjust("other", -0.5)} onPlus={() => adjust("other", 0.5)} />
             </section>
 
             <section className="calendar-card">

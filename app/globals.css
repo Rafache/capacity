@@ -112,7 +112,7 @@ button { color: inherit; }
 .table-heading .csv-button { height: 31px; padding: 0 9px; font-size: 11px; }
 .table-heading .csv-menu { top: 36px; width: 150px; }
 .annual-table { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: white; }
-.annual-table-header, .annual-table-row { display: grid; grid-template-columns: 54px repeat(7, minmax(0, 1fr)); align-items: stretch; }
+.annual-table-header, .annual-table-row { display: grid; grid-template-columns: 54px repeat(6, minmax(0, 1fr)); align-items: stretch; }
 .annual-table-header { min-height: 36px; background: #f5f7fb; border-bottom: 1px solid var(--line); }
 .annual-table-header > span { min-width: 0; display: flex; align-items: center; justify-content: center; padding: 4px 1px; color: #60708a; text-align: center; }
 .annual-table-header > span:first-child { align-items: flex-start; padding-left: 7px; }
@@ -123,7 +123,6 @@ button { color: inherit; }
 .annual-table-header > span.rtt { color: var(--rtt); }
 .annual-table-header > span.training { color: var(--training); }
 .annual-table-header > span.other { color: var(--other); }
-.annual-table-header > span.holidays { color: var(--holidays); }
 .annual-table-row { min-height: 39px; border-bottom: 1px solid #ebeff5; }
 .annual-table-row:last-child { border-bottom: 0; }
 .month-cell { min-width: 0; display: flex; flex-direction: column; justify-content: center; padding: 4px 5px 4px 7px; background: #fbfcfe; border-right: 1px solid #ebeff5; }
@@ -138,7 +137,6 @@ button { color: inherit; }
 .day-cell.rtt { color: #d7377e; background: #fff7fb; }
 .day-cell.training { color: #7045d8; background: #f8f5ff; }
 .day-cell.other { color: #b67805; background: #fffbf2; }
-.day-cell.holidays { color: #2784d7; background: #f5faff; }
 .total-row { min-height: 48px; border-top: 3px solid #47617f; box-shadow: 0 -4px 12px rgba(16,35,75,.08); }
 .total-row .month-cell { background: var(--ink); color: white; }
 .total-row .month-cell small { color: #cbd6e8; }
@@ -168,7 +166,7 @@ button { color: inherit; }
   .summary-stat.rate { grid-column: 2 / 4; border-left: 0; border-top: 1px solid #d7e0ed; padding-top: 7px; display: flex; justify-content: center; gap: 7px; }
   .input-row { grid-template-columns: 34px minmax(0,1fr) auto; gap: 6px; }
   .row-icon { width: 32px; height: 32px; }
-  .annual-table-header, .annual-table-row { grid-template-columns: 48px repeat(7, minmax(0, 1fr)); }
+  .annual-table-header, .annual-table-row { grid-template-columns: 48px repeat(6, minmax(0, 1fr)); }
   .day-cell { font-size: 10px; }
   .table-heading .csv-button { padding: 0 7px; font-size: 10px; }
 }
