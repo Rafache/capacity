@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 type Zone = "A" | "B" | "C";
-type SegmentKey = "available" | "leave" | "rtt" | "other" | "holidays" | "nonWorked";
+type SegmentKey = "available" | "leave" | "rtt" | "other" | "holidays";
 
 type Entry = {
   workRate: number;
@@ -46,7 +46,6 @@ const SEGMENTS: Array<{ key: SegmentKey; label: string; short: string; table: st
   { key: "rtt", label: "RTT", short: "RTT", table: "RTT" },
   { key: "other", label: "Autres", short: "Autres", table: "Autres" },
   { key: "holidays", label: "Jours fériés", short: "Jours fériés", table: "Fériés" },
-  { key: "nonWorked", label: "Temps non travaillé", short: "Non travaillé", table: "Non trav." },
 ];
 
 const SCHOOL_BREAKS: Record<string, Record<Zone, SchoolBreak[]>> = {
@@ -205,7 +204,7 @@ function getMonthStats(startYear: number, index: number, entry: Entry) {
   const contracted = roundHalf(baseline * (entry.workRate / 100));
   const nonWorked = Math.max(0, baseline - contracted);
   const available = Math.max(0, roundHalf(contracted - holidays - entry.leave - entry.rtt - entry.other));
-  return { baseline, holidays, nonWorked, available, leave: entry.leave, rtt: entry.rtt, other: entry.other };
+  return { baseline, contracted, holidays, nonWorked, available, leave: entry.leave, rtt: entry.rtt, other: entry.other };
 }
 
 export default function Home() {
@@ -235,15 +234,18 @@ export default function Home() {
   const annualAvailable = stats.reduce((sum, item) => sum + item.available, 0);
   const annualUnavailable = annualBaseline - annualAvailable;
   const annualRate = annualBaseline ? Math.round((annualAvailable / annualBaseline) * 100) : 0;
+  const annualContracted = stats.reduce((sum, item) => sum + item.contracted, 0);
   const annualStats = {
-    baseline: annualBaseline,
     available: annualAvailable,
     leave: stats.reduce((sum, item) => sum + item.leave, 0),
     rtt: stats.reduce((sum, item) => sum + item.rtt, 0),
     other: stats.reduce((sum, item) => sum + item.other, 0),
     holidays: stats.reduce((sum, item) => sum + item.holidays, 0),
-    nonWorked: stats.reduce((sum, item) => sum + item.nonWorked, 0),
   };
+
+  function annualPercent(value: number) {
+    return annualBaseline ? Math.round((value / annualBaseline) * 100) : 0;
+  }
 
   useEffect(() => {
     if (!storageReady.current) return;
@@ -326,11 +328,6 @@ export default function Home() {
                 <option value={2028}>2028 — 2029</option>
               </select>
             </label>
-            <div className="csv-wrap">
-              <button className="csv-button" onClick={() => setCsvOpen((open) => !open)} aria-expanded={csvOpen}><ArrowUpDown aria-hidden="true" /> <span>CSV</span></button>
-              {csvOpen && <div className="csv-menu"><button onClick={() => fileRef.current?.click()}>Importer</button><button onClick={exportCsv}>Exporter</button></div>}
-              <input ref={fileRef} className="hidden-input" type="file" accept=".csv,text/csv" onChange={importCsv} />
-            </div>
           </div>
         </header>
 
@@ -384,22 +381,36 @@ export default function Home() {
             </section>
 
             <section className="monthly-bars">
-              <h2>Capacité par mois <small>en jours</small></h2>
+              <div className="table-heading">
+                <h2>Capacité par mois</h2>
+                <div className="csv-wrap">
+                  <button className="csv-button" onClick={() => setCsvOpen((open) => !open)} aria-expanded={csvOpen}><ArrowUpDown aria-hidden="true" /> <span>Import / export</span></button>
+                  {csvOpen && <div className="csv-menu"><button onClick={() => fileRef.current?.click()}>Importer un CSV</button><button onClick={exportCsv}>Exporter en CSV</button></div>}
+                  <input ref={fileRef} className="hidden-input" type="file" accept=".csv,text/csv" onChange={importCsv} />
+                </div>
+              </div>
               <div className="annual-table" role="table" aria-label="Capacité mensuelle en jours">
                 <div className="annual-table-header" role="row">
                   <span role="columnheader">Mois</span>
+                  <span role="columnheader" title="Temps de travail"><i className="dot workRate" />Tps travail</span>
                   {SEGMENTS.map((segment) => <span key={segment.key} role="columnheader" title={segment.label}><i className={`dot ${segment.key}`} />{segment.table}</span>)}
                 </div>
                 {stats.map((item, index) => <div className="annual-table-row" role="row" key={MONTHS_SHORT[index]}>
                   <div className="month-cell" role="rowheader"><strong>{MONTHS_SHORT[index]}</strong><small>{item.baseline} ouvrés</small></div>
+                  <span className="day-cell workRate" role="cell">{formatNumber(item.contracted)}<small>j</small></span>
                   {SEGMENTS.map((segment) => <span className={`day-cell ${segment.key}`} role="cell" key={segment.key}>{formatNumber(item[segment.key])}<small>j</small></span>)}
                 </div>)}
+                <div className="annual-table-row total-row" role="row">
+                  <div className="month-cell" role="rowheader"><strong>Total</strong><small>{annualBaseline} ouvrés</small></div>
+                  <span className="day-cell workRate" role="cell">{formatNumber(annualContracted)}<small>j</small></span>
+                  {SEGMENTS.map((segment) => <span className={`day-cell ${segment.key}`} role="cell" key={segment.key}>{formatNumber(annualStats[segment.key])}<small>j</small></span>)}
+                </div>
+                <div className="annual-table-row percent-row" role="row">
+                  <div className="month-cell" role="rowheader"><strong>Part</strong><small>de l’année</small></div>
+                  <span className="day-cell workRate" role="cell">{annualPercent(annualContracted)}<small>%</small></span>
+                  {SEGMENTS.map((segment) => <span className={`day-cell ${segment.key}`} role="cell" key={segment.key}>{annualPercent(annualStats[segment.key])}<small>%</small></span>)}
+                </div>
               </div>
-            </section>
-
-            <section className="annual-distribution">
-              <h2>Répartition annuelle</h2>
-              <AnnualPie stats={annualStats} rate={annualRate} />
             </section>
           </div>
         )}
@@ -410,31 +421,4 @@ export default function Home() {
 
 function InputRow({ icon: Icon, iconClass, label, sublabel, value, onMinus, onPlus }: { icon: LucideIcon; iconClass: string; label: string; sublabel?: string; value: number; onMinus: () => void; onPlus: () => void }) {
   return <div className="input-row"><span className={`row-icon ${iconClass}`}><Icon aria-hidden="true" /></span><span className="row-copy"><strong>{label}</strong>{sublabel && <small>{sublabel}</small>}</span><div className="stepper"><button onClick={onMinus} aria-label={`Réduire ${label}`}>−</button><output>{formatNumber(value)} j</output><button onClick={onPlus} aria-label={`Augmenter ${label}`}>+</button></div></div>;
-}
-
-function AnnualPie({ stats, rate }: { stats: ReturnType<typeof getMonthStats>; rate: number }) {
-  const colors: Record<SegmentKey, string> = {
-    available: "var(--available)",
-    leave: "var(--leave)",
-    rtt: "var(--rtt)",
-    other: "var(--other)",
-    holidays: "var(--holidays)",
-    nonWorked: "var(--non-worked)",
-  };
-  const percentages = SEGMENTS.map((segment) => stats.baseline ? (stats[segment.key] / stats.baseline) * 100 : 0);
-  const slices = SEGMENTS.map((segment, index) => {
-    const start = percentages.slice(0, index).reduce((sum, percent) => sum + percent, 0);
-    return `${colors[segment.key]} ${start}% ${start + percentages[index]}%`;
-  });
-
-  return <div className="pie-layout">
-    <div className="annual-pie" style={{ background: `conic-gradient(${slices.join(", ")})` }} role="img" aria-label={`Répartition annuelle, capacité ${rate} %`}>
-      <div className="pie-center"><strong>{rate} %</strong><span>capacité</span></div>
-    </div>
-    <div className="pie-legend">{SEGMENTS.map((segment) => {
-      const value = stats[segment.key];
-      const percent = stats.baseline ? Math.round((value / stats.baseline) * 100) : 0;
-      return <div key={segment.key}><i className={`dot ${segment.key}`} /><span>{segment.short}</span><strong>{formatNumber(value)} j · {percent} %</strong></div>;
-    })}</div>
-  </div>;
 }
