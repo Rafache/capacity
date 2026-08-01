@@ -193,59 +193,62 @@ export default function App() {
   return (
     <main className="app-shell">
       <section className="app-card" aria-label="Gestion de capacité">
-        <header className="topbar">
-          <div className="brand">
-            <span className="brand-mark" aria-hidden="true">
-              <ChartNoAxesColumnIncreasing />
-            </span>
-            <span>Ma capacité</span>
-          </div>
-          <div className="top-actions">
-            <label className="year-select">
-              <span className="sr-only">Année budgétaire</span>
-              <select
-                value={startYear}
-                onChange={(event) => {
-                  setStartYear(Number(event.target.value));
-                  setMonthIndex(0);
-                  closeActions();
-                }}
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year} — {year + 1}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <ActionMenu
-              open={actionsOpen}
-              showMonthlyActions={tab === "monthly"}
-              onToggle={() => setActionsOpen((open) => !open)}
-              onClose={closeActions}
-              onImport={importCsv}
-              onExport={exportCsv}
-              onApplyWorkRate={applyWorkRate}
-              onCopyNext={copyNext}
-              onResetMonth={resetMonth}
-              onClear={clearStoredData}
-            />
-          </div>
-        </header>
-        <nav className="tabs" aria-label="Vues">
-          <button
-            className={tab === "monthly" ? "active" : ""}
-            onClick={() => changeTab("monthly")}
-          >
-            Mensuelle
-          </button>
-          <button
-            className={tab === "annual" ? "active" : ""}
-            onClick={() => changeTab("annual")}
-          >
-            Annuelle
-          </button>
-        </nav>
+        <div className="sticky-header">
+          <header className="topbar">
+            <div className="brand">
+              <span className="brand-mark" aria-hidden="true">
+                <ChartNoAxesColumnIncreasing />
+              </span>
+              <span>Ma capacité</span>
+            </div>
+            <div className="top-actions">
+              <label className="year-select">
+                <span className="sr-only">Année budgétaire</span>
+                <select
+                  value={startYear}
+                  onChange={(event) => {
+                    setStartYear(Number(event.target.value));
+                    setMonthIndex(0);
+                    closeActions();
+                  }}
+                >
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year} — {year + 1}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <ActionMenu
+                open={actionsOpen}
+                showCsvActions={tab === "annual"}
+                showMonthlyActions={tab === "monthly"}
+                onToggle={() => setActionsOpen((open) => !open)}
+                onClose={closeActions}
+                onImport={importCsv}
+                onExport={exportCsv}
+                onApplyWorkRate={applyWorkRate}
+                onCopyNext={copyNext}
+                onResetMonth={resetMonth}
+                onClear={clearStoredData}
+              />
+            </div>
+          </header>
+          <nav className="tabs" aria-label="Vues">
+            <button
+              className={tab === "monthly" ? "active" : ""}
+              onClick={() => changeTab("monthly")}
+            >
+              Mensuelle
+            </button>
+            <button
+              className={tab === "annual" ? "active" : ""}
+              onClick={() => changeTab("annual")}
+            >
+              Annuelle
+            </button>
+          </nav>
+        </div>
         {notice && (
           <div className="notice" role="status">
             <span>{notice}</span>

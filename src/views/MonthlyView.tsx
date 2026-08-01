@@ -131,18 +131,29 @@ export function MonthlyView({
           <CalendarDays />
         </span>
         <div className="summary-main">
-          <strong>{stats.baseline} jours ouvrés</strong>
+          <strong>
+            <span className="summary-value">{stats.baseline}</span>
+            <span className="summary-unit">jours ouvrés</span>
+          </strong>
           <small>
             {weekdays} jours en semaine − {weekdayHolidays} férié
             {weekdayHolidays > 1 ? "s" : ""}
           </small>
         </div>
         <div className="summary-stat available">
-          <strong>{formatNumber(stats.available)} jours</strong>
+          <strong>
+            <span className="summary-value">
+              {formatNumber(stats.available)}
+            </span>
+            <span className="summary-unit">jours</span>
+          </strong>
           <span>disponibles</span>
         </div>
         <div className="summary-stat rate">
-          <strong>{capacityRate} %</strong>
+          <strong>
+            <span className="summary-value">{capacityRate}</span>
+            <span className="summary-unit">%</span>
+          </strong>
           <span>de capacité</span>
         </div>
       </section>
