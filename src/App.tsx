@@ -1,5 +1,3 @@
-"use client";
-
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUpDown,
@@ -18,6 +16,7 @@ import {
   Sun,
   type LucideIcon,
 } from "lucide-react";
+import { dateUTC, fiscalMonth, publicHolidays, roundHalf, workingDaysInMonth } from "./capacity";
 
 type Zone = "A" | "B" | "C";
 type SegmentKey = "available" | "leave" | "rtt" | "training" | "other";
@@ -99,92 +98,8 @@ const SCHOOL_BREAKS: Record<string, Record<Zone, SchoolBreak[]>> = {
   "2028": { A: [], B: [], C: [] },
 };
 
-const presets: Entry[] = [
-  { workRate: 100, leave: 5, rtt: 1, training: 0, other: 1 },
-  { workRate: 100, leave: 8, rtt: 1, training: 0, other: 1 },
-  { workRate: 100, leave: 1, rtt: 1, training: 0, other: 2 },
-  { workRate: 100, leave: 2, rtt: 1, training: 0, other: 2 },
-  { workRate: 100, leave: 5, rtt: 2.5, training: 0, other: 4.5 },
-  { workRate: 100, leave: 5, rtt: 1, training: 0, other: 2 },
-  { workRate: 100, leave: 2, rtt: 1, training: 0, other: 2 },
-  { workRate: 80, leave: 1, rtt: 1, training: 0, other: 1 },
-  { workRate: 100, leave: 1, rtt: 1, training: 0, other: 2 },
-  { workRate: 100, leave: 3, rtt: 1, training: 0, other: 1 },
-  { workRate: 90, leave: 2, rtt: 1, training: 0, other: 1 },
-  { workRate: 100, leave: 1, rtt: 1, training: 0, other: 2 },
-];
+const EMPTY_ENTRY: Entry = { workRate: 100, leave: 0, rtt: 0, training: 0, other: 0 };
 
-function dateUTC(year: number, month: number, day: number) {
-  return new Date(Date.UTC(year, month, day));
-}
-
-function addDays(date: Date, days: number) {
-  const next = new Date(date);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next;
-}
-
-function easterSunday(year: number) {
-  const a = year % 19;
-  const b = Math.floor(year / 100);
-  const c = year % 100;
-  const d = Math.floor(b / 4);
-  const e = b % 4;
-  const f = Math.floor((b + 8) / 25);
-  const g = Math.floor((b - f + 1) / 3);
-  const h = (19 * a + b - d - g + 15) % 30;
-  const i = Math.floor(c / 4);
-  const k = c % 4;
-  const l = (32 + 2 * e + 2 * i - h - k) % 7;
-  const m = Math.floor((a + 11 * h + 22 * l) / 451);
-  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
-  const day = ((h + l - 7 * m + 114) % 31) + 1;
-  return dateUTC(year, month, day);
-}
-
-function publicHolidays(year: number) {
-  const easter = easterSunday(year);
-  return [
-    { name: "Jour de l’An", date: dateUTC(year, 0, 1) },
-    { name: "Lundi de Pâques", date: addDays(easter, 1) },
-    { name: "Fête du Travail", date: dateUTC(year, 4, 1) },
-    { name: "Victoire 1945", date: dateUTC(year, 4, 8) },
-    { name: "Ascension", date: addDays(easter, 39) },
-    { name: "Lundi de Pentecôte", date: addDays(easter, 50) },
-    { name: "Fête nationale", date: dateUTC(year, 6, 14) },
-    { name: "Assomption", date: dateUTC(year, 7, 15) },
-    { name: "Toussaint", date: dateUTC(year, 10, 1) },
-    { name: "Armistice", date: dateUTC(year, 10, 11) },
-    { name: "Noël", date: dateUTC(year, 11, 25) },
-  ];
-}
-
-function weekdaysInMonth(year: number, month: number) {
-  const total = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-  let count = 0;
-  for (let day = 1; day <= total; day += 1) {
-    const weekday = dateUTC(year, month, day).getUTCDay();
-    if (weekday !== 0 && weekday !== 6) count += 1;
-  }
-  return count;
-}
-
-function workingDaysInMonth(year: number, month: number) {
-  const holidaysOnWeekdays = publicHolidays(year).filter(
-    (item) => item.date.getUTCMonth() === month && item.date.getUTCDay() !== 0 && item.date.getUTCDay() !== 6,
-  ).length;
-  return weekdaysInMonth(year, month) - holidaysOnWeekdays;
-}
-
-function fiscalMonth(startYear: number, index: number) {
-  const month = (index + 6) % 12;
-  const year = startYear + (index >= 6 ? 1 : 0);
-  return { year, month };
-}
-
-function roundHalf(value: number) {
-  return Math.round(value * 2) / 2;
-}
 
 function formatNumber(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
@@ -214,7 +129,7 @@ function overlapsMonth(item: SchoolBreak, year: number, month: number) {
 }
 
 function defaultEntries() {
-  return presets.map((item) => ({ ...item }));
+  return Array.from({ length: 12 }, () => ({ ...EMPTY_ENTRY }));
 }
 
 function normalizeEntry(item?: Partial<Entry>): Entry {
@@ -343,6 +258,13 @@ export default function Home() {
     setCsvOpen(false);
   }
 
+  function clearStoredData() {
+    if (!window.confirm("Effacer toutes les données enregistrées sur cet appareil ?")) return;
+    setAllEntries({ "2026": defaultEntries(), "2027": defaultEntries(), "2028": defaultEntries() });
+    setZone("C");
+    window.localStorage.removeItem(STORAGE_KEY);
+  }
+
   function importCsv(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -438,7 +360,7 @@ export default function Home() {
                 <h2>Capacité par mois</h2>
                 <div className="csv-wrap">
                   <button className="csv-button" onClick={() => setCsvOpen((open) => !open)} aria-expanded={csvOpen}><ArrowUpDown aria-hidden="true" /> <span>Import / export</span></button>
-                  {csvOpen && <div className="csv-menu"><button onClick={() => fileRef.current?.click()}>Importer un CSV</button><button onClick={exportCsv}>Exporter en CSV</button></div>}
+                  {csvOpen && <div className="csv-menu"><button onClick={() => fileRef.current?.click()}>Importer un CSV</button><button onClick={exportCsv}>Exporter en CSV</button><button className="danger-action" onClick={clearStoredData}>Effacer mes données</button></div>}
                   <input ref={fileRef} className="hidden-input" type="file" accept=".csv,text/csv" onChange={importCsv} />
                 </div>
               </div>
