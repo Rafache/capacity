@@ -149,15 +149,6 @@
   line-height: 1.25;
 }
 
-.metric-capacity::after {
-  content: "";
-  width: min(76px, 82%);
-  height: 6px;
-  margin-top: 8px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--blue) 0 60%, #dbe7fb 60% 100%);
-}
-
 @media (max-width: 450px) {
   .monthly-metrics {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -226,9 +217,5 @@
   .metric-available p,
   .metric-capacity p {
     display: none;
-  }
-
-  .metric-capacity::after {
-    width: 60px;
   }
 }
