@@ -1,11 +1,18 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 import { ChartNoAxesColumnIncreasing } from "lucide-react";
+import { ActionMenu } from "./components/ActionMenu";
 import { exportCapacityCsv, importCapacityCsv } from "./domain/csv";
 import {
   EMPTY_ENTRY,
   STORAGE_KEY,
   availableFiscalYears,
-  createEntries,
   emptyData,
   getMonthStats,
   loadData,
@@ -16,7 +23,20 @@ import { AnnualView } from "./views/AnnualView";
 import { MonthlyView } from "./views/MonthlyView";
 import type { CapacityData, Entry, SegmentKey, Zone } from "./types";
 
-const MONTHS_SHORT = ["Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc.", "Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin"];
+const MONTHS_SHORT = [
+  "Juil.",
+  "Août",
+  "Sept.",
+  "Oct.",
+  "Nov.",
+  "Déc.",
+  "Janv.",
+  "Févr.",
+  "Mars",
+  "Avr.",
+  "Mai",
+  "Juin",
+];
 
 export default function App() {
   const years = useMemo(() => availableFiscalYears(), []);
@@ -24,9 +44,10 @@ export default function App() {
   const [startYear, setStartYear] = useState(years[1]);
   const [monthIndex, setMonthIndex] = useState(0);
   const [data, setData] = useState<CapacityData>(() => emptyData());
-  const [csvOpen, setCsvOpen] = useState(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const storageReady = useRef(false);
+  const closeActions = useCallback(() => setActionsOpen(false), []);
 
   useEffect(() => {
     setData(loadData(window.localStorage));
@@ -38,24 +59,53 @@ export default function App() {
   }, [data]);
 
   const entries = useMemo(
-    () => Array.from({ length: 12 }, (_, index) => normalizeEntry(data.entries[String(startYear)]?.[index])),
+    () =>
+      Array.from({ length: 12 }, (_, index) =>
+        normalizeEntry(data.entries[String(startYear)]?.[index]),
+      ),
     [data.entries, startYear],
   );
   const stats = useMemo(
-    () => entries.map((entry, index) => getMonthStats(startYear, index, entry)),
+    () =>
+      entries.map((entry, index) =>
+        getMonthStats(startYear, index, entry),
+      ),
     [entries, startYear],
   );
   const currentEntry = entries[monthIndex];
   const currentStats = stats[monthIndex];
-  const annualBaseline = stats.reduce((sum, item) => sum + item.baseline, 0);
-  const annualAvailable = stats.reduce((sum, item) => sum + item.available, 0);
-  const annualWorkRate = annualBaseline ? Math.round((stats.reduce((sum, item) => sum + item.contracted, 0) / annualBaseline) * 100) : 0;
-  const annualRate = annualBaseline ? Math.round((annualAvailable / annualBaseline) * 100) : 0;
-  const annualStats = (["available", "leave", "rtt", "training", "other"] as SegmentKey[]).reduce(
-    (result, key) => ({ ...result, [key]: stats.reduce((sum, item) => sum + item[key], 0) }),
+  const annualBaseline = stats.reduce(
+    (sum, item) => sum + item.baseline,
+    0,
+  );
+  const annualAvailable = stats.reduce(
+    (sum, item) => sum + item.available,
+    0,
+  );
+  const annualWorkRate = annualBaseline
+    ? Math.round(
+        (stats.reduce((sum, item) => sum + item.contracted, 0) /
+          annualBaseline) *
+          100,
+      )
+    : 0;
+  const annualRate = annualBaseline
+    ? Math.round((annualAvailable / annualBaseline) * 100)
+    : 0;
+  const annualStats = (
+    ["available", "leave", "rtt", "training", "other"] as SegmentKey[]
+  ).reduce(
+    (result, key) => ({
+      ...result,
+      [key]: stats.reduce((sum, item) => sum + item[key], 0),
+    }),
     {} as Record<SegmentKey, number>,
   );
-  const annualUnavailable = annualStats.leave + annualStats.rtt + annualStats.training + annualStats.other;
+  const annualUnavailable =
+    annualStats.leave +
+    annualStats.rtt +
+    annualStats.training +
+    annualStats.other;
 
   const replaceYear = (nextEntries: Entry[]) => {
     setData((previous) => ({
@@ -72,13 +122,14 @@ export default function App() {
 
   const exportCsv = () => {
     const text = exportCapacityCsv(MONTHS_SHORT, entries, stats);
-    const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+    const url = URL.createObjectURL(
+      new Blob([text], { type: "text/csv;charset=utf-8" }),
+    );
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = `capacite-${startYear}-${startYear + 1}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
-    setCsvOpen(false);
     setNotice("Export CSV créé.");
   };
 
@@ -93,12 +144,15 @@ export default function App() {
       setNotice(error instanceof Error ? error.message : "Import impossible.");
     } finally {
       event.target.value = "";
-      setCsvOpen(false);
+      closeActions();
     }
   };
 
   const clearStoredData = () => {
-    if (!window.confirm("Effacer toutes les données enregistrées sur cet appareil ?")) return;
+    if (
+      !window.confirm("Effacer toutes les données enregistrées sur cet appareil ?")
+    )
+      return;
     setData(emptyData());
     window.localStorage.removeItem(STORAGE_KEY);
     window.localStorage.removeItem("ma-capacite-v1");
@@ -115,7 +169,12 @@ export default function App() {
   };
 
   const applyWorkRate = () => {
-    replaceYear(entries.map((entry) => ({ ...entry, workRate: currentEntry.workRate })));
+    replaceYear(
+      entries.map((entry) => ({
+        ...entry,
+        workRate: currentEntry.workRate,
+      })),
+    );
     setNotice("Le temps de travail a été appliqué aux 12 mois.");
   };
 
@@ -126,23 +185,75 @@ export default function App() {
     setNotice("Le mois a été réinitialisé.");
   };
 
+  const changeTab = (nextTab: "monthly" | "annual") => {
+    setTab(nextTab);
+    closeActions();
+  };
+
   return (
     <main className="app-shell">
       <section className="app-card" aria-label="Gestion de capacité">
         <header className="topbar">
-          <div className="brand"><span className="brand-mark" aria-hidden="true"><ChartNoAxesColumnIncreasing /></span><span>Ma capacité</span></div>
-          <label className="year-select">
-            <span className="sr-only">Année budgétaire</span>
-            <select value={startYear} onChange={(event) => { setStartYear(Number(event.target.value)); setMonthIndex(0); }}>
-              {years.map((year) => <option key={year} value={year}>{year} — {year + 1}</option>)}
-            </select>
-          </label>
+          <div className="brand">
+            <span className="brand-mark" aria-hidden="true">
+              <ChartNoAxesColumnIncreasing />
+            </span>
+            <span>Ma capacité</span>
+          </div>
+          <div className="top-actions">
+            <label className="year-select">
+              <span className="sr-only">Année budgétaire</span>
+              <select
+                value={startYear}
+                onChange={(event) => {
+                  setStartYear(Number(event.target.value));
+                  setMonthIndex(0);
+                  closeActions();
+                }}
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year} — {year + 1}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <ActionMenu
+              open={actionsOpen}
+              showMonthlyActions={tab === "monthly"}
+              onToggle={() => setActionsOpen((open) => !open)}
+              onClose={closeActions}
+              onImport={importCsv}
+              onExport={exportCsv}
+              onApplyWorkRate={applyWorkRate}
+              onCopyNext={copyNext}
+              onResetMonth={resetMonth}
+              onClear={clearStoredData}
+            />
+          </div>
         </header>
         <nav className="tabs" aria-label="Vues">
-          <button className={tab === "monthly" ? "active" : ""} onClick={() => setTab("monthly")}>Mensuelle</button>
-          <button className={tab === "annual" ? "active" : ""} onClick={() => setTab("annual")}>Annuelle</button>
+          <button
+            className={tab === "monthly" ? "active" : ""}
+            onClick={() => changeTab("monthly")}
+          >
+            Mensuelle
+          </button>
+          <button
+            className={tab === "annual" ? "active" : ""}
+            onClick={() => changeTab("annual")}
+          >
+            Annuelle
+          </button>
         </nav>
-        {notice && <div className="notice" role="status"><span>{notice}</span><button onClick={() => setNotice("")} aria-label="Fermer">×</button></div>}
+        {notice && (
+          <div className="notice" role="status">
+            <span>{notice}</span>
+            <button onClick={() => setNotice("")} aria-label="Fermer">
+              ×
+            </button>
+          </div>
+        )}
         {tab === "monthly" ? (
           <MonthlyView
             startYear={startYear}
@@ -151,11 +262,10 @@ export default function App() {
             stats={currentStats}
             zone={data.zone}
             onMonthChange={setMonthIndex}
-            onZoneChange={(zone: Zone) => setData((previous) => ({ ...previous, zone }))}
+            onZoneChange={(zone: Zone) =>
+              setData((previous) => ({ ...previous, zone }))
+            }
             onChange={updateEntry}
-            onCopyNext={copyNext}
-            onApplyWorkRate={applyWorkRate}
-            onReset={resetMonth}
           />
         ) : (
           <AnnualView
@@ -167,12 +277,10 @@ export default function App() {
             annualRate={annualRate}
             annualWorkRate={annualWorkRate}
             annualStats={annualStats}
-            csvOpen={csvOpen}
-            onCsvToggle={() => setCsvOpen((open) => !open)}
-            onImport={importCsv}
-            onExport={exportCsv}
-            onClear={clearStoredData}
-            onMonthOpen={(index) => { setMonthIndex(index); setTab("monthly"); }}
+            onMonthOpen={(index) => {
+              setMonthIndex(index);
+              setTab("monthly");
+            }}
           />
         )}
       </section>
