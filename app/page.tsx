@@ -169,6 +169,13 @@ function weekdaysInMonth(year: number, month: number) {
   return count;
 }
 
+function workingDaysInMonth(year: number, month: number) {
+  const holidaysOnWeekdays = publicHolidays(year).filter(
+    (item) => item.date.getUTCMonth() === month && item.date.getUTCDay() !== 0 && item.date.getUTCDay() !== 6,
+  ).length;
+  return weekdaysInMonth(year, month) - holidaysOnWeekdays;
+}
+
 function fiscalMonth(startYear: number, index: number) {
   const month = (index + 6) % 12;
   const year = startYear + (index >= 6 ? 1 : 0);
@@ -222,11 +229,11 @@ function normalizeEntry(item?: Partial<Entry>): Entry {
 
 function getMonthStats(startYear: number, index: number, entry: Entry) {
   const { year, month } = fiscalMonth(startYear, index);
-  const baseline = weekdaysInMonth(year, month);
+  const baseline = workingDaysInMonth(year, month);
   const holidays = publicHolidays(year).filter((item) => item.date.getUTCMonth() === month && item.date.getUTCDay() !== 0 && item.date.getUTCDay() !== 6).length;
   const contracted = roundHalf(baseline * (entry.workRate / 100));
   const nonWorked = Math.max(0, baseline - contracted);
-  const available = Math.max(0, roundHalf(contracted - holidays - entry.leave - entry.rtt - entry.training - entry.other));
+  const available = Math.max(0, roundHalf(contracted - entry.leave - entry.rtt - entry.training - entry.other));
   return { baseline, contracted, holidays, nonWorked, available, leave: entry.leave, rtt: entry.rtt, training: entry.training, other: entry.other };
 }
 
@@ -256,7 +263,6 @@ export default function Home() {
 
   const annualBaseline = stats.reduce((sum, item) => sum + item.baseline, 0);
   const annualAvailable = stats.reduce((sum, item) => sum + item.available, 0);
-  const annualUnavailable = annualBaseline - annualAvailable;
   const annualRate = annualBaseline ? Math.round((annualAvailable / annualBaseline) * 100) : 0;
   const annualContracted = stats.reduce((sum, item) => sum + item.contracted, 0);
   const annualWorkRate = annualBaseline ? Math.round((annualContracted / annualBaseline) * 100) : 0;
@@ -267,6 +273,7 @@ export default function Home() {
     training: stats.reduce((sum, item) => sum + item.training, 0),
     other: stats.reduce((sum, item) => sum + item.other, 0),
   };
+  const annualUnavailable = annualStats.leave + annualStats.rtt + annualStats.training + annualStats.other;
 
   useEffect(() => {
     if (!storageReady.current) return;
