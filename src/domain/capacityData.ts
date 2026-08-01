@@ -1,4 +1,4 @@
-import { roundHalf, workingDaysInMonth } from "../capacity";
+import { roundHalf, workingDaysInMonth } from "../capacity.ts";
 import type { CapacityData, Entry, MonthStats, Zone } from "../types";
 
 export const STORAGE_KEY = "ma-capacite-v2";
@@ -61,11 +61,16 @@ export function emptyData(zone: Zone = "C"): CapacityData {
 export function migrateData(raw: unknown): CapacityData {
   if (!raw || typeof raw !== "object") return emptyData();
   const value = raw as Record<string, unknown>;
-  const legacyEntries = (value.entries ?? {}) as Record<string, Partial<Entry>[]>;
+  const legacyEntries = (value.entries ?? {}) as Record<
+    string,
+    Partial<Entry>[]
+  >;
   const entries = Object.fromEntries(
     Object.entries(legacyEntries).map(([year, months]) => [
       year,
-      Array.from({ length: 12 }, (_, index) => normalizeEntry(months?.[index])),
+      Array.from({ length: 12 }, (_, index) =>
+        normalizeEntry(months?.[index]),
+      ),
     ]),
   );
   const zone = ["A", "B", "C"].includes(String(value.zone))
