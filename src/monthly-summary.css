@@ -3,7 +3,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
   margin-top: 10px;
-  padding: 14px 10px 12px;
+  padding: 14px 8px 12px;
   overflow: hidden;
   border: 1px solid #a8c7ff;
   border-radius: 16px;
@@ -14,7 +14,7 @@
 .monthly-metrics::before {
   content: "Résumé du mois";
   grid-column: 1 / -1;
-  margin: 0 0 10px 4px;
+  margin: 0 0 12px 4px;
   color: var(--ink);
   font-size: 16px;
   font-weight: 800;
@@ -25,17 +25,12 @@
 .metric-baseline,
 .metric-available,
 .metric-capacity {
-  display: flex;
   min-width: 0;
   min-height: 108px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0;
   overflow: visible;
   border: 0;
   border-radius: 0;
-  padding: 7px 12px 4px;
+  padding: 4px 8px 2px;
   background: transparent;
   box-shadow: none;
   text-align: center;
@@ -47,14 +42,14 @@
 
 .metric-baseline {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: 24px minmax(0, 1fr);
   grid-template-areas:
     "label label"
     "icon value"
     "detail detail";
   align-content: start;
   justify-content: center;
-  column-gap: 7px;
+  column-gap: 5px;
 }
 
 .metric-baseline .monthly-metric-content {
@@ -78,6 +73,14 @@
   grid-area: detail;
 }
 
+.metric-available,
+.metric-capacity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
 .monthly-metric-label {
   display: block;
   min-height: 28px;
@@ -89,17 +92,17 @@
 
 .monthly-metric-icon {
   display: grid;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 7px;
   color: var(--blue);
   background: #e5efff;
 }
 
 .monthly-metric-icon svg {
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   stroke-width: 2.1;
 }
 
@@ -113,10 +116,10 @@
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 4px;
-  margin-top: 6px;
+  gap: 3px;
+  margin-top: 7px;
   color: var(--ink);
-  font-size: clamp(27px, 7vw, 32px);
+  font-size: clamp(26px, 7vw, 30px);
   font-weight: 850;
   letter-spacing: -0.045em;
   line-height: 1;
@@ -125,9 +128,9 @@
 
 .monthly-metric-value small {
   color: inherit;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 
 .metric-available .monthly-metric-value {
@@ -143,9 +146,9 @@
 .metric-capacity p {
   grid-column: auto;
   align-self: auto;
-  margin: 8px 0 0;
+  margin: 9px 0 0;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 8px;
   line-height: 1.25;
 }
 
@@ -156,7 +159,7 @@
   }
 
   .monthly-metrics::before {
-    margin-left: 6px;
+    margin-left: 5px;
     font-size: 15px;
   }
 
@@ -166,23 +169,17 @@
   .metric-capacity {
     grid-column: auto;
     min-height: 104px;
-    padding: 6px 7px 3px;
+    padding: 4px 6px 2px;
   }
 
   .monthly-metric-label {
-    min-height: 25px;
+    min-height: 26px;
     font-size: 10px;
   }
 
   .monthly-metric-value,
   .metric-baseline .monthly-metric-value {
-    font-size: clamp(25px, 8vw, 30px);
-  }
-
-  .monthly-metric-card p,
-  .metric-available p,
-  .metric-capacity p {
-    font-size: 8px;
+    font-size: clamp(24px, 7.5vw, 28px);
   }
 }
 
@@ -196,21 +193,23 @@
   .metric-baseline,
   .metric-available,
   .metric-capacity {
-    padding-right: 4px;
-    padding-left: 4px;
+    min-height: 88px;
+    padding-right: 3px;
+    padding-left: 3px;
   }
 
   .monthly-metric-label {
+    min-height: 24px;
     font-size: 9px;
   }
 
   .monthly-metric-value,
   .metric-baseline .monthly-metric-value {
-    font-size: 23px;
+    font-size: 22px;
   }
 
   .monthly-metric-value small {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .monthly-metric-card p,
