@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type Zone = "A" | "B" | "C";
 type SegmentKey = "available" | "leave" | "rtt" | "other" | "holidays" | "nonWorked";
@@ -192,31 +192,16 @@ function getMonthStats(startYear: number, index: number, entry: Entry) {
 }
 
 export default function Home() {
-  const [initialState] = useState(() => {
-    const fallback = { entries: { "2026": defaultEntries(), "2027": defaultEntries(), "2028": defaultEntries() }, zone: "C" as Zone };
-    if (typeof window === "undefined") return fallback;
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (!stored) return fallback;
-    try {
-      const parsed = JSON.parse(stored);
-      return {
-        entries: parsed.entries ?? fallback.entries,
-        zone: (["A", "B", "C"].includes(parsed.zone) ? parsed.zone : "C") as Zone,
-      };
-    } catch {
-      return fallback;
-    }
-  });
   const [tab, setTab] = useState<"monthly" | "annual">("monthly");
   const [startYear, setStartYear] = useState(2026);
   const [monthIndex, setMonthIndex] = useState(4);
   const [detailMonth, setDetailMonth] = useState(4);
   const [selectedSegment, setSelectedSegment] = useState<SegmentKey>("leave");
-  const [zone, setZone] = useState<Zone>(initialState.zone);
-  const [allEntries, setAllEntries] = useState<Record<string, Entry[]>>(initialState.entries);
-  const [saved, setSaved] = useState(false);
+  const [zone, setZone] = useState<Zone>("C");
+  const [allEntries, setAllEntries] = useState<Record<string, Entry[]>>(() => ({ "2026": defaultEntries(), "2027": defaultEntries(), "2028": defaultEntries() }));
   const [csvOpen, setCsvOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const storageReady = useRef(false);
 
   const entries = allEntries[String(startYear)] ?? defaultEntries();
   const currentEntry = entries[monthIndex];
@@ -235,6 +220,38 @@ export default function Home() {
   const annualAvailable = stats.reduce((sum, item) => sum + item.available, 0);
   const annualUnavailable = annualBaseline - annualAvailable;
   const annualRate = annualBaseline ? Math.round((annualAvailable / annualBaseline) * 100) : 0;
+  const annualStats = {
+    baseline: annualBaseline,
+    available: annualAvailable,
+    leave: stats.reduce((sum, item) => sum + item.leave, 0),
+    rtt: stats.reduce((sum, item) => sum + item.rtt, 0),
+    other: stats.reduce((sum, item) => sum + item.other, 0),
+    holidays: stats.reduce((sum, item) => sum + item.holidays, 0),
+    nonWorked: stats.reduce((sum, item) => sum + item.nonWorked, 0),
+  };
+
+  useEffect(() => {
+    if (!storageReady.current) return;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ entries: allEntries, zone }));
+  }, [allEntries, zone]);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      storageReady.current = true;
+      return;
+    }
+    try {
+      const parsed = JSON.parse(stored);
+      queueMicrotask(() => {
+        setAllEntries(parsed.entries ?? { "2026": defaultEntries(), "2027": defaultEntries(), "2028": defaultEntries() });
+        setZone((["A", "B", "C"].includes(parsed.zone) ? parsed.zone : "C") as Zone);
+        storageReady.current = true;
+      });
+    } catch {
+      storageReady.current = true;
+    }
+  }, []);
 
   function updateEntry(field: keyof Entry, value: number) {
     setAllEntries((previous) => {
@@ -242,7 +259,6 @@ export default function Home() {
       yearEntries[monthIndex] = { ...yearEntries[monthIndex], [field]: value };
       return { ...previous, [String(startYear)]: yearEntries };
     });
-    setSaved(false);
   }
 
   function adjust(field: keyof Entry, delta: number) {
@@ -250,12 +266,6 @@ export default function Home() {
     const max = field === "workRate" ? 100 : currentStats.baseline;
     const min = field === "workRate" ? 20 : 0;
     updateEntry(field, Math.min(max, Math.max(min, current + delta)));
-  }
-
-  function save() {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ entries: allEntries, zone }));
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2200);
   }
 
   function exportCsv() {
@@ -282,7 +292,6 @@ export default function Home() {
         return { workRate: num(values[2]), leave: num(values[3]), rtt: num(values[4]), other: num(values[5]) };
       });
       setAllEntries((previous) => ({ ...previous, [String(startYear)]: imported }));
-      setSaved(false);
     });
     event.target.value = "";
     setCsvOpen(false);
@@ -296,11 +305,6 @@ export default function Home() {
     setDetailMonth(index);
     setSelectedSegment(key);
   }
-
-  const detailStats = stats[detailMonth];
-  const selectedValue = segmentValue(detailStats, selectedSegment);
-  const selectedPercent = detailStats.baseline ? Math.round((selectedValue / detailStats.baseline) * 100) : 0;
-  const selectedMeta = SEGMENTS.find((item) => item.key === selectedSegment)!;
 
   return (
     <main className="app-shell">
@@ -364,7 +368,6 @@ export default function Home() {
               <InputRow icon="◆" iconClass="other-icon" label="Autres" sublabel="Formation, mandat…" value={currentEntry.other} onMinus={() => adjust("other", -0.5)} onPlus={() => adjust("other", 0.5)} />
             </section>
 
-            <button className={`save-button ${saved ? "saved" : ""}`} onClick={save}>{saved ? "✓ Enregistré" : "▣ Enregistrer"}</button>
           </div>
         ) : (
           <div className="annual-view">
@@ -386,7 +389,6 @@ export default function Home() {
                   {detailMonth === index && (
                     <div className="month-detail">
                       <h3>Détail · {MONTHS_LONG[index]}</h3>
-                      <div className="segment-tooltip"><strong>{selectedMeta.label}</strong><span>{formatNumber(selectedValue)} j · {selectedPercent} %</span></div>
                       <StackedBar stats={item} onSelect={(key) => chooseSegment(index, key)} selected={selectedSegment} />
                       <div className="detail-legend">{SEGMENTS.map((segment) => <button key={segment.key} onClick={() => chooseSegment(index, segment.key)}><i className={`dot ${segment.key}`} />{segment.short}<strong>{formatNumber(segmentValue(item, segment.key))} j</strong></button>)}</div>
                     </div>
@@ -397,15 +399,7 @@ export default function Home() {
 
             <section className="annual-distribution">
               <h2>Répartition annuelle</h2>
-              <StackedBar stats={{
-                baseline: annualBaseline,
-                available: annualAvailable,
-                leave: stats.reduce((sum, item) => sum + item.leave, 0),
-                rtt: stats.reduce((sum, item) => sum + item.rtt, 0),
-                other: stats.reduce((sum, item) => sum + item.other, 0),
-                holidays: stats.reduce((sum, item) => sum + item.holidays, 0),
-                nonWorked: stats.reduce((sum, item) => sum + item.nonWorked, 0),
-              }} onSelect={(key) => setSelectedSegment(key)} />
+              <AnnualPie stats={annualStats} rate={annualRate} />
             </section>
           </div>
         )}
@@ -423,6 +417,33 @@ function StackedBar({ stats, onSelect, compact = false, selected }: { stats: Ret
     const value = stats[segment.key];
     const percent = stats.baseline ? (value / stats.baseline) * 100 : 0;
     if (value <= 0 && compact) return null;
-    return <button key={segment.key} className={`segment ${segment.key} ${selected === segment.key ? "active" : ""}`} style={{ width: `${Math.max(value > 0 ? 2 : 0, percent)}%` }} onClick={() => onSelect(segment.key)} aria-label={`${segment.label} : ${formatNumber(value)} jours`}><span>{!compact && value > 0 ? `${formatNumber(value)} j` : ""}</span></button>;
+    return <button key={segment.key} className={`segment ${segment.key} ${selected === segment.key ? "active" : ""}`} style={{ width: `${Math.max(value > 0 ? 2 : 0, percent)}%` }} onClick={() => onSelect(segment.key)} aria-label={`${segment.label} : ${formatNumber(value)} jours`}><span>{!compact && value > 0 ? (selected === segment.key ? `${Math.round(percent)} %` : `${formatNumber(value)} j`) : ""}</span></button>;
   })}</div>;
+}
+
+function AnnualPie({ stats, rate }: { stats: ReturnType<typeof getMonthStats>; rate: number }) {
+  const colors: Record<SegmentKey, string> = {
+    available: "var(--available)",
+    leave: "var(--leave)",
+    rtt: "var(--rtt)",
+    other: "var(--other)",
+    holidays: "var(--holidays)",
+    nonWorked: "var(--non-worked)",
+  };
+  const percentages = SEGMENTS.map((segment) => stats.baseline ? (stats[segment.key] / stats.baseline) * 100 : 0);
+  const slices = SEGMENTS.map((segment, index) => {
+    const start = percentages.slice(0, index).reduce((sum, percent) => sum + percent, 0);
+    return `${colors[segment.key]} ${start}% ${start + percentages[index]}%`;
+  });
+
+  return <div className="pie-layout">
+    <div className="annual-pie" style={{ background: `conic-gradient(${slices.join(", ")})` }} role="img" aria-label={`Répartition annuelle, capacité ${rate} %`}>
+      <div className="pie-center"><strong>{rate} %</strong><span>capacité</span></div>
+    </div>
+    <div className="pie-legend">{SEGMENTS.map((segment) => {
+      const value = stats[segment.key];
+      const percent = stats.baseline ? Math.round((value / stats.baseline) * 100) : 0;
+      return <div key={segment.key}><i className={`dot ${segment.key}`} /><span>{segment.short}</span><strong>{formatNumber(value)} j · {percent} %</strong></div>;
+    })}</div>
+  </div>;
 }

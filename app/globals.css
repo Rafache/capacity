@@ -89,9 +89,6 @@ button { color: inherit; }
 .empty-calendar { margin: 2px 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .absence-section { margin-top: 12px; }
 .absence-section h2 { margin-bottom: 0; }
-.save-button { width: 100%; height: 50px; margin-top: 13px; border: 0; border-radius: 10px; background: var(--blue); color: white; font-size: 17px; font-weight: 750; box-shadow: 0 8px 18px rgba(18,96,239,.24); cursor: pointer; transition: .2s ease; }
-.save-button.saved { background: var(--available); }
-
 .kpis { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
 .kpis article { min-width: 0; padding: 10px 8px; border: 1px solid var(--line); border-radius: 11px; background: white; display: grid; grid-template-columns: 34px 1fr; align-items: center; }
 .kpi-icon { grid-row: span 2; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; }
@@ -120,17 +117,21 @@ button { color: inherit; }
 .segment.nonWorked, .dot.nonWorked { background: var(--non-worked); }
 .segment.active { outline: 2px solid #16325d; outline-offset: -2px; position: relative; z-index: 2; }
 .month-detail { position: relative; margin: 2px 6px 8px; padding: 10px; border: 1px solid #8eb6ff; border-radius: 9px; background: white; }
-.month-detail h3 { margin: 0 0 38px; font-size: 14px; }
-.segment-tooltip { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); min-width: 112px; padding: 6px 9px; border: 1px solid #cfd7e4; border-radius: 8px; background: white; box-shadow: 0 5px 14px rgba(31,48,81,.15); text-align: center; z-index: 4; }
-.segment-tooltip::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 10px; height: 10px; transform: translateX(-50%) rotate(45deg); background: white; border-right: 1px solid #cfd7e4; border-bottom: 1px solid #cfd7e4; }
-.segment-tooltip strong, .segment-tooltip span { display: block; font-size: 11px; }
-.segment-tooltip span { margin-top: 2px; font-weight: 750; }
+.month-detail h3 { margin: 0 0 9px; font-size: 14px; }
 .detail-legend { margin-top: 9px; display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; }
 .detail-legend button { min-width: 0; border: 0; background: transparent; padding: 2px; display: grid; grid-template-columns: 8px 1fr; column-gap: 4px; text-align: left; color: #526077; font-size: 9px; cursor: pointer; }
 .detail-legend button strong { grid-column: 2; color: var(--ink); font-size: 10px; }
 .dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 2px; }
-.annual-distribution { margin-top: 10px; padding: 11px; border: 1px solid var(--line); border-radius: 11px; }
-.annual-distribution .stacked-bar { height: 34px; border-radius: 7px; overflow: hidden; }
+.annual-distribution { margin-top: 10px; padding: 13px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+.pie-layout { display: grid; grid-template-columns: 156px 1fr; gap: 17px; align-items: center; }
+.annual-pie { width: 156px; aspect-ratio: 1; border-radius: 50%; padding: 23px; box-shadow: 0 8px 25px rgba(20,42,78,.12); }
+.pie-center { width: 100%; height: 100%; display: grid; place-content: center; text-align: center; border-radius: 50%; background: white; box-shadow: inset 0 0 0 1px #eef1f6; }
+.pie-center strong { font-size: 26px; letter-spacing: -.04em; color: var(--available); }
+.pie-center span { color: var(--muted); font-size: 11px; font-weight: 700; }
+.pie-legend { display: grid; gap: 7px; }
+.pie-legend > div { min-width: 0; display: grid; grid-template-columns: 9px 1fr; column-gap: 6px; align-items: center; }
+.pie-legend span { color: #536078; font-size: 11px; }
+.pie-legend strong { grid-column: 2; color: var(--ink); font-size: 10px; }
 
 @media (max-width: 450px) {
   .app-shell { padding: 0; display: block; }
@@ -145,6 +146,8 @@ button { color: inherit; }
   .stepper { grid-template-columns: 34px 58px 34px; }
   .percent-stepper { grid-template-columns: 34px 65px 34px; }
   .calendar-card { padding: 10px; }
+  .pie-layout { grid-template-columns: 138px 1fr; gap: 13px; }
+  .annual-pie { width: 138px; padding: 21px; }
 }
 
 @media (max-width: 370px) {
@@ -158,4 +161,7 @@ button { color: inherit; }
   .input-row { grid-template-columns: 34px minmax(0,1fr) auto; gap: 6px; }
   .row-icon { width: 32px; height: 32px; }
   .month-bar-row { grid-template-columns: 43px 1fr 32px; gap: 5px; }
+  .pie-layout { grid-template-columns: 120px 1fr; gap: 10px; }
+  .annual-pie { width: 120px; padding: 18px; }
+  .pie-center strong { font-size: 22px; }
 }
