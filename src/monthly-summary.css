@@ -1,9 +1,6 @@
-.monthly-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
+.month-summary {
   margin-top: 10px;
-  padding: 14px 8px 12px;
+  padding: 14px 12px 12px;
   overflow: hidden;
   border: 1px solid #a8c7ff;
   border-radius: 16px;
@@ -11,210 +8,198 @@
   box-shadow: 0 8px 22px rgba(36, 55, 91, 0.05);
 }
 
-.monthly-metrics::before {
-  content: "Résumé du mois";
-  grid-column: 1 / -1;
-  margin: 0 0 12px 4px;
+.month-summary h2 {
+  margin: 0 0 12px;
   color: var(--ink);
   font-size: 16px;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
-.monthly-metric-card,
-.metric-baseline,
-.metric-available,
-.metric-capacity {
-  min-width: 0;
-  min-height: 108px;
-  overflow: visible;
-  border: 0;
-  border-radius: 0;
-  padding: 4px 8px 2px;
-  background: transparent;
-  box-shadow: none;
-  text-align: center;
-}
-
-.monthly-metric-card + .monthly-metric-card {
-  border-left: 1px solid #d7e0ed;
-}
-
-.metric-baseline {
+.month-summary-grid {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  grid-template-areas:
-    "label label"
-    "icon value"
-    "detail detail";
-  align-content: start;
-  justify-content: center;
-  column-gap: 5px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.metric-baseline .monthly-metric-content {
-  display: contents;
-}
-
-.metric-baseline .monthly-metric-label {
-  grid-area: label;
-}
-
-.metric-baseline .monthly-metric-icon {
-  grid-area: icon;
-  align-self: center;
-}
-
-.metric-baseline .monthly-metric-value {
-  grid-area: value;
-}
-
-.metric-baseline p {
-  grid-area: detail;
-}
-
-.metric-available,
-.metric-capacity {
+.month-summary-item {
+  min-width: 0;
+  min-height: 104px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  padding: 4px 10px 6px;
+  text-align: center;
 }
 
-.monthly-metric-label {
-  display: block;
+.month-summary-item + .month-summary-item {
+  border-left: 1px solid #d7e0ed;
+}
+
+.month-summary-label {
   min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--muted);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 750;
   line-height: 1.2;
 }
 
-.monthly-metric-icon {
+.month-summary-value-row {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.month-summary-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
   display: grid;
-  width: 24px;
-  height: 24px;
   place-items: center;
-  border-radius: 7px;
+  border-radius: 10px;
   color: var(--blue);
   background: #e5efff;
 }
 
-.monthly-metric-icon svg {
-  width: 16px;
-  height: 16px;
+.month-summary-icon svg {
+  width: 20px;
+  height: 20px;
   stroke-width: 2.1;
 }
 
-.metric-available .monthly-metric-icon,
-.metric-capacity .monthly-metric-icon {
-  display: none;
-}
-
-.monthly-metric-value,
-.metric-baseline .monthly-metric-value {
+.month-summary-value {
+  min-height: 48px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
   gap: 3px;
-  margin-top: 7px;
   color: var(--ink);
-  font-size: clamp(26px, 7vw, 30px);
+  font-size: clamp(30px, 8vw, 36px);
   font-weight: 850;
   letter-spacing: -0.045em;
   line-height: 1;
   white-space: nowrap;
 }
 
-.monthly-metric-value small {
-  color: inherit;
-  font-size: 10px;
-  font-weight: 700;
+.month-summary-value small {
+  font-size: 12px;
+  font-weight: 750;
   letter-spacing: 0;
 }
 
-.metric-available .monthly-metric-value {
+.month-summary-unit {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.month-summary-available .month-summary-value {
   color: var(--available);
 }
 
-.metric-capacity .monthly-metric-value {
+.month-summary-capacity .month-summary-value {
   color: var(--blue);
 }
 
-.monthly-metric-card p,
-.metric-available p,
-.metric-capacity p {
-  grid-column: auto;
-  align-self: auto;
-  margin: 9px 0 0;
-  color: var(--muted);
-  font-size: 8px;
-  line-height: 1.25;
+.month-summary-progress {
+  width: min(86px, 82%);
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dbe7fb;
+}
+
+.month-summary-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--blue);
 }
 
 @media (max-width: 450px) {
-  .monthly-metrics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    padding: 13px 6px 11px;
+  .month-summary {
+    padding: 13px 8px 11px;
   }
 
-  .monthly-metrics::before {
-    margin-left: 5px;
+  .month-summary h2 {
+    margin-left: 2px;
     font-size: 15px;
   }
 
-  .monthly-metric-card,
-  .metric-baseline,
-  .metric-available,
-  .metric-capacity {
-    grid-column: auto;
-    min-height: 104px;
-    padding: 4px 6px 2px;
+  .month-summary-item {
+    min-height: 98px;
+    padding-right: 6px;
+    padding-left: 6px;
   }
 
-  .monthly-metric-label {
+  .month-summary-label {
     min-height: 26px;
     font-size: 10px;
   }
 
-  .monthly-metric-value,
-  .metric-baseline .monthly-metric-value {
-    font-size: clamp(24px, 7.5vw, 28px);
+  .month-summary-value,
+  .month-summary-value-row {
+    min-height: 44px;
+  }
+
+  .month-summary-value {
+    font-size: clamp(27px, 8.5vw, 33px);
+  }
+
+  .month-summary-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .month-summary-icon svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
 @media (max-width: 370px) {
-  .monthly-metrics {
+  .month-summary {
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+
+  .month-summary-item {
+    min-height: 90px;
     padding-right: 3px;
     padding-left: 3px;
   }
 
-  .monthly-metric-card,
-  .metric-baseline,
-  .metric-available,
-  .metric-capacity {
-    min-height: 88px;
-    padding-right: 3px;
-    padding-left: 3px;
-  }
-
-  .monthly-metric-label {
+  .month-summary-label {
     min-height: 24px;
     font-size: 9px;
   }
 
-  .monthly-metric-value,
-  .metric-baseline .monthly-metric-value {
-    font-size: 22px;
+  .month-summary-value {
+    font-size: 25px;
   }
 
-  .monthly-metric-value small {
-    font-size: 8px;
+  .month-summary-value small,
+  .month-summary-unit {
+    font-size: 9px;
   }
 
-  .monthly-metric-card p,
-  .metric-available p,
-  .metric-capacity p {
-    display: none;
+  .month-summary-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .month-summary-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .month-summary-progress {
+    height: 6px;
   }
 }
