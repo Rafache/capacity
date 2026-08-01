@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { LucideIcon } from "lucide-react";
 
 export function InputRow({
@@ -5,19 +6,28 @@ export function InputRow({
   iconClass,
   label,
   value,
-  onMinus,
-  onPlus,
+  max,
+  onChange,
 }: {
   icon: LucideIcon;
   iconClass: string;
   label: string;
   value: number;
-  onMinus: () => void;
-  onPlus: () => void;
+  max: number;
+  onChange: (value: number) => void;
 }) {
+  const [editing, setEditing] = useState(false);
   const formattedValue = Number.isInteger(value)
     ? String(value)
     : value.toFixed(1).replace(".", ",");
+  const commit = (raw: string) => {
+    const parsed = Number(raw.replace(",", "."));
+    if (Number.isFinite(parsed)) {
+      onChange(Math.min(max, Math.max(0, Math.round(parsed * 2) / 2)));
+    }
+    setEditing(false);
+  };
+
   return (
     <div className="input-row">
       <span className={`row-icon ${iconClass}`}>
@@ -27,11 +37,35 @@ export function InputRow({
         <strong>{label}</strong>
       </span>
       <div className="stepper">
-        <button onClick={onMinus} aria-label={`Réduire ${label}`}>
+        <button
+          disabled={value <= 0}
+          onClick={() => onChange(Math.max(0, value - 0.5))}
+          aria-label={`Réduire ${label}`}
+        >
           −
         </button>
-        <output>{formattedValue} j</output>
-        <button onClick={onPlus} aria-label={`Augmenter ${label}`}>
+        {editing ? (
+          <input
+            autoFocus
+            inputMode="decimal"
+            defaultValue={formattedValue}
+            aria-label={`${label} en jours`}
+            onBlur={(event) => commit(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") commit(event.currentTarget.value);
+              if (event.key === "Escape") setEditing(false);
+            }}
+          />
+        ) : (
+          <button className="editable-value" onClick={() => setEditing(true)}>
+            {formattedValue} j
+          </button>
+        )}
+        <button
+          disabled={value >= max}
+          onClick={() => onChange(Math.min(max, value + 0.5))}
+          aria-label={`Augmenter ${label}`}
+        >
           +
         </button>
       </div>
