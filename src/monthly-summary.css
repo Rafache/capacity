@@ -1,0 +1,221 @@
+.monthly-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 10px;
+  padding: 14px 10px 12px;
+  overflow: hidden;
+  border: 1px solid #a8c7ff;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fbfdff 0%, #f2f7ff 100%);
+  box-shadow: 0 8px 22px rgba(36, 55, 91, 0.05);
+}
+
+.monthly-metrics::before {
+  content: "Résumé du mois";
+  grid-column: 1 / -1;
+  margin: 0 0 10px 4px;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.monthly-metric-card,
+.metric-baseline,
+.metric-available,
+.metric-capacity {
+  display: flex;
+  min-width: 0;
+  min-height: 108px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  padding: 7px 12px 4px;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+.monthly-metric-card + .monthly-metric-card {
+  border-left: 1px solid #d7e0ed;
+}
+
+.metric-baseline {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    "label label"
+    "icon value"
+    "detail detail";
+  align-content: start;
+  justify-content: center;
+  column-gap: 7px;
+}
+
+.metric-baseline .monthly-metric-content {
+  display: contents;
+}
+
+.metric-baseline .monthly-metric-label {
+  grid-area: label;
+}
+
+.metric-baseline .monthly-metric-icon {
+  grid-area: icon;
+  align-self: center;
+}
+
+.metric-baseline .monthly-metric-value {
+  grid-area: value;
+}
+
+.metric-baseline p {
+  grid-area: detail;
+}
+
+.monthly-metric-label {
+  display: block;
+  min-height: 28px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.monthly-metric-icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--blue);
+  background: #e5efff;
+}
+
+.monthly-metric-icon svg {
+  width: 17px;
+  height: 17px;
+  stroke-width: 2.1;
+}
+
+.metric-available .monthly-metric-icon,
+.metric-capacity .monthly-metric-icon {
+  display: none;
+}
+
+.monthly-metric-value,
+.metric-baseline .monthly-metric-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: clamp(27px, 7vw, 32px);
+  font-weight: 850;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.monthly-metric-value small {
+  color: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.metric-available .monthly-metric-value {
+  color: var(--available);
+}
+
+.metric-capacity .monthly-metric-value {
+  color: var(--blue);
+}
+
+.monthly-metric-card p,
+.metric-available p,
+.metric-capacity p {
+  grid-column: auto;
+  align-self: auto;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.25;
+}
+
+@media (max-width: 450px) {
+  .monthly-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 13px 6px 11px;
+  }
+
+  .monthly-metrics::before {
+    margin-left: 6px;
+    font-size: 15px;
+  }
+
+  .monthly-metric-card,
+  .metric-baseline,
+  .metric-available,
+  .metric-capacity {
+    grid-column: auto;
+    min-height: 104px;
+    padding: 6px 7px 3px;
+  }
+
+  .monthly-metric-label {
+    min-height: 25px;
+    font-size: 10px;
+  }
+
+  .monthly-metric-value,
+  .metric-baseline .monthly-metric-value {
+    font-size: clamp(25px, 8vw, 30px);
+  }
+
+  .monthly-metric-card p,
+  .metric-available p,
+  .metric-capacity p {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 370px) {
+  .monthly-metrics {
+    padding-right: 3px;
+    padding-left: 3px;
+  }
+
+  .monthly-metric-card,
+  .metric-baseline,
+  .metric-available,
+  .metric-capacity {
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+
+  .monthly-metric-label {
+    font-size: 9px;
+  }
+
+  .monthly-metric-value,
+  .metric-baseline .monthly-metric-value {
+    font-size: 23px;
+  }
+
+  .monthly-metric-value small {
+    font-size: 9px;
+  }
+
+  .monthly-metric-card p,
+  .metric-available p,
+  .metric-capacity p {
+    display: none;
+  }
+}
