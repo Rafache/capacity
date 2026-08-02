@@ -69,7 +69,7 @@ export default function App() {
 
   useEffect(() => {
     if (!notice) return;
-    const timeout = window.setTimeout(() => setNotice(null), 4200);
+    const timeout = window.setTimeout(() => setNotice(null), 3000);
     return () => window.clearTimeout(timeout);
   }, [notice]);
 
