@@ -6,7 +6,11 @@ import {
   useState,
   type ChangeEvent,
 } from "react";
-import { ChartNoAxesColumnIncreasing } from "lucide-react";
+import {
+  AlertTriangle,
+  ChartNoAxesColumnIncreasing,
+  CircleCheckBig,
+} from "lucide-react";
 import { ActionMenu } from "./components/ActionMenu";
 import { exportCapacityCsv, importCapacityCsv } from "./domain/csv";
 import {
@@ -38,6 +42,11 @@ const MONTHS_SHORT = [
   "Juin",
 ];
 
+type Notice = {
+  message: string;
+  type: "success" | "error";
+};
+
 export default function App() {
   const years = useMemo(() => availableFiscalYears(), []);
   const [tab, setTab] = useState<"monthly" | "annual">("annual");
@@ -45,7 +54,7 @@ export default function App() {
   const [monthIndex, setMonthIndex] = useState(0);
   const [data, setData] = useState<CapacityData>(() => emptyData());
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState<Notice | null>(null);
   const storageReady = useRef(false);
   const closeActions = useCallback(() => setActionsOpen(false), []);
 
@@ -57,6 +66,12 @@ export default function App() {
   useEffect(() => {
     if (storageReady.current) saveData(window.localStorage, data);
   }, [data]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timeout = window.setTimeout(() => setNotice(null), 4200);
+    return () => window.clearTimeout(timeout);
+  }, [notice]);
 
   const entries = useMemo(
     () =>
@@ -130,7 +145,7 @@ export default function App() {
     anchor.download = `capacite-${startYear}-${startYear + 1}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
-    setNotice("Export CSV créé.");
+    setNotice({ message: "Export CSV créé.", type: "success" });
   };
 
   const importCsv = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -139,9 +154,15 @@ export default function App() {
     try {
       const imported = importCapacityCsv(await file.text());
       replaceYear(imported);
-      setNotice("Import terminé : 12 mois ont été chargés.");
+      setNotice({
+        message: "Import terminé : 12 mois ont été chargés.",
+        type: "success",
+      });
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Import impossible.");
+      setNotice({
+        message: error instanceof Error ? error.message : "Import impossible.",
+        type: "error",
+      });
     } finally {
       event.target.value = "";
       closeActions();
@@ -156,7 +177,10 @@ export default function App() {
     setData(emptyData());
     window.localStorage.removeItem(STORAGE_KEY);
     window.localStorage.removeItem("ma-capacite-v1");
-    setNotice("Les données locales ont été effacées.");
+    setNotice({
+      message: "Les données locales ont été effacées.",
+      type: "success",
+    });
   };
 
   const copyNext = () => {
@@ -165,7 +189,7 @@ export default function App() {
     next[target] = { ...currentEntry };
     replaceYear(next);
     setMonthIndex(target);
-    setNotice("Le mois a été copié.");
+    setNotice({ message: "Le mois a été copié.", type: "success" });
   };
 
   const applyWorkRate = () => {
@@ -175,14 +199,20 @@ export default function App() {
         workRate: currentEntry.workRate,
       })),
     );
-    setNotice("Le temps de travail a été appliqué aux 12 mois.");
+    setNotice({
+      message: "Le temps de travail a été appliqué aux 12 mois.",
+      type: "success",
+    });
   };
 
   const resetMonth = () => {
     const next = [...entries];
     next[monthIndex] = { ...EMPTY_ENTRY };
     replaceYear(next);
-    setNotice("Le mois a été réinitialisé.");
+    setNotice({
+      message: "Le mois a été réinitialisé.",
+      type: "success",
+    });
   };
 
   const changeTab = (nextTab: "monthly" | "annual") => {
@@ -250,11 +280,22 @@ export default function App() {
           </nav>
         </div>
         {notice && (
-          <div className="notice" role="status">
-            <span>{notice}</span>
-            <button onClick={() => setNotice("")} aria-label="Fermer">
+          <div
+            className={`notice-toast ${notice.type}`}
+            role={notice.type === "error" ? "alert" : "status"}
+            aria-live={notice.type === "error" ? "assertive" : "polite"}
+          >
+            <span className="notice-toast-icon" aria-hidden="true">
+              {notice.type === "error" ? <AlertTriangle /> : <CircleCheckBig />}
+            </span>
+            <span className="notice-toast-message">{notice.message}</span>
+            <button
+              onClick={() => setNotice(null)}
+              aria-label="Fermer la notification"
+            >
               ×
             </button>
+            <span className="notice-toast-progress" aria-hidden="true" />
           </div>
         )}
         {tab === "monthly" ? (
