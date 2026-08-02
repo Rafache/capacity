@@ -2,7 +2,6 @@ import {
   BriefcaseBusiness,
   CalendarRange,
   CalendarX2,
-  ChevronRight,
   CircleCheckBig,
   Clock3,
   Coffee,
@@ -26,51 +25,50 @@ const MONTHS_SHORT = [
   "Mai",
   "Juin",
 ];
+
 const formatNumber = (value: number) =>
   Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
+
 const SEGMENTS: Array<{
   key: SegmentKey;
   label: string;
-  shortLabel: string;
   icon: LucideIcon;
   tone: string;
 }> = [
   {
     key: "available",
     label: "Disponible",
-    shortLabel: "Dispo.",
     icon: CircleCheckBig,
     tone: "text-emerald-600",
   },
   {
     key: "leave",
     label: "Congés payés",
-    shortLabel: "CP",
     icon: CalendarRange,
     tone: "text-red-500",
   },
   {
     key: "rtt",
     label: "RTT",
-    shortLabel: "RTT",
     icon: Coffee,
     tone: "text-pink-500",
   },
   {
     key: "training",
     label: "Formations",
-    shortLabel: "Form.",
     icon: GraduationCap,
     tone: "text-violet-500",
   },
   {
     key: "other",
     label: "Autres",
-    shortLabel: "Autres",
     icon: BriefcaseBusiness,
     tone: "text-amber-500",
   },
 ];
+
+const TABLE_GRID =
+  "grid min-w-[650px] grid-cols-[8.75rem_4.5rem_repeat(5,4.75rem)] items-center";
 
 type Props = {
   entries: Entry[];
@@ -154,180 +152,112 @@ export function AnnualView({
               Capacité par mois
             </h2>
           </div>
-          <span className="text-right text-xs font-semibold text-slate-400">
-            Touchez un mois pour le modifier
+          <span className="max-w-40 text-right text-[11px] font-semibold leading-tight text-slate-400 sm:max-w-none sm:text-xs">
+            Touchez une ligne pour modifier le mois
           </span>
         </div>
 
-        <div className="space-y-2.5 sm:hidden">
-          {stats.map((item, index) => (
-            <button
-              className="w-full rounded-2xl border border-slate-200/80 bg-white p-4 text-left shadow-sm transition active:scale-[0.99]"
-              key={MONTHS_SHORT[index]}
-              onClick={() => onMonthOpen(index)}
-              aria-label={`Ouvrir ${MONTHS_SHORT[index]}`}
+        <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-sm sm:rounded-[1.75rem]">
+          <div
+            className="overflow-x-auto overscroll-x-contain [scrollbar-width:thin]"
+            role="table"
+            aria-label="Capacité mensuelle en jours"
+          >
+            <div
+              className={`${TABLE_GRID} border-b border-slate-200 bg-slate-50 text-center`}
+              role="row"
             >
-              <span className="flex items-center justify-between gap-3">
-                <span>
-                  <strong className="text-base font-black text-slate-950">
+              <span className="sticky left-0 z-10 bg-slate-50 px-4 py-3 text-left text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 sm:px-5 sm:text-xs">
+                Mois
+              </span>
+              <span
+                className="grid place-items-center py-3 text-slate-500"
+                role="columnheader"
+                aria-label="Temps de travail"
+                title="Temps de travail"
+              >
+                <Clock3 className="size-4" aria-hidden="true" />
+              </span>
+              {SEGMENTS.map(({ key, label, icon: Icon, tone }) => (
+                <span
+                  className={`grid place-items-center py-3 ${tone}`}
+                  key={key}
+                  role="columnheader"
+                  aria-label={label}
+                  title={label}
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                </span>
+              ))}
+            </div>
+
+            {stats.map((item, index) => (
+              <button
+                className={`${TABLE_GRID} group w-full border-b border-slate-100 bg-white text-left transition hover:bg-blue-50/60 focus-visible:bg-blue-50 focus-visible:outline-none`}
+                role="row"
+                key={MONTHS_SHORT[index]}
+                onClick={() => onMonthOpen(index)}
+                aria-label={`Ouvrir ${MONTHS_SHORT[index]}`}
+              >
+                <span className="sticky left-0 z-10 bg-white px-4 py-3.5 text-left transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-5">
+                  <strong className="block text-sm font-black text-slate-950">
                     {MONTHS_SHORT[index]}
                     {entries[index].note ? (
                       <span className="ml-1 text-blue-500">•</span>
                     ) : null}
                   </strong>
-                  <small className="ml-2 text-xs font-semibold text-slate-400">
-                    {item.baseline} jours ouvrés
+                  <small className="text-[11px] font-semibold text-slate-400">
+                    {item.baseline} ouvrés
                   </small>
                 </span>
-                <ChevronRight className="size-4 text-slate-400" />
-              </span>
-
-              <span className="mt-3 grid grid-cols-3 gap-2">
-                <span className="rounded-xl bg-slate-50 p-2 text-center">
-                  <small className="block text-[9px] font-black uppercase tracking-wide text-slate-400">
-                    Travail
-                  </small>
-                  <strong className="text-sm font-black text-slate-900">
-                    {formatNumber(entries[index].workRate)} %
-                  </strong>
+                <span className="text-center text-sm font-extrabold text-slate-700">
+                  {formatNumber(entries[index].workRate)}
+                  <small className="ml-0.5 text-[10px] text-slate-400">%</small>
                 </span>
                 {SEGMENTS.map((segment) => (
                   <span
-                    className="rounded-xl bg-slate-50 p-2 text-center"
+                    className={`text-center text-sm font-extrabold ${segment.tone}`}
+                    role="cell"
                     key={segment.key}
                   >
-                    <small
-                      className={`block text-[9px] font-black uppercase tracking-wide ${segment.tone}`}
-                    >
-                      {segment.shortLabel}
-                    </small>
-                    <strong className="text-sm font-black text-slate-900">
-                      {formatNumber(item[segment.key])} j
-                    </strong>
+                    {formatNumber(item[segment.key])}
+                    <small className="ml-0.5 text-[10px] text-slate-400">j</small>
                   </span>
                 ))}
-              </span>
-            </button>
-          ))}
-
-          <div className="rounded-2xl bg-slate-950 p-4 text-white shadow-lg">
-            <span className="flex items-center justify-between">
-              <strong className="text-base font-black">Total annuel</strong>
-              <small className="font-semibold text-slate-400">
-                {annualBaseline} jours ouvrés
-              </small>
-            </span>
-            <span className="mt-3 grid grid-cols-3 gap-2">
-              <span className="rounded-xl bg-white/10 p-2 text-center">
-                <small className="block text-[9px] font-black uppercase text-slate-400">
-                  Travail
-                </small>
-                <strong className="text-sm font-black">{annualWorkRate} %</strong>
-              </span>
-              {SEGMENTS.map((segment) => (
-                <span
-                  className="rounded-xl bg-white/10 p-2 text-center"
-                  key={segment.key}
-                >
-                  <small className="block text-[9px] font-black uppercase text-slate-400">
-                    {segment.shortLabel}
-                  </small>
-                  <strong className="text-sm font-black">
-                    {formatNumber(annualStats[segment.key])} j
-                  </strong>
-                </span>
-              ))}
-            </span>
-          </div>
-        </div>
-
-        <div className="hidden overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm sm:block">
-          <div
-            className="grid grid-cols-[minmax(8rem,1.4fr)_repeat(6,minmax(4.5rem,0.8fr))] items-center gap-2 border-b border-slate-200 bg-slate-50 px-5 py-3"
-            role="row"
-          >
-            <span className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">
-              Mois
-            </span>
-            <span
-              className="grid place-items-center text-slate-500"
-              role="columnheader"
-              aria-label="Temps de travail"
-              title="Temps de travail"
-            >
-              <Clock3 className="size-4" aria-hidden="true" />
-            </span>
-            {SEGMENTS.map(({ key, label, icon: Icon, tone }) => (
-              <span
-                className={`grid place-items-center ${tone}`}
-                key={key}
-                role="columnheader"
-                aria-label={label}
-                title={label}
-              >
-                <Icon className="size-4" aria-hidden="true" />
-              </span>
+              </button>
             ))}
-          </div>
 
-          {stats.map((item, index) => (
-            <button
-              className="grid w-full grid-cols-[minmax(8rem,1.4fr)_repeat(6,minmax(4.5rem,0.8fr))] items-center gap-2 border-b border-slate-100 px-5 py-3 text-left transition hover:bg-blue-50/50 focus:bg-blue-50 focus:outline-none"
+            <div
+              className={`${TABLE_GRID} bg-slate-950 text-white`}
               role="row"
-              key={MONTHS_SHORT[index]}
-              onClick={() => onMonthOpen(index)}
-              aria-label={`Ouvrir ${MONTHS_SHORT[index]}`}
             >
-              <span role="rowheader">
-                <strong className="block text-sm font-black text-slate-950">
-                  {MONTHS_SHORT[index]}
-                  {entries[index].note ? (
-                    <span className="ml-1 text-blue-500">•</span>
-                  ) : null}
-                </strong>
-                <small className="text-xs font-semibold text-slate-400">
-                  {item.baseline} ouvrés
+              <span className="sticky left-0 z-10 bg-slate-950 px-4 py-4 sm:px-5">
+                <strong className="block text-sm font-black">Total</strong>
+                <small className="text-[11px] font-semibold text-slate-400">
+                  {annualBaseline} ouvrés
                 </small>
               </span>
-              <span className="text-center text-sm font-extrabold text-slate-700">
-                {formatNumber(entries[index].workRate)}
+              <span className="text-center text-sm font-black">
+                {annualWorkRate}
                 <small className="ml-0.5 text-[10px] text-slate-400">%</small>
               </span>
               {SEGMENTS.map((segment) => (
                 <span
-                  className={`text-center text-sm font-extrabold ${segment.tone}`}
+                  className="text-center text-sm font-black"
                   role="cell"
                   key={segment.key}
                 >
-                  {formatNumber(item[segment.key])}
+                  {formatNumber(annualStats[segment.key])}
                   <small className="ml-0.5 text-[10px] text-slate-400">j</small>
                 </span>
               ))}
-            </button>
-          ))}
-
-          <div className="grid grid-cols-[minmax(8rem,1.4fr)_repeat(6,minmax(4.5rem,0.8fr))] items-center gap-2 bg-slate-950 px-5 py-4 text-white">
-            <span>
-              <strong className="block text-sm font-black">Total</strong>
-              <small className="text-xs font-semibold text-slate-400">
-                {annualBaseline} ouvrés
-              </small>
-            </span>
-            <span className="text-center text-sm font-black">
-              {annualWorkRate}
-              <small className="ml-0.5 text-[10px] text-slate-400">%</small>
-            </span>
-            {SEGMENTS.map((segment) => (
-              <span
-                className="text-center text-sm font-black"
-                key={segment.key}
-              >
-                {formatNumber(annualStats[segment.key])}
-                <small className="ml-0.5 text-[10px] text-slate-400">j</small>
-              </span>
-            ))}
+            </div>
           </div>
         </div>
+
+        <p className="mt-2 text-center text-[10px] font-semibold text-slate-400 sm:hidden">
+          Faites glisser le tableau horizontalement pour afficher toutes les colonnes.
+        </p>
       </section>
     </div>
   );
