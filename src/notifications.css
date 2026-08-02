@@ -1,7 +1,7 @@
 .notice-toast {
   position: fixed;
   z-index: 100;
-  top: max(18px, env(safe-area-inset-top));
+  bottom: max(18px, env(safe-area-inset-bottom));
   left: 50%;
   width: min(430px, calc(100vw - 28px));
   min-height: 58px;
@@ -78,7 +78,7 @@
   height: 4px;
   background: #27a66f;
   transform-origin: left;
-  animation: notice-progress 4.2s linear forwards;
+  animation: notice-progress 3s linear forwards;
 }
 
 .notice-toast.error .notice-toast-progress {
@@ -88,7 +88,7 @@
 @keyframes notice-toast-in {
   from {
     opacity: 0;
-    transform: translate(-50%, -12px) scale(0.98);
+    transform: translate(-50%, 12px) scale(0.98);
   }
   to {
     opacity: 1;
@@ -107,7 +107,7 @@
 
 @media (max-width: 450px) {
   .notice-toast {
-    top: max(10px, env(safe-area-inset-top));
+    bottom: max(10px, env(safe-area-inset-bottom));
     width: calc(100vw - 20px);
   }
 }
