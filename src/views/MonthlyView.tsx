@@ -190,21 +190,21 @@ export function MonthlyView({
         }
       />
 
-      <InputRow
-        icon={Clock3}
-        iconClass="bg-blue-50 text-blue-600"
-        label="Temps de travail"
-        value={entry.workRate}
-        min={20}
-        max={100}
-        step={5}
-        unit="%"
-        onChange={(value) => onChange("workRate", value)}
-        onApplyToYear={() => onRequestApplyToYear("workRate")}
-      />
-
-      <section aria-label="Mes absences">
+      <section aria-label="Temps de travail et absences">
         <div className="space-y-2.5">
+          <InputRow
+            icon={Clock3}
+            iconClass="bg-blue-50 text-blue-600"
+            label="Temps de travail"
+            value={entry.workRate}
+            min={20}
+            max={100}
+            step={5}
+            unit="%"
+            onChange={(value) => onChange("workRate", value)}
+            onApplyToYear={() => onRequestApplyToYear("workRate")}
+          />
+
           {ABSENCE_SEGMENTS.map(({ key, label, icon: Icon, softClass }) => (
             <InputRow
               icon={Icon}
