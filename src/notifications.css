@@ -1,0 +1,120 @@
+.notice-toast {
+  position: fixed;
+  z-index: 100;
+  top: max(18px, env(safe-area-inset-top));
+  left: 50%;
+  width: min(430px, calc(100vw - 28px));
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  border: 1px solid #b7d9c8;
+  border-radius: 14px;
+  padding: 11px 10px 13px 12px;
+  background: #f0fbf5;
+  color: #145c3b;
+  box-shadow: 0 18px 46px rgba(21, 44, 35, 0.24);
+  transform: translateX(-50%);
+  animation: notice-toast-in 180ms ease-out;
+}
+
+.notice-toast.error {
+  border-color: #f0b8b3;
+  background: #fff4f2;
+  color: #9b2924;
+  box-shadow: 0 18px 46px rgba(73, 28, 24, 0.24);
+}
+
+.notice-toast-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #d9f3e4;
+}
+
+.notice-toast.error .notice-toast-icon {
+  background: #ffe0dc;
+}
+
+.notice-toast-icon svg {
+  width: 21px;
+  height: 21px;
+  stroke-width: 2.4;
+}
+
+.notice-toast-message {
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.notice-toast button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: currentColor;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.notice-toast button:hover,
+.notice-toast button:focus-visible {
+  background: rgba(0, 0, 0, 0.06);
+  outline: 0;
+}
+
+.notice-toast-progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: #27a66f;
+  transform-origin: left;
+  animation: notice-progress 4.2s linear forwards;
+}
+
+.notice-toast.error .notice-toast-progress {
+  background: #d54b43;
+}
+
+@keyframes notice-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes notice-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (max-width: 450px) {
+  .notice-toast {
+    top: max(10px, env(safe-area-inset-top));
+    width: calc(100vw - 20px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notice-toast,
+  .notice-toast-progress {
+    animation: none;
+  }
+}
