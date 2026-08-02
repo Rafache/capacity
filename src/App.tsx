@@ -112,11 +112,6 @@ export default function App() {
   const currentStats = stats[monthIndex];
   const annualBaseline = stats.reduce((sum, item) => sum + item.baseline, 0);
   const annualAvailable = stats.reduce((sum, item) => sum + item.available, 0);
-  const annualWorkRate = annualBaseline
-    ? Math.round(
-        (stats.reduce((sum, item) => sum + item.contracted, 0) / annualBaseline) * 100,
-      )
-    : 0;
   const annualStats = (
     ["available", "leave", "rtt", "training", "other"] as SegmentKey[]
   ).reduce(
@@ -317,12 +312,10 @@ export default function App() {
             />
           ) : (
             <AnnualView
-              entries={entries}
               stats={stats}
               annualBaseline={annualBaseline}
               annualUnavailable={annualUnavailable}
               annualAvailable={annualAvailable}
-              annualWorkRate={annualWorkRate}
               annualStats={annualStats}
               onMonthOpen={(index) => {
                 setMonthIndex(index);

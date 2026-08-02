@@ -1,37 +1,33 @@
-import { CalendarDays, CalendarX2, Clock3, Gauge } from "lucide-react";
+import { CalendarDays, CalendarX2, Gauge } from "lucide-react";
 import { CapacityBar } from "../components/CapacityBar";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { CAPACITY_SEGMENTS } from "../components/capacitySegments";
 import { MONTHS_SHORT } from "../data/months";
-import type { Entry, MonthStats, SegmentKey } from "../types";
+import type { MonthStats, SegmentKey } from "../types";
 
 const formatNumber = (value: number) =>
   Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
 
 const TABLE_GRID =
-  "grid w-full grid-cols-[4.5rem_repeat(6,minmax(3.5rem,1fr))] items-center sm:grid-cols-[7rem_repeat(6,minmax(4rem,1fr))]";
+  "grid w-full grid-cols-[4rem_repeat(5,minmax(0,1fr))] items-center sm:grid-cols-[7rem_repeat(5,minmax(0,1fr))]";
 
 const segmentTotal = (values: Record<SegmentKey, number>) =>
   CAPACITY_SEGMENTS.reduce((sum, segment) => sum + values[segment.key], 0);
 
 type Props = {
-  entries: Entry[];
   stats: MonthStats[];
   annualBaseline: number;
   annualUnavailable: number;
   annualAvailable: number;
-  annualWorkRate: number;
   annualStats: Record<SegmentKey, number>;
   onMonthOpen: (index: number) => void;
 };
 
 export function AnnualView({
-  entries,
   stats,
   annualBaseline,
   annualUnavailable,
   annualAvailable,
-  annualWorkRate,
   annualStats,
   onMonthOpen,
 }: Props) {
@@ -75,11 +71,7 @@ export function AnnualView({
         </div>
 
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:rounded-2xl">
-          <div
-            className="overflow-x-auto overscroll-x-contain"
-            role="table"
-            aria-label="Capacité mensuelle en jours"
-          >
+          <div role="table" aria-label="Capacité mensuelle en jours">
             <div
               className={`${TABLE_GRID} border-b border-slate-200 bg-slate-50 text-center`}
               role="row"
@@ -89,14 +81,6 @@ export function AnnualView({
                 role="columnheader"
               >
                 Mois
-              </span>
-              <span
-                className="grid place-items-center whitespace-nowrap py-2 text-slate-500"
-                role="columnheader"
-                aria-label="Temps de travail"
-                title="Temps de travail"
-              >
-                <Clock3 className="size-3.5" aria-hidden="true" />
               </span>
               {CAPACITY_SEGMENTS.map(({ key, label, icon: Icon, textClass }) => (
                 <span
@@ -128,13 +112,9 @@ export function AnnualView({
                       {MONTHS_SHORT[index]}
                     </strong>
                   </span>
-                  <span className="row-start-1 whitespace-nowrap text-center text-[10px] font-extrabold leading-none text-slate-700 sm:text-xs">
-                    {formatNumber(entries[index].workRate)}
-                    <small className="ml-px text-[8px] text-slate-400">%</small>
-                  </span>
                   {CAPACITY_SEGMENTS.map((segment) => (
                     <span
-                      className={`row-start-1 whitespace-nowrap text-center text-[10px] font-extrabold leading-none sm:text-xs ${segment.textClass}`}
+                      className={`row-start-1 min-w-0 whitespace-nowrap text-center text-[10px] font-extrabold leading-none sm:text-xs ${segment.textClass}`}
                       role="cell"
                       key={segment.key}
                     >
@@ -143,7 +123,7 @@ export function AnnualView({
                     </span>
                   ))}
                   <CapacityBar
-                    className="col-span-7 mb-2"
+                    className="col-span-6 mb-2"
                     values={item}
                     total={rowTotal}
                     label={`Répartition de ${MONTHS_SHORT[index]}`}
@@ -158,13 +138,9 @@ export function AnnualView({
                   Total
                 </strong>
               </span>
-              <span className="row-start-1 text-center text-[10px] font-black leading-none sm:text-xs">
-                {annualWorkRate}
-                <small className="ml-px text-[8px] text-slate-400">%</small>
-              </span>
               {CAPACITY_SEGMENTS.map((segment) => (
                 <span
-                  className="row-start-1 text-center text-[10px] font-black leading-none sm:text-xs"
+                  className="row-start-1 min-w-0 whitespace-nowrap text-center text-[10px] font-black leading-none sm:text-xs"
                   role="cell"
                   key={segment.key}
                 >
