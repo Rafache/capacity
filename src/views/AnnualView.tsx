@@ -200,15 +200,15 @@ export function AnnualView({
                 onClick={() => onMonthOpen(index)}
                 aria-label={`Ouvrir ${MONTHS_SHORT[index]}`}
               >
-                <span className="sticky left-0 z-10 flex items-baseline gap-1 bg-white px-2 py-1.5 text-left transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-3 sm:py-2">
+                <span className="sticky left-0 z-10 flex flex-col justify-center bg-white px-2 py-2 text-left transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-3 sm:py-2.5">
                   <strong className="truncate text-[11px] font-black leading-none text-slate-950 sm:text-xs">
                     {MONTHS_SHORT[index]}
                     {entries[index].note ? (
                       <span className="ml-0.5 text-blue-500">•</span>
                     ) : null}
                   </strong>
-                  <small className="shrink-0 text-[8px] font-semibold leading-none text-slate-400 sm:text-[9px]">
-                    {item.baseline}j
+                  <small className="mt-1 block text-[8px] font-semibold leading-none text-slate-400 sm:text-[9px]">
+                    {item.baseline} jours ouvrés
                   </small>
                 </span>
                 <span className="text-center text-[10px] font-extrabold leading-none text-slate-700 sm:text-xs">
@@ -232,12 +232,12 @@ export function AnnualView({
               className={`${TABLE_GRID} bg-slate-950 text-white`}
               role="row"
             >
-              <span className="sticky left-0 z-10 flex items-baseline gap-1 bg-slate-950 px-2 py-2 sm:px-3 sm:py-2.5">
+              <span className="sticky left-0 z-10 flex flex-col justify-center bg-slate-950 px-2 py-2.5 sm:px-3 sm:py-3">
                 <strong className="text-[11px] font-black leading-none sm:text-xs">
                   Total
                 </strong>
-                <small className="text-[8px] font-semibold leading-none text-slate-400 sm:text-[9px]">
-                  {annualBaseline}j
+                <small className="mt-1 block text-[8px] font-semibold leading-none text-slate-400 sm:text-[9px]">
+                  {annualBaseline} jours ouvrés
                 </small>
               </span>
               <span className="text-center text-[10px] font-black leading-none sm:text-xs">
