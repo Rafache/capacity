@@ -40,6 +40,8 @@ export function AnnualView({
       <CapacitySummary
         title="Synthèse de l’année"
         eyebrow={null}
+        barValues={annualStats}
+        barLabel="Répartition de l’année"
         items={[
           {
             icon: CalendarDays,

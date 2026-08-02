@@ -1,4 +1,7 @@
 import type { LucideIcon } from "lucide-react";
+import { CapacityBar } from "./CapacityBar";
+import { CAPACITY_SEGMENTS } from "./capacitySegments";
+import type { SegmentKey } from "../types";
 
 type SummaryTone = "neutral" | "positive" | "negative" | "accent";
 
@@ -8,7 +11,6 @@ export type SummaryItem = {
   value: string | number;
   unit?: string;
   tone: SummaryTone;
-  progress?: number;
 };
 
 type Props = {
@@ -16,35 +18,41 @@ type Props = {
   eyebrow?: string | null;
   meta?: string;
   items: SummaryItem[];
+  barValues?: Record<SegmentKey, number>;
+  barTotal?: number;
+  barLabel?: string;
 };
 
-const toneClasses: Record<
-  SummaryTone,
-  { label: string; value: string; progress: string }
-> = {
+const toneClasses: Record<SummaryTone, { label: string; value: string }> = {
   neutral: {
     label: "text-slate-400",
     value: "text-white",
-    progress: "bg-slate-300",
   },
   positive: {
     label: "text-emerald-300",
     value: "text-emerald-300",
-    progress: "bg-emerald-300",
   },
   negative: {
     label: "text-red-300",
     value: "text-red-300",
-    progress: "bg-red-300",
   },
   accent: {
     label: "text-blue-300",
     value: "text-blue-300",
-    progress: "bg-blue-400",
   },
 };
 
-export function CapacitySummary({ title, eyebrow = "Synthèse", meta, items }: Props) {
+export function CapacitySummary({
+  title,
+  eyebrow = "Synthèse",
+  meta,
+  items,
+  barValues,
+  barTotal,
+  barLabel,
+}: Props) {
+  const distributionLabel = barLabel ?? `Répartition de ${title.toLowerCase()}`;
+
   return (
     <section
       className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-5 text-white shadow-[0_20px_50px_rgba(15,23,42,0.24)] sm:p-6"
@@ -72,10 +80,6 @@ export function CapacitySummary({ title, eyebrow = "Synthèse", meta, items }: P
         {items.map((item) => {
           const Icon = item.icon;
           const tone = toneClasses[item.tone];
-          const progress =
-            item.progress === undefined
-              ? undefined
-              : Math.min(100, Math.max(0, item.progress));
 
           return (
             <article
@@ -99,30 +103,35 @@ export function CapacitySummary({ title, eyebrow = "Synthèse", meta, items }: P
                   </small>
                 ) : null}
               </strong>
-              {progress !== undefined ? (
-                <span className="mx-auto mt-2 flex max-w-28 items-center gap-1.5">
-                  <span
-                    className="block h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/10"
-                    role="progressbar"
-                    aria-label={`Taux de ${item.label.toLowerCase()}`}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={progress}
-                  >
-                    <span
-                      className={`block h-full rounded-full ${tone.progress}`}
-                      style={{ width: `${progress}%` }}
-                    />
-                  </span>
-                  <small className={`shrink-0 text-[9px] font-bold ${tone.label}`}>
-                    {Math.round(progress)}%
-                  </small>
-                </span>
-              ) : null}
             </article>
           );
         })}
       </div>
+
+      {barValues ? (
+        <div className="mt-5 border-t border-white/10 pt-4">
+          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+            Répartition
+          </p>
+          <CapacityBar
+            values={barValues}
+            total={barTotal}
+            label={distributionLabel}
+            className="h-3 bg-white/10"
+          />
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
+            {CAPACITY_SEGMENTS.map(({ key, label, barClass }) => (
+              <span
+                className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 sm:text-[10px]"
+                key={key}
+              >
+                <span className={`size-1.5 shrink-0 rounded-full ${barClass}`} />
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
