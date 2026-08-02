@@ -184,17 +184,12 @@ export function AnnualView({
         <div
           className="mt-3 rounded-2xl border border-slate-200/80 bg-slate-50 p-3 sm:p-4"
           role="group"
-          aria-label="Légende de la répartition"
+          aria-label="Légende"
         >
           <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-                Légende
-              </p>
-              <p className="mt-0.5 text-xs font-bold text-slate-700">
-                Répartition des jours
-              </p>
-            </div>
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+              Légende
+            </p>
             <span
               className="flex h-1.5 w-12 overflow-hidden rounded-full"
               aria-hidden="true"

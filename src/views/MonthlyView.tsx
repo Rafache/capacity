@@ -4,7 +4,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  CircleCheckBig,
+  CalendarX2,
   Clock3,
   Gauge,
   Sun,
@@ -91,7 +91,7 @@ export function MonthlyView({
     ? Math.round((stats.available / stats.baseline) * 100)
     : 0;
   const progressRate = Math.min(100, Math.max(0, capacityRate));
-  const referenceCount = holidays.length + schoolBreaks.length;
+  const absenceTotal = stats.leave + stats.rtt + stats.training + stats.other;
   const stepperButtonClass =
     "grid size-11 place-items-center text-xl font-black text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent";
 
@@ -106,9 +106,6 @@ export function MonthlyView({
           <ChevronLeft className="size-5" />
         </button>
         <div className="min-w-0 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
-            Synthèse du mois
-          </p>
           <strong className="block truncate text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
             {MONTHS_LONG[monthIndex]} {year}
           </strong>
@@ -123,7 +120,7 @@ export function MonthlyView({
       </div>
 
       <CapacitySummary
-        title="Résumé du mois"
+        title="Synthèse"
         eyebrow={null}
         items={[
           {
@@ -134,11 +131,11 @@ export function MonthlyView({
             tone: "neutral",
           },
           {
-            icon: CircleCheckBig,
-            label: "Disponibles",
-            value: formatNumber(stats.available),
+            icon: CalendarX2,
+            label: "Absences",
+            value: formatNumber(absenceTotal),
             unit: "j",
-            tone: "positive",
+            tone: "negative",
           },
           {
             icon: Gauge,
@@ -232,18 +229,12 @@ export function MonthlyView({
               <CalendarDays className="size-5" />
             </span>
             <span className="min-w-0">
-              <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
-                Évènements
-              </span>
               <span className="block truncate text-lg font-black text-slate-950">
                 Évènements
               </span>
             </span>
           </span>
-          <span className="flex shrink-0 items-center gap-2 text-xs font-bold text-slate-400">
-            {referenceCount
-              ? `${referenceCount} évènement${referenceCount > 1 ? "s" : ""}`
-              : "Aucun évènement"}
+          <span className="flex shrink-0 items-center text-slate-400">
             <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
           </span>
         </summary>
