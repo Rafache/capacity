@@ -174,51 +174,7 @@ export function AnnualView({
                   <small className="ml-px text-[8px] text-slate-400">j</small>
                 </span>
               ))}
-              <CapacityBar
-                className="col-span-7 mb-2 bg-white/10"
-                values={annualStats}
-                label="Répartition de l’année"
-              />
             </div>
-          </div>
-        </div>
-
-        <div
-          className="mt-3 rounded-2xl border border-slate-200/80 bg-slate-50 p-3 sm:p-4"
-          role="group"
-          aria-label="Légende"
-        >
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-              Légende
-            </p>
-            <span
-              className="flex h-1.5 w-12 overflow-hidden rounded-full"
-              aria-hidden="true"
-            >
-              {CAPACITY_SEGMENTS.map(({ key, barClass }) => (
-                <span className={`min-w-0 flex-1 ${barClass}`} key={key} />
-              ))}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {CAPACITY_SEGMENTS.map(({ key, label, icon: Icon, softClass }) => (
-              <span
-                className="flex min-w-0 items-center gap-2 rounded-xl bg-white px-2 py-2 ring-1 ring-slate-200/70 sm:px-2.5"
-                key={key}
-              >
-                <span
-                  className={`grid size-7 shrink-0 place-items-center rounded-lg ${softClass}`}
-                  aria-hidden="true"
-                >
-                  <Icon className="size-3.5" />
-                </span>
-                <span className="truncate text-[10px] font-bold text-slate-600 sm:text-[11px]">
-                  {label}
-                </span>
-              </span>
-            ))}
           </div>
         </div>
       </section>

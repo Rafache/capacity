@@ -1,8 +1,8 @@
 import {
+  CalendarRange,
   Copy,
   Download,
   MoreVertical,
-  Percent,
   RotateCcw,
   Trash2,
   Upload,
@@ -16,6 +16,7 @@ import {
   useState,
   type ChangeEvent,
 } from "react";
+import type { Zone } from "../types";
 
 type Props = {
   open: boolean;
@@ -25,7 +26,8 @@ type Props = {
   onClose: () => void;
   onImport: (event: ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
-  onApplyWorkRate: () => void;
+  zone: Zone;
+  onZoneChange: (zone: Zone) => void;
   onCopyNext: () => void;
   onResetMonth: () => void;
   onClear: () => void;
@@ -42,7 +44,8 @@ export function ActionMenu({
   onClose,
   onImport,
   onExport,
-  onApplyWorkRate,
+  zone,
+  onZoneChange,
   onCopyNext,
   onResetMonth,
   onClear,
@@ -183,15 +186,6 @@ export function ActionMenu({
                   className={itemClass}
                   type="button"
                   role="menuitem"
-                  onClick={() => runAction(onApplyWorkRate)}
-                >
-                  <Percent className="size-4 text-blue-600" aria-hidden="true" />
-                  <span>Appliquer le temps de travail aux 12 mois</span>
-                </button>
-                <button
-                  className={itemClass}
-                  type="button"
-                  role="menuitem"
                   onClick={() => runAction(onCopyNext)}
                 >
                   <Copy className="size-4 text-blue-600" aria-hidden="true" />
@@ -206,6 +200,41 @@ export function ActionMenu({
                   <RotateCcw className="size-4" aria-hidden="true" />
                   <span>Réinitialiser ce mois</span>
                 </button>
+
+                <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+                  Vacances scolaires
+                </p>
+                <div
+                  className="grid grid-cols-3 gap-1 px-1 pb-1"
+                  role="group"
+                  aria-label="Zone scolaire"
+                >
+                  {["A", "B", "C"].map((item) => {
+                    const schoolZone = item as Zone;
+
+                    return (
+                      <button
+                        className={`rounded-xl px-2 py-2 text-xs font-extrabold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                          zone === schoolZone
+                            ? "bg-slate-950 text-white"
+                            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                        }`}
+                        key={schoolZone}
+                        type="button"
+                        role="menuitemradio"
+                        aria-checked={zone === schoolZone}
+                        onClick={() => runAction(() => onZoneChange(schoolZone))}
+                      >
+                        <span className="inline-flex items-center gap-1.5">
+                          {zone === schoolZone ? (
+                            <CalendarRange className="size-3.5" aria-hidden="true" />
+                          ) : null}
+                          Zone {schoolZone}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </>
             )}
 

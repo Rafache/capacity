@@ -11,10 +11,10 @@ import {
 import { publicHolidays } from "../capacity";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
-import { InputRow } from "../components/InputRow";
+import { ApplyToYearButton, InputRow } from "../components/InputRow";
 import { SCHOOL_BREAKS } from "../data/schoolBreaks";
 import { MONTHS_LONG } from "../data/months";
-import type { Entry, MonthStats, SchoolBreak, Zone } from "../types";
+import type { Entry, EntryNumericKey, MonthStats, SchoolBreak, Zone } from "../types";
 
 const WEEKDAY = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 
@@ -56,7 +56,7 @@ type Props = {
   stats: MonthStats;
   zone: Zone;
   onMonthChange: (index: number) => void;
-  onZoneChange: (zone: Zone) => void;
+  onApplyToYear: (field: EntryNumericKey) => void;
   onChange: (field: keyof Entry, value: number | string) => void;
 };
 
@@ -67,7 +67,7 @@ export function MonthlyView({
   stats,
   zone,
   onMonthChange,
-  onZoneChange,
+  onApplyToYear,
   onChange,
 }: Props) {
   const month = (monthIndex + 6) % 12;
@@ -78,11 +78,6 @@ export function MonthlyView({
     Date.parse(`${item.start}T00:00:00Z`) <= monthEnd &&
     Date.parse(`${item.end}T00:00:00Z`) >= monthStart;
   const schoolBreaks = (SCHOOL_BREAKS[String(startYear)]?.[zone] ?? []).filter(overlaps);
-  const showZones = (["A", "B", "C"] as Zone[]).some((schoolZone) =>
-    (SCHOOL_BREAKS[String(startYear)]?.[schoolZone] ?? []).some(
-      (item) => (item.name === "Hiver" || item.name === "Printemps") && overlaps(item),
-    ),
-  );
   const holidays = publicHolidays(year).filter(
     (item) => item.date.getUTCMonth() === month,
   );
@@ -157,24 +152,32 @@ export function MonthlyView({
           </strong>
           <small className="text-xs font-medium text-slate-400">Quotité du mois</small>
         </span>
-        <div className="grid h-11 grid-cols-[2.5rem_minmax(4.5rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-          <button
-            className={stepperButtonClass}
-            disabled={entry.workRate <= 20}
-            onClick={() => onChange("workRate", Math.max(20, entry.workRate - 5))}
-          >
-            −
-          </button>
-          <output className="grid place-items-center border-x border-slate-200 bg-white px-1 text-sm font-black text-slate-950">
-            {entry.workRate} %
-          </output>
-          <button
-            className={stepperButtonClass}
-            disabled={entry.workRate >= 100}
-            onClick={() => onChange("workRate", Math.min(100, entry.workRate + 5))}
-          >
-            +
-          </button>
+        <div className="flex items-center gap-2">
+          <div className="grid h-11 grid-cols-[2.5rem_minmax(4.5rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+            <button
+              className={stepperButtonClass}
+              type="button"
+              disabled={entry.workRate <= 20}
+              onClick={() => onChange("workRate", Math.max(20, entry.workRate - 5))}
+            >
+              −
+            </button>
+            <output className="grid place-items-center border-x border-slate-200 bg-white px-1 text-sm font-black text-slate-950">
+              {entry.workRate} %
+            </output>
+            <button
+              className={stepperButtonClass}
+              type="button"
+              disabled={entry.workRate >= 100}
+              onClick={() => onChange("workRate", Math.min(100, entry.workRate + 5))}
+            >
+              +
+            </button>
+          </div>
+          <ApplyToYearButton
+            label="le temps de travail"
+            onClick={() => onApplyToYear("workRate")}
+          />
         </div>
       </section>
 
@@ -199,8 +202,57 @@ export function MonthlyView({
               value={entry[key]}
               max={stats.contracted}
               onChange={(value) => onChange(key, value)}
+              onApplyToYear={() => onApplyToYear(key)}
             />
           ))}
+        </div>
+
+        <div
+          className="mt-4 space-y-2 px-1 text-xs sm:text-sm"
+          aria-label="Jours fériés et vacances scolaires"
+        >
+          {holidays.length ? (
+            <p className="flex items-start gap-2 text-slate-500">
+              <Sun className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden="true" />
+              <span>
+                <strong className="font-extrabold text-slate-800">Jours fériés : </strong>
+                <span className="font-medium">
+                  {holidays
+                    .map((item) => `${item.name} · ${formatDate(item.date)}`)
+                    .join(" · ")}
+                </span>
+              </span>
+            </p>
+          ) : null}
+
+          {schoolBreaks.length ? (
+            <p className="flex items-start gap-2 text-slate-500">
+              <CalendarRange
+                className="mt-0.5 size-4 shrink-0 text-blue-600"
+                aria-hidden="true"
+              />
+              <span>
+                <strong className="font-extrabold text-slate-800">
+                  Vacances scolaires :{" "}
+                </strong>
+                <span className="font-medium">
+                  {schoolBreaks.map(formatRange).join(" · ")}
+                </span>
+              </span>
+            </p>
+          ) : null}
+
+          {!holidays.length && !schoolBreaks.length ? (
+            <p className="font-medium text-slate-400">
+              Aucun jour férié ni vacances scolaires ce mois-ci.
+            </p>
+          ) : null}
+
+          {!SCHOOL_BREAKS[String(startYear)]?.[zone]?.length ? (
+            <p className="font-medium text-slate-400">
+              Les dates scolaires de cette année ne sont pas encore publiées.
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -214,94 +266,6 @@ export function MonthlyView({
           onChange={(event) => onChange("note", event.target.value)}
         />
       </label>
-
-      <section
-        className="rounded-[1.75rem] border border-slate-200/80 bg-slate-50 p-4 shadow-sm sm:p-5"
-        aria-label="Évènements"
-      >
-        <div className="flex items-start gap-3">
-          <span
-            className="grid size-11 shrink-0 place-items-center rounded-2xl bg-blue-50 text-blue-600"
-            aria-hidden="true"
-          >
-            <CalendarDays className="size-5" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-lg font-black text-slate-950">Évènements</h2>
-            <p className="text-xs font-medium text-slate-500">
-              Jours fériés et vacances scolaires
-            </p>
-          </div>
-        </div>
-
-        {showZones && (
-          <div className="mt-3 flex justify-end">
-            <div
-              className="flex rounded-xl border border-slate-200 bg-white p-1"
-              aria-label="Zone scolaire"
-            >
-              {(["A", "B", "C"] as Zone[]).map((item) => (
-                <button
-                  key={item}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-extrabold transition ${
-                    zone === item
-                      ? "bg-slate-950 text-white shadow-sm"
-                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                  }`}
-                  onClick={() => onZoneChange(item)}
-                >
-                  Zone {item}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="mt-4 space-y-3 border-t border-slate-200/80 pt-4">
-          {holidays.length ? (
-            <div className="flex items-start gap-2.5 text-sm text-slate-700">
-              <Sun className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden="true" />
-              <p>
-                <strong className="font-extrabold text-slate-900">Jours fériés : </strong>
-                <span className="font-medium">
-                  {holidays
-                    .map((item) => `${item.name} · ${formatDate(item.date)}`)
-                    .join(" · ")}
-                </span>
-              </p>
-            </div>
-          ) : null}
-
-          {schoolBreaks.length ? (
-            <div className="flex items-start gap-2.5 text-sm text-slate-700">
-              <CalendarRange
-                className="mt-0.5 size-4 shrink-0 text-blue-600"
-                aria-hidden="true"
-              />
-              <p>
-                <strong className="font-extrabold text-slate-900">
-                  Vacances scolaires :{" "}
-                </strong>
-                <span className="font-medium">
-                  {schoolBreaks.map(formatRange).join(" · ")}
-                </span>
-              </p>
-            </div>
-          ) : null}
-
-          {!holidays.length && !schoolBreaks.length ? (
-            <p className="text-sm font-medium text-slate-500">
-              Aucun jour férié ni vacances scolaires ce mois-ci.
-            </p>
-          ) : null}
-
-          {!SCHOOL_BREAKS[String(startYear)]?.[zone]?.length ? (
-            <p className="text-xs font-medium text-slate-400">
-              Les dates scolaires de cette année ne sont pas encore publiées.
-            </p>
-          ) : null}
-        </div>
-      </section>
     </div>
   );
 }

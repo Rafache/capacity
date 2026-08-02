@@ -11,6 +11,8 @@ export type Entry = {
   note: string;
 };
 
+export type EntryNumericKey = Exclude<keyof Entry, "note">;
+
 export type MonthStats = {
   baseline: number;
   contracted: number;

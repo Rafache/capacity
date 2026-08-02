@@ -30,7 +30,7 @@ import { ConfirmDialog } from "./components/ConfirmDialog";
 import { MONTHS_SHORT } from "./data/months";
 import { AnnualView } from "./views/AnnualView";
 import { MonthlyView } from "./views/MonthlyView";
-import type { CapacityData, Entry, SegmentKey, Zone } from "./types";
+import type { CapacityData, Entry, EntryNumericKey, SegmentKey, Zone } from "./types";
 
 type Notice = {
   message: string;
@@ -180,15 +180,23 @@ export default function App() {
     setNotice({ message: "Le mois a été copié.", type: "success" });
   };
 
-  const applyWorkRate = () => {
+  const applyFieldToYear = (field: EntryNumericKey) => {
+    const messages: Record<EntryNumericKey, string> = {
+      workRate: "Le temps de travail a été appliqué aux 12 mois.",
+      leave: "Les congés payés ont été appliqués aux 12 mois.",
+      rtt: "Les RTT ont été appliqués aux 12 mois.",
+      training: "Les formations ont été appliquées aux 12 mois.",
+      other: "Les autres absences ont été appliquées aux 12 mois.",
+    };
+
     replaceYear(
       entries.map((entry) => ({
         ...entry,
-        workRate: currentEntry.workRate,
+        [field]: currentEntry[field],
       })),
     );
     setNotice({
-      message: "Le temps de travail a été appliqué aux 12 mois.",
+      message: messages[field],
       type: "success",
     });
   };
@@ -274,7 +282,10 @@ export default function App() {
                 onClose={closeActions}
                 onImport={importCsv}
                 onExport={exportCsv}
-                onApplyWorkRate={applyWorkRate}
+                zone={data.zone}
+                onZoneChange={(zone: Zone) =>
+                  setData((previous) => ({ ...previous, zone }))
+                }
                 onCopyNext={copyNext}
                 onResetMonth={resetMonth}
                 onClear={clearStoredData}
@@ -318,9 +329,7 @@ export default function App() {
               stats={currentStats}
               zone={data.zone}
               onMonthChange={setMonthIndex}
-              onZoneChange={(zone: Zone) =>
-                setData((previous) => ({ ...previous, zone }))
-              }
+              onApplyToYear={applyFieldToYear}
               onChange={updateEntry}
             />
           ) : (

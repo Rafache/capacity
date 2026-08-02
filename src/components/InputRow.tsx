@@ -1,5 +1,25 @@
 import { useState } from "react";
-import type { LucideIcon } from "lucide-react";
+import { CalendarRange, type LucideIcon } from "lucide-react";
+
+export function ApplyToYearButton({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className="grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
+      type="button"
+      onClick={onClick}
+      aria-label={`Appliquer ${label} aux 12 mois`}
+      title="Appliquer à l’année"
+    >
+      <CalendarRange className="size-4" aria-hidden="true" />
+    </button>
+  );
+}
 
 export function InputRow({
   icon: Icon,
@@ -8,6 +28,7 @@ export function InputRow({
   value,
   max,
   onChange,
+  onApplyToYear,
 }: {
   icon: LucideIcon;
   iconClass: string;
@@ -15,6 +36,7 @@ export function InputRow({
   value: number;
   max: number;
   onChange: (value: number) => void;
+  onApplyToYear: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const formattedValue = Number.isInteger(value)
@@ -44,44 +66,48 @@ export function InputRow({
           {label}
         </strong>
       </span>
-      <div className="grid h-11 grid-cols-[2.5rem_minmax(4rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-        <button
-          className={controlClass}
-          disabled={value <= 0}
-          onClick={() => onChange(Math.max(0, value - 0.5))}
-          aria-label={`Réduire ${label}`}
-        >
-          −
-        </button>
-        {editing ? (
-          <input
-            className="w-full min-w-0 border-x border-slate-200 bg-white px-1 text-center text-[16px] font-black leading-none text-slate-950 outline-none focus:bg-blue-50 sm:text-sm"
-            autoFocus
-            inputMode="decimal"
-            defaultValue={formattedValue}
-            aria-label={`${label} en jours`}
-            onBlur={(event) => commit(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") commit(event.currentTarget.value);
-              if (event.key === "Escape") setEditing(false);
-            }}
-          />
-        ) : (
+      <div className="flex items-center gap-2">
+        <div className="grid h-11 min-w-0 grid-cols-[2.5rem_minmax(4rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
           <button
-            className="min-w-0 border-x border-slate-200 bg-white px-1 text-sm font-black text-slate-950 transition hover:bg-blue-50 hover:text-blue-700"
-            onClick={() => setEditing(true)}
+            className={controlClass}
+            disabled={value <= 0}
+            onClick={() => onChange(Math.max(0, value - 0.5))}
+            aria-label={`Réduire ${label}`}
           >
-            {formattedValue} j
+            −
           </button>
-        )}
-        <button
-          className={controlClass}
-          disabled={value >= max}
-          onClick={() => onChange(Math.min(max, value + 0.5))}
-          aria-label={`Augmenter ${label}`}
-        >
-          +
-        </button>
+          {editing ? (
+            <input
+              className="w-full min-w-0 border-x border-slate-200 bg-white px-1 text-center text-[16px] font-black leading-none text-slate-950 outline-none focus:bg-blue-50 sm:text-sm"
+              autoFocus
+              inputMode="decimal"
+              defaultValue={formattedValue}
+              aria-label={`${label} en jours`}
+              onBlur={(event) => commit(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") commit(event.currentTarget.value);
+                if (event.key === "Escape") setEditing(false);
+              }}
+            />
+          ) : (
+            <button
+              className="min-w-0 border-x border-slate-200 bg-white px-1 text-sm font-black text-slate-950 transition hover:bg-blue-50 hover:text-blue-700"
+              type="button"
+              onClick={() => setEditing(true)}
+            >
+              {formattedValue} j
+            </button>
+          )}
+          <button
+            className={controlClass}
+            disabled={value >= max}
+            onClick={() => onChange(Math.min(max, value + 0.5))}
+            aria-label={`Augmenter ${label}`}
+          >
+            +
+          </button>
+        </div>
+        <ApplyToYearButton label={label} onClick={onApplyToYear} />
       </div>
     </div>
   );
