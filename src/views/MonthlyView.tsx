@@ -139,7 +139,7 @@ export function MonthlyView({
         ]}
       />
 
-      <section className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4">
+      <section className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:p-4">
         <span
           className="grid size-11 place-items-center rounded-2xl bg-blue-50 text-blue-600"
           aria-hidden="true"
@@ -152,7 +152,7 @@ export function MonthlyView({
           </strong>
           <small className="text-xs font-medium text-slate-400">Quotité du mois</small>
         </span>
-        <div className="flex items-center gap-2">
+        <div className="col-span-2 flex items-center justify-self-end gap-2 sm:col-span-1">
           <div className="grid h-11 grid-cols-[2.5rem_minmax(4.5rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
             <button
               className={stepperButtonClass}

@@ -55,7 +55,7 @@ export function InputRow({
     "grid size-10 place-items-center text-xl font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent";
 
   return (
-    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm transition hover:border-slate-300 sm:p-4">
+    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm transition hover:border-slate-300 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:p-4">
       <span
         className={`grid size-11 shrink-0 place-items-center rounded-2xl ${iconClass}`}
       >
@@ -66,7 +66,7 @@ export function InputRow({
           {label}
         </strong>
       </span>
-      <div className="flex items-center gap-2">
+      <div className="col-span-2 flex items-center justify-self-end gap-2 sm:col-span-1">
         <div className="grid h-11 min-w-0 grid-cols-[2.5rem_minmax(4rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
           <button
             className={controlClass}
