@@ -1,12 +1,4 @@
-import {
-  CalendarRange,
-  Copy,
-  Download,
-  MoreVertical,
-  RotateCcw,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { CalendarRange, Download, MoreVertical, Trash2, Upload } from "lucide-react";
 import { createPortal } from "react-dom";
 import {
   useCallback,
@@ -20,16 +12,15 @@ import type { Zone } from "../types";
 
 type Props = {
   open: boolean;
-  showCsvActions: boolean;
-  showMonthlyActions: boolean;
+  years: number[];
+  startYear: number;
   onToggle: () => void;
   onClose: () => void;
+  onFiscalYearChange: (startYear: number) => void;
   onImport: (event: ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
   zone: Zone;
   onZoneChange: (zone: Zone) => void;
-  onCopyNext: () => void;
-  onResetMonth: () => void;
   onClear: () => void;
 };
 
@@ -38,16 +29,15 @@ const itemClass =
 
 export function ActionMenu({
   open,
-  showCsvActions,
-  showMonthlyActions,
+  years,
+  startYear,
   onToggle,
   onClose,
+  onFiscalYearChange,
   onImport,
   onExport,
   zone,
   onZoneChange,
-  onCopyNext,
-  onResetMonth,
   onClear,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -148,95 +138,88 @@ export function ActionMenu({
               visibility: menuPosition ? "visible" : "hidden",
             }}
           >
-            {showCsvActions && (
-              <>
-                <p className="px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-                  Données
-                </p>
-                <button
-                  className={itemClass}
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    onClose();
-                    fileRef.current?.click();
-                  }}
-                >
-                  <Upload className="size-4 text-blue-600" aria-hidden="true" />
-                  <span>Importer un CSV</span>
-                </button>
-                <button
-                  className={itemClass}
-                  type="button"
-                  role="menuitem"
-                  onClick={() => runAction(onExport)}
-                >
-                  <Download className="size-4 text-blue-600" aria-hidden="true" />
-                  <span>Exporter en CSV</span>
-                </button>
-              </>
-            )}
+            <p className="px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+              Année fiscale
+            </p>
+            <label className="relative block px-1 pb-2">
+              <span className="sr-only">Année fiscale</span>
+              <select
+                className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-8 text-sm font-extrabold text-slate-900 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                value={startYear}
+                onChange={(event) =>
+                  runAction(() => onFiscalYearChange(Number(event.target.value)))
+                }
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year} — {year + 1}
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                ▾
+              </span>
+            </label>
 
-            {showMonthlyActions && (
-              <>
-                <p className="px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-                  Mois sélectionné
-                </p>
-                <button
-                  className={itemClass}
-                  type="button"
-                  role="menuitem"
-                  onClick={() => runAction(onCopyNext)}
-                >
-                  <Copy className="size-4 text-blue-600" aria-hidden="true" />
-                  <span>Copier vers le mois suivant</span>
-                </button>
-                <button
-                  className={`${itemClass} text-amber-700 hover:bg-amber-50 hover:text-amber-800`}
-                  type="button"
-                  role="menuitem"
-                  onClick={() => runAction(onResetMonth)}
-                >
-                  <RotateCcw className="size-4" aria-hidden="true" />
-                  <span>Réinitialiser ce mois</span>
-                </button>
+            <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+              Vacances scolaires
+            </p>
+            <div
+              className="grid grid-cols-3 gap-1 px-1 pb-1"
+              role="group"
+              aria-label="Zone scolaire"
+            >
+              {["A", "B", "C"].map((item) => {
+                const schoolZone = item as Zone;
 
-                <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-                  Vacances scolaires
-                </p>
-                <div
-                  className="grid grid-cols-3 gap-1 px-1 pb-1"
-                  role="group"
-                  aria-label="Zone scolaire"
-                >
-                  {["A", "B", "C"].map((item) => {
-                    const schoolZone = item as Zone;
+                return (
+                  <button
+                    className={`rounded-xl px-2 py-2 text-xs font-extrabold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                      zone === schoolZone
+                        ? "bg-slate-950 text-white"
+                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                    }`}
+                    key={schoolZone}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={zone === schoolZone}
+                    onClick={() => runAction(() => onZoneChange(schoolZone))}
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      {zone === schoolZone ? (
+                        <CalendarRange className="size-3.5" aria-hidden="true" />
+                      ) : null}
+                      Zone {schoolZone}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-                    return (
-                      <button
-                        className={`rounded-xl px-2 py-2 text-xs font-extrabold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
-                          zone === schoolZone
-                            ? "bg-slate-950 text-white"
-                            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                        }`}
-                        key={schoolZone}
-                        type="button"
-                        role="menuitemradio"
-                        aria-checked={zone === schoolZone}
-                        onClick={() => runAction(() => onZoneChange(schoolZone))}
-                      >
-                        <span className="inline-flex items-center gap-1.5">
-                          {zone === schoolZone ? (
-                            <CalendarRange className="size-3.5" aria-hidden="true" />
-                          ) : null}
-                          Zone {schoolZone}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
+            <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+              Données
+            </p>
+            <button
+              className={itemClass}
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                onClose();
+                fileRef.current?.click();
+              }}
+            >
+              <Upload className="size-4 text-blue-600" aria-hidden="true" />
+              <span>Importer un CSV</span>
+            </button>
+            <button
+              className={itemClass}
+              type="button"
+              role="menuitem"
+              onClick={() => runAction(onExport)}
+            >
+              <Download className="size-4 text-blue-600" aria-hidden="true" />
+              <span>Exporter en CSV</span>
+            </button>
 
             <div className="my-2 h-px bg-slate-200" role="separator" />
             <button
@@ -252,15 +235,13 @@ export function ActionMenu({
           document.body,
         )}
 
-      {showCsvActions && (
-        <input
-          ref={fileRef}
-          className="sr-only"
-          type="file"
-          accept=".csv,text/csv"
-          onChange={onImport}
-        />
-      )}
+      <input
+        ref={fileRef}
+        className="sr-only"
+        type="file"
+        accept=".csv,text/csv"
+        onChange={onImport}
+      />
     </div>
   );
 }

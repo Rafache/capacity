@@ -21,6 +21,7 @@ type Props = {
   barValues?: Record<SegmentKey, number>;
   barTotal?: number;
   barLabel?: string;
+  showLegend?: boolean;
 };
 
 const toneClasses: Record<SummaryTone, { label: string; value: string }> = {
@@ -50,6 +51,7 @@ export function CapacitySummary({
   barValues,
   barTotal,
   barLabel,
+  showLegend = true,
 }: Props) {
   const distributionLabel = barLabel ?? `Répartition de ${title.toLowerCase()}`;
 
@@ -119,17 +121,19 @@ export function CapacitySummary({
             label={distributionLabel}
             className="h-3 bg-white/10"
           />
-          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
-            {CAPACITY_SEGMENTS.map(({ key, label, barClass }) => (
-              <span
-                className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 sm:text-[10px]"
-                key={key}
-              >
-                <span className={`size-1.5 shrink-0 rounded-full ${barClass}`} />
-                {label}
-              </span>
-            ))}
-          </div>
+          {showLegend ? (
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
+              {CAPACITY_SEGMENTS.map(({ key, label, barClass }) => (
+                <span
+                  className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 sm:text-[10px]"
+                  key={key}
+                >
+                  <span className={`size-1.5 shrink-0 rounded-full ${barClass}`} />
+                  {label}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </section>

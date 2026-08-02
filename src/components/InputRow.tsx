@@ -66,8 +66,8 @@ export function InputRow({
           {label}
         </strong>
       </span>
-      <div className="col-span-2 flex items-center justify-self-end gap-2 sm:col-span-1">
-        <div className="grid h-11 min-w-0 grid-cols-[2.5rem_minmax(4rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+      <div className="col-span-2 flex w-full flex-nowrap items-center justify-end gap-2 sm:col-span-1">
+        <div className="grid h-11 shrink-0 grid-cols-[2.5rem_5rem_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
           <button
             className={controlClass}
             disabled={value <= 0}
@@ -78,7 +78,7 @@ export function InputRow({
           </button>
           {editing ? (
             <input
-              className="w-full min-w-0 border-x border-slate-200 bg-white px-1 text-center text-[16px] font-black leading-none text-slate-950 outline-none focus:bg-blue-50 sm:text-sm"
+              className="w-full min-w-0 whitespace-nowrap border-x border-slate-200 bg-white px-1 text-center text-[16px] font-black leading-none text-slate-950 outline-none focus:bg-blue-50 sm:text-sm"
               autoFocus
               inputMode="decimal"
               defaultValue={formattedValue}
@@ -91,7 +91,7 @@ export function InputRow({
             />
           ) : (
             <button
-              className="min-w-0 border-x border-slate-200 bg-white px-1 text-sm font-black text-slate-950 transition hover:bg-blue-50 hover:text-blue-700"
+              className="min-w-0 whitespace-nowrap border-x border-slate-200 bg-white px-1 text-sm font-black text-slate-950 transition hover:bg-blue-50 hover:text-blue-700"
               type="button"
               onClick={() => setEditing(true)}
             >

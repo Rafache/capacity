@@ -57,7 +57,7 @@ type Props = {
   zone: Zone;
   onMonthChange: (index: number) => void;
   onApplyToYear: (field: EntryNumericKey) => void;
-  onChange: (field: keyof Entry, value: number | string) => void;
+  onChange: (field: EntryNumericKey, value: number) => void;
 };
 
 export function MonthlyView({
@@ -192,23 +192,8 @@ export function MonthlyView({
             </h2>
           </div>
         </div>
-        <div className="space-y-2.5">
-          {ABSENCE_SEGMENTS.map(({ key, label, icon: Icon, softClass }) => (
-            <InputRow
-              icon={Icon}
-              iconClass={softClass}
-              key={key}
-              label={label}
-              value={entry[key]}
-              max={stats.contracted}
-              onChange={(value) => onChange(key, value)}
-              onApplyToYear={() => onApplyToYear(key)}
-            />
-          ))}
-        </div>
-
         <div
-          className="mt-4 space-y-2 px-1 text-xs sm:text-sm"
+          className="mb-4 space-y-2 px-1 text-xs sm:text-sm"
           aria-label="Jours fériés et vacances scolaires"
         >
           {holidays.length ? (
@@ -254,18 +239,22 @@ export function MonthlyView({
             </p>
           ) : null}
         </div>
-      </section>
 
-      <label className="block rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4">
-        <span className="mb-2 block text-sm font-extrabold text-slate-900">Notes</span>
-        <textarea
-          className="min-h-20 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
-          value={entry.note}
-          maxLength={300}
-          placeholder="Ex. formation, mandat, congés d’été…"
-          onChange={(event) => onChange("note", event.target.value)}
-        />
-      </label>
+        <div className="space-y-2.5">
+          {ABSENCE_SEGMENTS.map(({ key, label, icon: Icon, softClass }) => (
+            <InputRow
+              icon={Icon}
+              iconClass={softClass}
+              key={key}
+              label={label}
+              value={entry[key]}
+              max={stats.contracted}
+              onChange={(value) => onChange(key, value)}
+              onApplyToYear={() => onApplyToYear(key)}
+            />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

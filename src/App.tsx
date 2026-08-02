@@ -17,7 +17,6 @@ import {
 import { ActionMenu } from "./components/ActionMenu";
 import { exportCapacityCsv, importCapacityCsv } from "./domain/csv";
 import {
-  EMPTY_ENTRY,
   STORAGE_KEY,
   availableFiscalYears,
   emptyData,
@@ -30,7 +29,7 @@ import { ConfirmDialog } from "./components/ConfirmDialog";
 import { MONTHS_SHORT } from "./data/months";
 import { AnnualView } from "./views/AnnualView";
 import { MonthlyView } from "./views/MonthlyView";
-import type { CapacityData, Entry, EntryNumericKey, SegmentKey, Zone } from "./types";
+import type { CapacityData, Entry, EntryNumericKey, SegmentKey } from "./types";
 
 type Notice = {
   message: string;
@@ -120,7 +119,7 @@ export default function App() {
     }));
   };
 
-  const updateEntry = (field: keyof Entry, value: number | string) => {
+  const updateEntry = (field: EntryNumericKey, value: number) => {
     const next = [...entries];
     next[monthIndex] = { ...next[monthIndex], [field]: value } as Entry;
     replaceYear(next);
@@ -171,15 +170,6 @@ export default function App() {
     });
   };
 
-  const copyNext = () => {
-    const next = [...entries];
-    const target = (monthIndex + 1) % 12;
-    next[target] = { ...currentEntry };
-    replaceYear(next);
-    setMonthIndex(target);
-    setNotice({ message: "Le mois a été copié.", type: "success" });
-  };
-
   const applyFieldToYear = (field: EntryNumericKey) => {
     const messages: Record<EntryNumericKey, string> = {
       workRate: "Le temps de travail a été appliqué aux 12 mois.",
@@ -197,16 +187,6 @@ export default function App() {
     );
     setNotice({
       message: messages[field],
-      type: "success",
-    });
-  };
-
-  const resetMonth = () => {
-    const next = [...entries];
-    next[monthIndex] = { ...EMPTY_ENTRY };
-    replaceYear(next);
-    setNotice({
-      message: "Le mois a été réinitialisé.",
       type: "success",
     });
   };
@@ -252,45 +232,24 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
-              <label className="relative">
-                <span className="sr-only">Année budgétaire</span>
-                <select
-                  className="h-11 appearance-none rounded-2xl border border-slate-200 bg-slate-50 py-0 pl-3 pr-8 text-sm font-extrabold text-slate-900 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 sm:px-4 sm:pr-9 sm:text-base"
-                  value={startYear}
-                  onChange={(event) => {
-                    setStartYear(Number(event.target.value));
-                    setMonthIndex(0);
-                    closeActions();
-                  }}
-                >
-                  {years.map((year) => (
-                    <option key={year} value={year}>
-                      {year} — {year + 1}
-                    </option>
-                  ))}
-                </select>
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-                  ▾
-                </span>
-              </label>
+            {tab === "annual" ? (
               <ActionMenu
                 open={actionsOpen}
-                showCsvActions={tab === "annual"}
-                showMonthlyActions={tab === "monthly"}
+                years={years}
+                startYear={startYear}
                 onToggle={() => setActionsOpen((open) => !open)}
                 onClose={closeActions}
+                onFiscalYearChange={(year) => {
+                  setStartYear(year);
+                  setMonthIndex(0);
+                }}
                 onImport={importCsv}
                 onExport={exportCsv}
                 zone={data.zone}
-                onZoneChange={(zone: Zone) =>
-                  setData((previous) => ({ ...previous, zone }))
-                }
-                onCopyNext={copyNext}
-                onResetMonth={resetMonth}
+                onZoneChange={(zone) => setData((previous) => ({ ...previous, zone }))}
                 onClear={clearStoredData}
               />
-            </div>
+            ) : null}
           </header>
 
           <nav
