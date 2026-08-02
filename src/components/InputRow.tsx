@@ -20,6 +20,7 @@ export function InputRow({
   const formattedValue = Number.isInteger(value)
     ? String(value)
     : value.toFixed(1).replace(".", ",");
+
   const commit = (raw: string) => {
     const parsed = Number(raw.replace(",", "."));
     if (Number.isFinite(parsed)) {
@@ -28,16 +29,27 @@ export function InputRow({
     setEditing(false);
   };
 
+  const controlClass =
+    "grid size-10 place-items-center text-xl font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent";
+
   return (
-    <div className="input-row">
-      <span className={`row-icon ${iconClass}`}>
-        <Icon aria-hidden="true" />
+    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm transition hover:border-slate-300 sm:p-4">
+      <span
+        className={`grid size-11 shrink-0 place-items-center rounded-2xl ${iconClass}`}
+      >
+        <Icon className="size-5" aria-hidden="true" />
       </span>
-      <span className="row-copy">
-        <strong>{label}</strong>
+      <span className="min-w-0">
+        <strong className="block truncate text-sm font-extrabold text-slate-900 sm:text-base">
+          {label}
+        </strong>
+        <small className="text-xs font-medium text-slate-400">
+          Saisie par demi-journée
+        </small>
       </span>
-      <div className="stepper">
+      <div className="grid h-11 grid-cols-[2.5rem_minmax(4rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
         <button
+          className={controlClass}
           disabled={value <= 0}
           onClick={() => onChange(Math.max(0, value - 0.5))}
           aria-label={`Réduire ${label}`}
@@ -46,6 +58,7 @@ export function InputRow({
         </button>
         {editing ? (
           <input
+            className="min-w-0 border-x border-slate-200 bg-white px-1 text-center text-sm font-black text-slate-950 outline-none focus:bg-blue-50"
             autoFocus
             inputMode="decimal"
             defaultValue={formattedValue}
@@ -57,11 +70,15 @@ export function InputRow({
             }}
           />
         ) : (
-          <button className="editable-value" onClick={() => setEditing(true)}>
+          <button
+            className="min-w-0 border-x border-slate-200 bg-white px-1 text-sm font-black text-slate-950 transition hover:bg-blue-50 hover:text-blue-700"
+            onClick={() => setEditing(true)}
+          >
             {formattedValue} j
           </button>
         )}
         <button
+          className={controlClass}
           disabled={value >= max}
           onClick={() => onChange(Math.min(max, value + 0.5))}
           aria-label={`Augmenter ${label}`}
