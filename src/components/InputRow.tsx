@@ -71,7 +71,7 @@ export function InputRow({
         <Icon className="size-5" aria-hidden="true" />
       </span>
       <span className="min-w-0">
-        <strong className="block truncate text-sm font-extrabold text-slate-900 sm:text-base">
+        <strong className="block whitespace-nowrap text-xs font-bold leading-none text-slate-900 sm:text-sm">
           {label}
         </strong>
       </span>

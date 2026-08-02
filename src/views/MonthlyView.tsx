@@ -142,12 +142,12 @@ export function MonthlyView({
             aria-label="Jours fériés et vacances scolaires"
           >
             {holidays.length ? (
-              <p className="flex min-w-0 items-start gap-1.5 overflow-hidden whitespace-nowrap text-slate-300">
+              <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
                 <Sun
                   className="mt-0.5 size-3.5 shrink-0 text-amber-300"
                   aria-hidden="true"
                 />
-                <span className="min-w-0 truncate">
+                <span className="min-w-0 flex-1">
                   <strong className="font-extrabold text-white/90">
                     Jours fériés :{" "}
                   </strong>
@@ -161,12 +161,12 @@ export function MonthlyView({
             ) : null}
 
             {schoolBreaks.length ? (
-              <p className="flex min-w-0 items-start gap-1.5 overflow-hidden whitespace-nowrap text-slate-300">
+              <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
                 <CalendarRange
                   className="mt-0.5 size-3.5 shrink-0 text-blue-300"
                   aria-hidden="true"
                 />
-                <span className="min-w-0 truncate">
+                <span className="min-w-0 flex-1">
                   <strong className="font-extrabold text-white/90">Vacances : </strong>
                   <span className="font-medium">
                     {schoolBreaks.map(formatRange).join(" · ")}
@@ -203,17 +203,7 @@ export function MonthlyView({
         onApplyToYear={() => onRequestApplyToYear("workRate")}
       />
 
-      <section>
-        <div className="mb-3">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
-              Planification
-            </p>
-            <h2 className="text-xl font-black tracking-tight text-slate-950">
-              Mes absences
-            </h2>
-          </div>
-        </div>
+      <section aria-label="Mes absences">
         <div className="space-y-2.5">
           {ABSENCE_SEGMENTS.map(({ key, label, icon: Icon, softClass }) => (
             <InputRow
