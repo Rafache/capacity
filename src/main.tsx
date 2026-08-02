@@ -4,6 +4,7 @@ import App from "./App";
 import "./styles.css";
 import "./enhancements.css";
 import "./monthly-summary.css";
+import "./notifications.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
