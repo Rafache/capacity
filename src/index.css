@@ -1,8 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+  --font-sans:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --color-capacity-navy: #0f172a;
+  --color-capacity-blue: #2563eb;
+  --color-capacity-available: #059669;
+  --color-capacity-available-soft: #ecfdf5;
+  --color-capacity-leave: #ef4444;
+  --color-capacity-leave-soft: #fef2f2;
+  --color-capacity-rtt: #ec4899;
+  --color-capacity-rtt-soft: #fdf2f8;
+  --color-capacity-training: #8b5cf6;
+  --color-capacity-training-soft: #f5f3ff;
+  --color-capacity-other: #f59e0b;
+  --color-capacity-other-soft: #fffbeb;
 }
 
 @layer base {
@@ -61,6 +74,28 @@
 
 .toast-progress {
   animation: toast-progress 3s linear forwards;
+}
+
+.monthly-month-nav {
+  position: sticky;
+  top: var(--app-header-height, 8.75rem);
+  z-index: 20;
+  margin-inline: -1rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgb(226 232 240 / 0.9);
+  background: rgb(255 255 255 / 0.94);
+  backdrop-filter: blur(16px);
+}
+
+@media (min-width: 640px) {
+  .monthly-month-nav {
+    position: static;
+    margin-inline: 0;
+    padding: 0;
+    border-bottom: 0;
+    background: transparent;
+    backdrop-filter: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

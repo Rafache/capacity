@@ -43,9 +43,6 @@ export function InputRow({
         <strong className="block truncate text-sm font-extrabold text-slate-900 sm:text-base">
           {label}
         </strong>
-        <small className="text-xs font-medium text-slate-400">
-          Saisie par demi-journée
-        </small>
       </span>
       <div className="grid h-11 grid-cols-[2.5rem_minmax(4rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
         <button

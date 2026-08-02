@@ -1,10 +1,12 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ChangeEvent,
+  type CSSProperties,
 } from "react";
 import {
   AlertTriangle,
@@ -24,24 +26,11 @@ import {
   normalizeEntry,
   saveData,
 } from "./domain/capacityData";
+import { ConfirmDialog } from "./components/ConfirmDialog";
+import { MONTHS_SHORT } from "./data/months";
 import { AnnualView } from "./views/AnnualView";
 import { MonthlyView } from "./views/MonthlyView";
 import type { CapacityData, Entry, SegmentKey, Zone } from "./types";
-
-const MONTHS_SHORT = [
-  "Juil.",
-  "Août",
-  "Sept.",
-  "Oct.",
-  "Nov.",
-  "Déc.",
-  "Janv.",
-  "Févr.",
-  "Mars",
-  "Avr.",
-  "Mai",
-  "Juin",
-];
 
 type Notice = {
   message: string;
@@ -56,8 +45,26 @@ export default function App() {
   const [data, setData] = useState<CapacityData>(() => emptyData());
   const [actionsOpen, setActionsOpen] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+  const [appHeaderHeight, setAppHeaderHeight] = useState<number>();
+  const appHeaderRef = useRef<HTMLDivElement>(null);
   const storageReady = useRef(false);
   const closeActions = useCallback(() => setActionsOpen(false), []);
+
+  useLayoutEffect(() => {
+    const header = appHeaderRef.current;
+    if (!header) return;
+
+    const updateHeaderHeight = () => {
+      setAppHeaderHeight(header.getBoundingClientRect().height);
+    };
+
+    updateHeaderHeight();
+    const observer = new ResizeObserver(updateHeaderHeight);
+    observer.observe(header);
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     setData(loadData(window.localStorage));
@@ -82,27 +89,16 @@ export default function App() {
     [data.entries, startYear],
   );
   const stats = useMemo(
-    () =>
-      entries.map((entry, index) =>
-        getMonthStats(startYear, index, entry),
-      ),
+    () => entries.map((entry, index) => getMonthStats(startYear, index, entry)),
     [entries, startYear],
   );
   const currentEntry = entries[monthIndex];
   const currentStats = stats[monthIndex];
-  const annualBaseline = stats.reduce(
-    (sum, item) => sum + item.baseline,
-    0,
-  );
-  const annualAvailable = stats.reduce(
-    (sum, item) => sum + item.available,
-    0,
-  );
+  const annualBaseline = stats.reduce((sum, item) => sum + item.baseline, 0);
+  const annualAvailable = stats.reduce((sum, item) => sum + item.available, 0);
   const annualWorkRate = annualBaseline
     ? Math.round(
-        (stats.reduce((sum, item) => sum + item.contracted, 0) /
-          annualBaseline) *
-          100,
+        (stats.reduce((sum, item) => sum + item.contracted, 0) / annualBaseline) * 100,
       )
     : 0;
   const annualRate = annualBaseline
@@ -118,10 +114,7 @@ export default function App() {
     {} as Record<SegmentKey, number>,
   );
   const annualUnavailable =
-    annualStats.leave +
-    annualStats.rtt +
-    annualStats.training +
-    annualStats.other;
+    annualStats.leave + annualStats.rtt + annualStats.training + annualStats.other;
 
   const replaceYear = (nextEntries: Entry[]) => {
     setData((previous) => ({
@@ -138,9 +131,7 @@ export default function App() {
 
   const exportCsv = () => {
     const text = exportCapacityCsv(MONTHS_SHORT, entries, stats);
-    const url = URL.createObjectURL(
-      new Blob([text], { type: "text/csv;charset=utf-8" }),
-    );
+    const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = `capacite-${startYear}-${startYear + 1}.csv`;
@@ -170,14 +161,13 @@ export default function App() {
     }
   };
 
-  const clearStoredData = () => {
-    if (
-      !window.confirm("Effacer toutes les données enregistrées sur cet appareil ?")
-    )
-      return;
+  const clearStoredData = () => setConfirmClearOpen(true);
+
+  const confirmClearStoredData = () => {
     setData(emptyData());
     window.localStorage.removeItem(STORAGE_KEY);
     window.localStorage.removeItem("ma-capacite-v1");
+    setConfirmClearOpen(false);
     setNotice({
       message: "Les données locales ont été effacées.",
       type: "success",
@@ -222,12 +212,23 @@ export default function App() {
   };
 
   return (
-    <main className="min-h-dvh bg-slate-50 text-slate-950 antialiased sm:px-5 sm:py-6">
+    <main
+      className="min-h-dvh bg-slate-50 text-slate-950 antialiased sm:px-5 sm:py-6"
+      style={
+        appHeaderHeight
+          ? ({ "--app-header-height": `${appHeaderHeight}px` } as CSSProperties)
+          : undefined
+      }
+    >
       <section
         className="mx-auto min-h-dvh w-full max-w-5xl bg-white sm:min-h-0 sm:rounded-[2rem] sm:border sm:border-slate-200/80 sm:shadow-[0_24px_80px_rgba(15,23,42,0.10)]"
         aria-label="Gestion de capacité"
       >
-        <div className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-xl sm:rounded-t-[2rem] sm:px-6 sm:pt-5">
+        <div
+          className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-xl sm:rounded-t-[2rem] sm:px-6 sm:pt-5"
+          data-app-header
+          ref={appHeaderRef}
+        >
           <header className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <span
@@ -338,6 +339,7 @@ export default function App() {
               onMonthOpen={(index) => {
                 setMonthIndex(index);
                 setTab("monthly");
+                closeActions();
               }}
             />
           )}
@@ -382,6 +384,15 @@ export default function App() {
           />
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmClearOpen}
+        title="Effacer toutes les données ?"
+        description="Cette action supprimera les données enregistrées sur cet appareil pour toutes les années budgétaires. Elle est irréversible."
+        confirmLabel="Effacer les données"
+        onCancel={() => setConfirmClearOpen(false)}
+        onConfirm={confirmClearStoredData}
+      />
     </main>
   );
 }

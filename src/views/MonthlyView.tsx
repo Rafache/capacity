@@ -1,45 +1,35 @@
 import {
-  BriefcaseBusiness,
   CalendarDays,
   CalendarRange,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   CircleCheckBig,
   Clock3,
-  Coffee,
   Gauge,
-  GraduationCap,
   Sun,
 } from "lucide-react";
 import { publicHolidays } from "../capacity";
+import { CapacitySummary } from "../components/CapacitySummary";
+import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
 import { InputRow } from "../components/InputRow";
 import { SCHOOL_BREAKS } from "../data/schoolBreaks";
+import { MONTHS_LONG } from "../data/months";
 import type { Entry, MonthStats, SchoolBreak, Zone } from "../types";
 
-const MONTHS_LONG = [
-  "Juillet",
-  "Août",
-  "Septembre",
-  "Octobre",
-  "Novembre",
-  "Décembre",
-  "Janvier",
-  "Février",
-  "Mars",
-  "Avril",
-  "Mai",
-  "Juin",
-];
 const WEEKDAY = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+
 const formatNumber = (value: number) =>
   Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
+
 const formatDate = (date: Date) =>
-  `${WEEKDAY[date.getUTCDay()]} ${date.getUTCDate()} ${new Intl.DateTimeFormat(
-    "fr-FR",
-    { month: "short", timeZone: "UTC" },
-  )
+  `${WEEKDAY[date.getUTCDay()]} ${date.getUTCDate()} ${new Intl.DateTimeFormat("fr-FR", {
+    month: "short",
+    timeZone: "UTC",
+  })
     .format(date)
     .replace(".", "")}.`;
+
 const formatRange = (item: SchoolBreak) => {
   const fmt = (date: Date) =>
     `${date.getUTCDate()} ${new Intl.DateTimeFormat("fr-FR", {
@@ -54,6 +44,7 @@ const formatRange = (item: SchoolBreak) => {
     Hiver: "Vacances d’hiver",
     Printemps: "Vacances de printemps",
   };
+
   return `${labels[item.name] ?? item.name} · ${fmt(
     new Date(`${item.start}T00:00:00Z`),
   )} — ${fmt(new Date(`${item.end}T00:00:00Z`))}`;
@@ -87,14 +78,10 @@ export function MonthlyView({
   const overlaps = (item: SchoolBreak) =>
     Date.parse(`${item.start}T00:00:00Z`) <= monthEnd &&
     Date.parse(`${item.end}T00:00:00Z`) >= monthStart;
-  const schoolBreaks = (SCHOOL_BREAKS[String(startYear)]?.[zone] ?? []).filter(
-    overlaps,
-  );
+  const schoolBreaks = (SCHOOL_BREAKS[String(startYear)]?.[zone] ?? []).filter(overlaps);
   const showZones = (["A", "B", "C"] as Zone[]).some((schoolZone) =>
     (SCHOOL_BREAKS[String(startYear)]?.[schoolZone] ?? []).some(
-      (item) =>
-        (item.name === "Hiver" || item.name === "Printemps") &&
-        overlaps(item),
+      (item) => (item.name === "Hiver" || item.name === "Printemps") && overlaps(item),
     ),
   );
   const holidays = publicHolidays(year).filter(
@@ -108,12 +95,13 @@ export function MonthlyView({
     ? Math.round((stats.available / stats.baseline) * 100)
     : 0;
   const progressRate = Math.min(100, Math.max(0, capacityRate));
+  const referenceCount = holidays.length + schoolBreaks.length;
   const stepperButtonClass =
     "grid size-11 place-items-center text-xl font-black text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent";
 
   return (
-    <div className="space-y-5 sm:space-y-6">
-      <div className="grid grid-cols-[3rem_minmax(0,1fr)_3rem] items-center gap-3">
+    <div className="space-y-4 sm:space-y-5">
+      <div className="monthly-month-nav grid grid-cols-[3rem_minmax(0,1fr)_3rem] items-center gap-3">
         <button
           className="grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
           onClick={() => onMonthChange((monthIndex + 11) % 12)}
@@ -138,84 +126,38 @@ export function MonthlyView({
         </button>
       </div>
 
-      <section
-        className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-5 text-white shadow-[0_20px_50px_rgba(15,23,42,0.24)] sm:p-6"
-        aria-labelledby="month-summary-title"
-      >
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-300">
-              Synthèse
-            </p>
-            <h2 id="month-summary-title" className="text-lg font-black">
-              Résumé du mois
-            </h2>
-          </div>
-          <p className="max-w-44 text-right text-[11px] font-medium leading-snug text-slate-400 sm:max-w-none sm:text-xs">
-            {weekdays} jours en semaine
-            {weekdayHolidays > 0
-              ? ` · ${weekdayHolidays} férié${weekdayHolidays > 1 ? "s" : ""} déduit${weekdayHolidays > 1 ? "s" : ""}`
-              : " · aucun férié déduit"}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-3 divide-x divide-white/15">
-          <article
-            className="min-w-0 px-2 text-center sm:px-5"
-            aria-label={`${stats.baseline} jours ouvrés`}
-          >
-            <span className="flex items-center justify-center gap-1.5 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.08em] text-slate-400 sm:text-xs">
-              <CalendarDays className="size-3.5 shrink-0" />
-              Jours ouvrés
-            </span>
-            <strong className="mt-2 block whitespace-nowrap text-3xl font-black tracking-tight sm:text-4xl">
-              {stats.baseline}
-              <small className="ml-1 text-sm font-bold text-slate-400 sm:text-base">
-                j
-              </small>
-            </strong>
-          </article>
-
-          <article className="min-w-0 px-2 text-center sm:px-5">
-            <span className="flex items-center justify-center gap-1.5 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.08em] text-emerald-300 sm:text-xs">
-              <CircleCheckBig className="size-3.5 shrink-0" />
-              Disponibles
-            </span>
-            <strong className="mt-2 block whitespace-nowrap text-3xl font-black tracking-tight text-emerald-300 sm:text-4xl">
-              {formatNumber(stats.available)}
-              <small className="ml-1 text-sm font-bold text-emerald-300/70 sm:text-base">
-                j
-              </small>
-            </strong>
-          </article>
-
-          <article className="min-w-0 px-2 text-center sm:px-5">
-            <span className="flex items-center justify-center gap-1.5 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.08em] text-blue-300 sm:text-xs">
-              <Gauge className="size-3.5 shrink-0" />
-              Capacité
-            </span>
-            <strong className="mt-2 block whitespace-nowrap text-3xl font-black tracking-tight text-blue-300 sm:text-4xl">
-              {capacityRate}
-              <small className="ml-0.5 text-sm font-bold text-blue-300/70 sm:text-base">
-                %
-              </small>
-            </strong>
-            <span
-              className="mx-auto mt-2 block h-1.5 max-w-24 overflow-hidden rounded-full bg-white/10"
-              role="progressbar"
-              aria-label="Taux de capacité"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={progressRate}
-            >
-              <span
-                className="block h-full rounded-full bg-blue-400"
-                style={{ width: `${progressRate}%` }}
-              />
-            </span>
-          </article>
-        </div>
-      </section>
+      <CapacitySummary
+        title="Résumé du mois"
+        meta={`${weekdays} jours en semaine${
+          weekdayHolidays > 0
+            ? ` · ${weekdayHolidays} férié${weekdayHolidays > 1 ? "s" : ""} déduit${weekdayHolidays > 1 ? "s" : ""}`
+            : " · aucun férié déduit"
+        }`}
+        items={[
+          {
+            icon: CalendarDays,
+            label: "Jours ouvrés",
+            value: stats.baseline,
+            unit: "j",
+            tone: "neutral",
+          },
+          {
+            icon: CircleCheckBig,
+            label: "Disponibles",
+            value: formatNumber(stats.available),
+            unit: "j",
+            tone: "positive",
+          },
+          {
+            icon: Gauge,
+            label: "Capacité",
+            value: capacityRate,
+            unit: "%",
+            tone: "accent",
+            progress: progressRate,
+          },
+        ]}
+      />
 
       <section className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4">
         <span
@@ -228,17 +170,13 @@ export function MonthlyView({
           <strong className="block truncate text-sm font-extrabold text-slate-900 sm:text-base">
             Temps de travail
           </strong>
-          <small className="text-xs font-medium text-slate-400">
-            Quotité du mois
-          </small>
+          <small className="text-xs font-medium text-slate-400">Quotité du mois</small>
         </span>
         <div className="grid h-11 grid-cols-[2.5rem_minmax(4.5rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
           <button
             className={stepperButtonClass}
             disabled={entry.workRate <= 20}
-            onClick={() =>
-              onChange("workRate", Math.max(20, entry.workRate - 5))
-            }
+            onClick={() => onChange("workRate", Math.max(20, entry.workRate - 5))}
           >
             −
           </button>
@@ -248,9 +186,7 @@ export function MonthlyView({
           <button
             className={stepperButtonClass}
             disabled={entry.workRate >= 100}
-            onClick={() =>
-              onChange("workRate", Math.min(100, entry.workRate + 5))
-            }
+            onClick={() => onChange("workRate", Math.min(100, entry.workRate + 5))}
           >
             +
           </button>
@@ -266,53 +202,35 @@ export function MonthlyView({
             <h2 className="text-xl font-black tracking-tight text-slate-950">
               Mes absences
             </h2>
+            <p className="mt-1 text-xs font-medium text-slate-400">
+              Saisie par demi-journée
+            </p>
           </div>
-          <span className="text-xs font-semibold text-slate-400">
+          <span className="text-right text-xs font-semibold text-slate-400">
             {formatNumber(stats.contracted)} j contractuels
           </span>
         </div>
         <div className="space-y-2.5">
-          <InputRow
-            icon={CalendarRange}
-            iconClass="bg-red-50 text-red-500"
-            label="Congés payés"
-            value={entry.leave}
-            max={stats.contracted}
-            onChange={(value) => onChange("leave", value)}
-          />
-          <InputRow
-            icon={Coffee}
-            iconClass="bg-pink-50 text-pink-500"
-            label="RTT"
-            value={entry.rtt}
-            max={stats.contracted}
-            onChange={(value) => onChange("rtt", value)}
-          />
-          <InputRow
-            icon={GraduationCap}
-            iconClass="bg-violet-50 text-violet-500"
-            label="Formations"
-            value={entry.training}
-            max={stats.contracted}
-            onChange={(value) => onChange("training", value)}
-          />
-          <InputRow
-            icon={BriefcaseBusiness}
-            iconClass="bg-amber-50 text-amber-500"
-            label="Autres"
-            value={entry.other}
-            max={stats.contracted}
-            onChange={(value) => onChange("other", value)}
-          />
+          {ABSENCE_SEGMENTS.map(({ key, label, icon: Icon, softClass }) => (
+            <InputRow
+              icon={Icon}
+              iconClass={softClass}
+              key={key}
+              label={label}
+              value={entry[key]}
+              max={stats.contracted}
+              onChange={(value) => onChange(key, value)}
+            />
+          ))}
         </div>
       </section>
 
-      <label className="block rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
+      <label className="block rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4">
         <span className="mb-2 block text-sm font-extrabold text-slate-900">
           Note du mois
         </span>
         <textarea
-          className="min-h-24 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+          className="min-h-20 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
           value={entry.note}
           maxLength={300}
           placeholder="Ex. formation, mandat, congés d’été…"
@@ -320,75 +238,94 @@ export function MonthlyView({
         />
       </label>
 
-      <section className="rounded-[1.75rem] border border-slate-200/80 bg-slate-50 p-4 sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
-              Repères
-            </p>
-            <h2 className="text-lg font-black text-slate-950">
-              Calendrier du mois
-            </h2>
-          </div>
-          {showZones && (
-            <div
-              className="flex rounded-xl border border-slate-200 bg-white p-1"
-              aria-label="Zone scolaire"
+      <details className="group rounded-[1.75rem] border border-slate-200/80 bg-slate-50 shadow-sm">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 [&::-webkit-details-marker]:hidden sm:p-5">
+          <span className="flex min-w-0 items-center gap-3">
+            <span
+              className="grid size-11 shrink-0 place-items-center rounded-2xl bg-blue-50 text-blue-600"
+              aria-hidden="true"
             >
-              {(["A", "B", "C"] as Zone[]).map((item) => (
-                <button
-                  key={item}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-extrabold transition ${
-                    zone === item
-                      ? "bg-slate-950 text-white shadow-sm"
-                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                  }`}
-                  onClick={() => onZoneChange(item)}
-                >
-                  Zone {item}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+              <CalendarDays className="size-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
+                Repères
+              </span>
+              <span className="block truncate text-lg font-black text-slate-950">
+                Calendrier du mois
+              </span>
+            </span>
+          </span>
+          <span className="flex shrink-0 items-center gap-2 text-xs font-bold text-slate-400">
+            {referenceCount
+              ? `${referenceCount} repère${referenceCount > 1 ? "s" : ""}`
+              : "Aucun repère"}
+            <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+          </span>
+        </summary>
 
-        <div className="mt-4 space-y-2">
-          {holidays.map((item) => (
-            <div
-              className="flex items-center gap-3 rounded-xl border border-amber-100 bg-white p-3 text-sm font-semibold text-slate-700"
-              key={item.name}
-            >
-              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-500">
-                <Sun className="size-4" />
-              </span>
-              <span>
-                {item.name} · {formatDate(item.date)}
-              </span>
+        <div className="border-t border-slate-200/80 px-4 pb-4 pt-4 sm:px-5 sm:pb-5">
+          {showZones && (
+            <div className="mb-4 flex justify-end">
+              <div
+                className="flex rounded-xl border border-slate-200 bg-white p-1"
+                aria-label="Zone scolaire"
+              >
+                {(["A", "B", "C"] as Zone[]).map((item) => (
+                  <button
+                    key={item}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-extrabold transition ${
+                      zone === item
+                        ? "bg-slate-950 text-white shadow-sm"
+                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                    }`}
+                    onClick={() => onZoneChange(item)}
+                  >
+                    Zone {item}
+                  </button>
+                ))}
+              </div>
             </div>
-          ))}
-          {schoolBreaks.map((item) => (
-            <div
-              className="flex items-center gap-3 rounded-xl border border-blue-100 bg-white p-3 text-sm font-semibold text-slate-700"
-              key={`${item.name}-${item.start}`}
-            >
-              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
-                <CalendarRange className="size-4" />
-              </span>
-              <span>{formatRange(item)}</span>
-            </div>
-          ))}
-          {!holidays.length && !schoolBreaks.length && (
-            <p className="rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-medium text-slate-400">
-              Aucun jour férié ni vacances scolaires ce mois-ci.
-            </p>
           )}
-          {!SCHOOL_BREAKS[String(startYear)]?.[zone]?.length && (
-            <p className="text-center text-xs font-medium text-slate-400">
-              Les dates scolaires de cette année ne sont pas encore publiées.
-            </p>
-          )}
+
+          <div className="space-y-2">
+            {holidays.map((item) => (
+              <div
+                className="flex items-center gap-3 rounded-xl border border-amber-100 bg-white p-3 text-sm font-semibold text-slate-700"
+                key={item.name}
+              >
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-500">
+                  <Sun className="size-4" />
+                </span>
+                <span>
+                  {item.name} · {formatDate(item.date)}
+                </span>
+              </div>
+            ))}
+            {schoolBreaks.map((item) => (
+              <div
+                className="flex items-center gap-3 rounded-xl border border-blue-100 bg-white p-3 text-sm font-semibold text-slate-700"
+                key={`${item.name}-${item.start}`}
+              >
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+                  <CalendarRange className="size-4" />
+                </span>
+                <span>{formatRange(item)}</span>
+              </div>
+            ))}
+            {!holidays.length && !schoolBreaks.length && (
+              <p className="rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-medium text-slate-400">
+                Aucun jour férié ni vacances scolaires ce mois-ci.
+              </p>
+            )}
+            {!SCHOOL_BREAKS[String(startYear)]?.[zone]?.length && (
+              <p className="text-center text-xs font-medium text-slate-400">
+                Les dates scolaires de cette année ne sont pas encore publiées.
+              </p>
+            )}
+          </div>
         </div>
-      </section>
+      </details>
     </div>
   );
 }
