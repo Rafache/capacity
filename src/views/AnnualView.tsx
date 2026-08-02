@@ -19,7 +19,7 @@ type Props = {
   stats: MonthStats[];
   annualBaseline: number;
   annualUnavailable: number;
-  annualRate: number;
+  annualAvailable: number;
   annualWorkRate: number;
   annualStats: Record<SegmentKey, number>;
   onMonthOpen: (index: number) => void;
@@ -30,7 +30,7 @@ export function AnnualView({
   stats,
   annualBaseline,
   annualUnavailable,
-  annualRate,
+  annualAvailable,
   annualWorkRate,
   annualStats,
   onMonthOpen,
@@ -58,9 +58,9 @@ export function AnnualView({
           {
             icon: Gauge,
             label: "Capacité",
-            value: annualRate,
-            unit: "%",
-            tone: "accent",
+            value: formatNumber(annualAvailable),
+            unit: "j",
+            tone: "positive",
           },
         ]}
       />

@@ -101,9 +101,6 @@ export default function App() {
         (stats.reduce((sum, item) => sum + item.contracted, 0) / annualBaseline) * 100,
       )
     : 0;
-  const annualRate = annualBaseline
-    ? Math.round((annualAvailable / annualBaseline) * 100)
-    : 0;
   const annualStats = (
     ["available", "leave", "rtt", "training", "other"] as SegmentKey[]
   ).reduce(
@@ -332,7 +329,7 @@ export default function App() {
               stats={stats}
               annualBaseline={annualBaseline}
               annualUnavailable={annualUnavailable}
-              annualRate={annualRate}
+              annualAvailable={annualAvailable}
               annualWorkRate={annualWorkRate}
               annualStats={annualStats}
               onMonthOpen={(index) => {

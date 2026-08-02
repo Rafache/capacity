@@ -100,18 +100,23 @@ export function CapacitySummary({ title, eyebrow = "Synthèse", meta, items }: P
                 ) : null}
               </strong>
               {progress !== undefined ? (
-                <span
-                  className="mx-auto mt-2 block h-1.5 max-w-24 overflow-hidden rounded-full bg-white/10"
-                  role="progressbar"
-                  aria-label={`Taux de ${item.label.toLowerCase()}`}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={progress}
-                >
+                <span className="mx-auto mt-2 flex max-w-28 items-center gap-1.5">
                   <span
-                    className={`block h-full rounded-full ${tone.progress}`}
-                    style={{ width: `${progress}%` }}
-                  />
+                    className="block h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/10"
+                    role="progressbar"
+                    aria-label={`Taux de ${item.label.toLowerCase()}`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={progress}
+                  >
+                    <span
+                      className={`block h-full rounded-full ${tone.progress}`}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </span>
+                  <small className={`shrink-0 text-[9px] font-bold ${tone.label}`}>
+                    {Math.round(progress)}%
+                  </small>
                 </span>
               ) : null}
             </article>

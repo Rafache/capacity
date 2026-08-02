@@ -140,9 +140,9 @@ export function MonthlyView({
           {
             icon: Gauge,
             label: "Capacité",
-            value: capacityRate,
-            unit: "%",
-            tone: "accent",
+            value: formatNumber(stats.available),
+            unit: "j",
+            tone: "positive",
             progress: progressRate,
           },
         ]}
