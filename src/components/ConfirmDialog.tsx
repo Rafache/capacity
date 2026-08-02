@@ -1,4 +1,4 @@
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, X, type LucideIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 type Props = {
@@ -6,6 +6,8 @@ type Props = {
   title: string;
   description: string;
   confirmLabel: string;
+  icon?: LucideIcon;
+  tone?: "danger" | "primary";
   onCancel: () => void;
   onConfirm: () => void;
 };
@@ -15,6 +17,8 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
+  icon: Icon = AlertTriangle,
+  tone = "danger",
   onCancel,
   onConfirm,
 }: Props) {
@@ -34,6 +38,8 @@ export function ConfirmDialog({
 
   if (!open) return null;
 
+  const isDanger = tone === "danger";
+
   return (
     <div
       className="fixed inset-0 z-[110] grid place-items-center bg-slate-950/45 p-4 backdrop-blur-sm"
@@ -49,8 +55,12 @@ export function ConfirmDialog({
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
-          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-red-50 text-red-600">
-            <AlertTriangle className="size-5" aria-hidden="true" />
+          <span
+            className={`grid size-11 shrink-0 place-items-center rounded-2xl ${
+              isDanger ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"
+            }`}
+          >
+            <Icon className="size-5" aria-hidden="true" />
           </span>
           <button
             className="grid size-9 place-items-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
@@ -84,7 +94,11 @@ export function ConfirmDialog({
             Annuler
           </button>
           <button
-            className="h-11 rounded-xl bg-red-600 px-4 text-sm font-extrabold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
+            className={`h-11 rounded-xl px-4 text-sm font-extrabold text-white shadow-sm transition focus:outline-none ${
+              isDanger
+                ? "bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-100"
+                : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-100"
+            }`}
             type="button"
             onClick={onConfirm}
             ref={confirmRef}

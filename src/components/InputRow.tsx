@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarRange, type LucideIcon } from "lucide-react";
+import { CopyPlus, type LucideIcon } from "lucide-react";
 
 export function ApplyToYearButton({
   label,
@@ -10,13 +10,13 @@ export function ApplyToYearButton({
 }) {
   return (
     <button
-      className="grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
+      className="grid size-11 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600 transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
       type="button"
       onClick={onClick}
-      aria-label={`Appliquer ${label} aux 12 mois`}
-      title="Appliquer à l’année"
+      aria-label={`Répliquer ${label} aux 12 mois`}
+      title="Répliquer sur l’année"
     >
-      <CalendarRange className="size-4" aria-hidden="true" />
+      <CopyPlus className="size-4.5" aria-hidden="true" />
     </button>
   );
 }
@@ -26,7 +26,10 @@ export function InputRow({
   iconClass,
   label,
   value,
+  min = 0,
   max,
+  step = 0.5,
+  unit = "j",
   onChange,
   onApplyToYear,
 }: {
@@ -34,7 +37,10 @@ export function InputRow({
   iconClass: string;
   label: string;
   value: number;
+  min?: number;
   max: number;
+  step?: number;
+  unit?: string;
   onChange: (value: number) => void;
   onApplyToYear: () => void;
 }) {
@@ -46,10 +52,13 @@ export function InputRow({
   const commit = (raw: string) => {
     const parsed = Number(raw.replace(",", "."));
     if (Number.isFinite(parsed)) {
-      onChange(Math.min(max, Math.max(0, Math.round(parsed * 2) / 2)));
+      const snapped = Math.round(parsed / step) * step;
+      onChange(Math.min(max, Math.max(min, Math.round(snapped * 100) / 100)));
     }
     setEditing(false);
   };
+
+  const formattedUnit = unit === "%" ? "%" : unit;
 
   const controlClass =
     "grid size-10 place-items-center text-xl font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent";
@@ -70,8 +79,8 @@ export function InputRow({
         <div className="grid h-11 shrink-0 grid-cols-[2.5rem_5rem_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
           <button
             className={controlClass}
-            disabled={value <= 0}
-            onClick={() => onChange(Math.max(0, value - 0.5))}
+            disabled={value <= min}
+            onClick={() => onChange(Math.max(min, value - step))}
             aria-label={`Réduire ${label}`}
           >
             −
@@ -82,7 +91,7 @@ export function InputRow({
               autoFocus
               inputMode="decimal"
               defaultValue={formattedValue}
-              aria-label={`${label} en jours`}
+              aria-label={`${label} en ${unit === "%" ? "pourcentage" : "jours"}`}
               onBlur={(event) => commit(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") commit(event.currentTarget.value);
@@ -95,13 +104,13 @@ export function InputRow({
               type="button"
               onClick={() => setEditing(true)}
             >
-              {formattedValue} j
+              {formattedValue} {formattedUnit}
             </button>
           )}
           <button
             className={controlClass}
             disabled={value >= max}
-            onClick={() => onChange(Math.min(max, value + 0.5))}
+            onClick={() => onChange(Math.min(max, value + step))}
             aria-label={`Augmenter ${label}`}
           >
             +

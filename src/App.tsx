@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   ChartNoAxesColumnIncreasing,
   CircleCheckBig,
+  CopyPlus,
   X,
 } from "lucide-react";
 import { ActionMenu } from "./components/ActionMenu";
@@ -36,15 +37,31 @@ type Notice = {
   type: "success" | "error";
 };
 
+const FIELD_LABELS: Record<EntryNumericKey, string> = {
+  workRate: "Temps de travail",
+  leave: "Congés payés",
+  rtt: "RTT",
+  training: "Formations",
+  other: "Autres",
+};
+
+const formatEntryValue = (field: EntryNumericKey, value: number) =>
+  `${Number.isInteger(value) ? value : value.toFixed(1).replace(".", ",")}${
+    field === "workRate" ? " %" : " j"
+  }`;
+
 export default function App() {
   const years = useMemo(() => availableFiscalYears(), []);
   const [tab, setTab] = useState<"monthly" | "annual">("annual");
-  const [startYear, setStartYear] = useState(years[1]);
+  const [startYear, setStartYear] = useState(years[0]);
   const [monthIndex, setMonthIndex] = useState(0);
   const [data, setData] = useState<CapacityData>(() => emptyData());
   const [actionsOpen, setActionsOpen] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+  const [pendingApplyField, setPendingApplyField] = useState<EntryNumericKey | null>(
+    null,
+  );
   const [appHeaderHeight, setAppHeaderHeight] = useState<number>();
   const appHeaderRef = useRef<HTMLDivElement>(null);
   const storageReady = useRef(false);
@@ -191,6 +208,13 @@ export default function App() {
     });
   };
 
+  const confirmApplyFieldToYear = () => {
+    if (!pendingApplyField) return;
+
+    applyFieldToYear(pendingApplyField);
+    setPendingApplyField(null);
+  };
+
   const changeTab = (nextTab: "monthly" | "annual") => {
     setTab(nextTab);
     closeActions();
@@ -288,7 +312,7 @@ export default function App() {
               stats={currentStats}
               zone={data.zone}
               onMonthChange={setMonthIndex}
-              onApplyToYear={applyFieldToYear}
+              onRequestApplyToYear={setPendingApplyField}
               onChange={updateEntry}
             />
           ) : (
@@ -356,6 +380,24 @@ export default function App() {
         confirmLabel="Effacer les données"
         onCancel={() => setConfirmClearOpen(false)}
         onConfirm={confirmClearStoredData}
+      />
+
+      <ConfirmDialog
+        open={pendingApplyField !== null}
+        title="Répliquer sur l’année ?"
+        description={
+          pendingApplyField
+            ? `La valeur ${formatEntryValue(
+                pendingApplyField,
+                currentEntry[pendingApplyField],
+              )} de ${FIELD_LABELS[pendingApplyField].toLowerCase()} sera appliquée aux 12 mois de l’année fiscale.`
+            : ""
+        }
+        confirmLabel="Répliquer sur l’année"
+        icon={CopyPlus}
+        tone="primary"
+        onCancel={() => setPendingApplyField(null)}
+        onConfirm={confirmApplyFieldToYear}
       />
     </main>
   );

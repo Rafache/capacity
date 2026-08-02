@@ -42,7 +42,6 @@ export function AnnualView({
         eyebrow={null}
         barValues={annualStats}
         barLabel="Répartition de l’année"
-        showLegend={false}
         items={[
           {
             icon: CalendarDays,

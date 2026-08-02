@@ -11,7 +11,7 @@ import {
 import { publicHolidays } from "../capacity";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
-import { ApplyToYearButton, InputRow } from "../components/InputRow";
+import { InputRow } from "../components/InputRow";
 import { SCHOOL_BREAKS } from "../data/schoolBreaks";
 import { MONTHS_LONG } from "../data/months";
 import type { Entry, EntryNumericKey, MonthStats, SchoolBreak, Zone } from "../types";
@@ -38,10 +38,11 @@ const formatRange = (item: SchoolBreak) => {
       .format(date)
       .replace(".", "")}.`;
   const labels: Record<string, string> = {
-    Toussaint: "Vacances de la Toussaint",
-    Noël: "Vacances de Noël",
-    Hiver: "Vacances d’hiver",
-    Printemps: "Vacances de printemps",
+    "Vacances d’été": "Été",
+    Toussaint: "Toussaint",
+    Noël: "Noël",
+    Hiver: "Hiver",
+    Printemps: "Printemps",
   };
 
   return `${labels[item.name] ?? item.name} · ${fmt(
@@ -56,7 +57,7 @@ type Props = {
   stats: MonthStats;
   zone: Zone;
   onMonthChange: (index: number) => void;
-  onApplyToYear: (field: EntryNumericKey) => void;
+  onRequestApplyToYear: (field: EntryNumericKey) => void;
   onChange: (field: EntryNumericKey, value: number) => void;
 };
 
@@ -67,7 +68,7 @@ export function MonthlyView({
   stats,
   zone,
   onMonthChange,
-  onApplyToYear,
+  onRequestApplyToYear,
   onChange,
 }: Props) {
   const month = (monthIndex + 6) % 12;
@@ -82,8 +83,6 @@ export function MonthlyView({
     (item) => item.date.getUTCMonth() === month,
   );
   const absenceTotal = stats.leave + stats.rtt + stats.training + stats.other;
-  const stepperButtonClass =
-    "grid size-11 place-items-center text-xl font-black text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent";
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -137,49 +136,72 @@ export function MonthlyView({
             tone: "positive",
           },
         ]}
+        afterBar={
+          <div
+            className="space-y-1.5 text-[11px] leading-snug sm:space-y-2 sm:text-sm"
+            aria-label="Jours fériés et vacances scolaires"
+          >
+            {holidays.length ? (
+              <p className="flex min-w-0 items-start gap-1.5 overflow-hidden whitespace-nowrap text-slate-300">
+                <Sun
+                  className="mt-0.5 size-3.5 shrink-0 text-amber-300"
+                  aria-hidden="true"
+                />
+                <span className="min-w-0 truncate">
+                  <strong className="font-extrabold text-white/90">
+                    Jours fériés :{" "}
+                  </strong>
+                  <span className="font-medium">
+                    {holidays
+                      .map((item) => `${item.name} · ${formatDate(item.date)}`)
+                      .join(" · ")}
+                  </span>
+                </span>
+              </p>
+            ) : null}
+
+            {schoolBreaks.length ? (
+              <p className="flex min-w-0 items-start gap-1.5 overflow-hidden whitespace-nowrap text-slate-300">
+                <CalendarRange
+                  className="mt-0.5 size-3.5 shrink-0 text-blue-300"
+                  aria-hidden="true"
+                />
+                <span className="min-w-0 truncate">
+                  <strong className="font-extrabold text-white/90">Vacances : </strong>
+                  <span className="font-medium">
+                    {schoolBreaks.map(formatRange).join(" · ")}
+                  </span>
+                </span>
+              </p>
+            ) : null}
+
+            {!holidays.length && !schoolBreaks.length ? (
+              <p className="font-medium text-slate-400">
+                Aucun jour férié ni vacances scolaires ce mois-ci.
+              </p>
+            ) : null}
+
+            {!SCHOOL_BREAKS[String(startYear)]?.[zone]?.length ? (
+              <p className="font-medium text-slate-400">
+                Les dates scolaires de cette année ne sont pas encore publiées.
+              </p>
+            ) : null}
+          </div>
+        }
       />
 
-      <section className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:p-4">
-        <span
-          className="grid size-11 place-items-center rounded-2xl bg-blue-50 text-blue-600"
-          aria-hidden="true"
-        >
-          <Clock3 className="size-5" />
-        </span>
-        <span className="min-w-0">
-          <strong className="block truncate text-sm font-extrabold text-slate-900 sm:text-base">
-            Temps de travail
-          </strong>
-          <small className="text-xs font-medium text-slate-400">Quotité du mois</small>
-        </span>
-        <div className="col-span-2 flex items-center justify-self-end gap-2 sm:col-span-1">
-          <div className="grid h-11 grid-cols-[2.5rem_minmax(4.5rem,1fr)_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-            <button
-              className={stepperButtonClass}
-              type="button"
-              disabled={entry.workRate <= 20}
-              onClick={() => onChange("workRate", Math.max(20, entry.workRate - 5))}
-            >
-              −
-            </button>
-            <output className="grid place-items-center border-x border-slate-200 bg-white px-1 text-sm font-black text-slate-950">
-              {entry.workRate} %
-            </output>
-            <button
-              className={stepperButtonClass}
-              type="button"
-              disabled={entry.workRate >= 100}
-              onClick={() => onChange("workRate", Math.min(100, entry.workRate + 5))}
-            >
-              +
-            </button>
-          </div>
-          <ApplyToYearButton
-            label="le temps de travail"
-            onClick={() => onApplyToYear("workRate")}
-          />
-        </div>
-      </section>
+      <InputRow
+        icon={Clock3}
+        iconClass="bg-blue-50 text-blue-600"
+        label="Temps de travail"
+        value={entry.workRate}
+        min={20}
+        max={100}
+        step={5}
+        unit="%"
+        onChange={(value) => onChange("workRate", value)}
+        onApplyToYear={() => onRequestApplyToYear("workRate")}
+      />
 
       <section>
         <div className="mb-3">
@@ -192,54 +214,6 @@ export function MonthlyView({
             </h2>
           </div>
         </div>
-        <div
-          className="mb-4 space-y-2 px-1 text-xs sm:text-sm"
-          aria-label="Jours fériés et vacances scolaires"
-        >
-          {holidays.length ? (
-            <p className="flex items-start gap-2 text-slate-500">
-              <Sun className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden="true" />
-              <span>
-                <strong className="font-extrabold text-slate-800">Jours fériés : </strong>
-                <span className="font-medium">
-                  {holidays
-                    .map((item) => `${item.name} · ${formatDate(item.date)}`)
-                    .join(" · ")}
-                </span>
-              </span>
-            </p>
-          ) : null}
-
-          {schoolBreaks.length ? (
-            <p className="flex items-start gap-2 text-slate-500">
-              <CalendarRange
-                className="mt-0.5 size-4 shrink-0 text-blue-600"
-                aria-hidden="true"
-              />
-              <span>
-                <strong className="font-extrabold text-slate-800">
-                  Vacances scolaires :{" "}
-                </strong>
-                <span className="font-medium">
-                  {schoolBreaks.map(formatRange).join(" · ")}
-                </span>
-              </span>
-            </p>
-          ) : null}
-
-          {!holidays.length && !schoolBreaks.length ? (
-            <p className="font-medium text-slate-400">
-              Aucun jour férié ni vacances scolaires ce mois-ci.
-            </p>
-          ) : null}
-
-          {!SCHOOL_BREAKS[String(startYear)]?.[zone]?.length ? (
-            <p className="font-medium text-slate-400">
-              Les dates scolaires de cette année ne sont pas encore publiées.
-            </p>
-          ) : null}
-        </div>
-
         <div className="space-y-2.5">
           {ABSENCE_SEGMENTS.map(({ key, label, icon: Icon, softClass }) => (
             <InputRow
@@ -250,7 +224,7 @@ export function MonthlyView({
               value={entry[key]}
               max={stats.contracted}
               onChange={(value) => onChange(key, value)}
-              onApplyToYear={() => onApplyToYear(key)}
+              onApplyToYear={() => onRequestApplyToYear(key)}
             />
           ))}
         </div>

@@ -13,8 +13,7 @@ export const EMPTY_ENTRY: Entry = {
   note: "",
 };
 
-export const createEntries = () =>
-  Array.from({ length: 12 }, () => ({ ...EMPTY_ENTRY }));
+export const createEntries = () => Array.from({ length: 12 }, () => ({ ...EMPTY_ENTRY }));
 
 export const normalizeEntry = (entry?: Partial<Entry>): Entry => ({
   ...EMPTY_ENTRY,
@@ -51,7 +50,7 @@ export function currentFiscalYear(today = new Date()) {
 
 export function availableFiscalYears(today = new Date()) {
   const current = currentFiscalYear(today);
-  return Array.from({ length: 5 }, (_, index) => current - 1 + index);
+  return Array.from({ length: 4 }, (_, index) => current + index);
 }
 
 export function emptyData(zone: Zone = "C"): CapacityData {
@@ -61,21 +60,14 @@ export function emptyData(zone: Zone = "C"): CapacityData {
 export function migrateData(raw: unknown): CapacityData {
   if (!raw || typeof raw !== "object") return emptyData();
   const value = raw as Record<string, unknown>;
-  const legacyEntries = (value.entries ?? {}) as Record<
-    string,
-    Partial<Entry>[]
-  >;
+  const legacyEntries = (value.entries ?? {}) as Record<string, Partial<Entry>[]>;
   const entries = Object.fromEntries(
     Object.entries(legacyEntries).map(([year, months]) => [
       year,
-      Array.from({ length: 12 }, (_, index) =>
-        normalizeEntry(months?.[index]),
-      ),
+      Array.from({ length: 12 }, (_, index) => normalizeEntry(months?.[index])),
     ]),
   );
-  const zone = ["A", "B", "C"].includes(String(value.zone))
-    ? (value.zone as Zone)
-    : "C";
+  const zone = ["A", "B", "C"].includes(String(value.zone)) ? (value.zone as Zone) : "C";
   return { version: DATA_VERSION, zone, entries };
 }
 

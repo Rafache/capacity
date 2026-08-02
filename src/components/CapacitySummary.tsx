@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { CapacityBar } from "./CapacityBar";
 import { CAPACITY_SEGMENTS } from "./capacitySegments";
 import type { SegmentKey } from "../types";
@@ -22,6 +23,7 @@ type Props = {
   barTotal?: number;
   barLabel?: string;
   showLegend?: boolean;
+  afterBar?: ReactNode;
 };
 
 const toneClasses: Record<SummaryTone, { label: string; value: string }> = {
@@ -52,6 +54,7 @@ export function CapacitySummary({
   barTotal,
   barLabel,
   showLegend = true,
+  afterBar,
 }: Props) {
   const distributionLabel = barLabel ?? `Répartition de ${title.toLowerCase()}`;
 
@@ -133,6 +136,9 @@ export function CapacitySummary({
                 </span>
               ))}
             </div>
+          ) : null}
+          {afterBar ? (
+            <div className="mt-4 border-t border-white/10 pt-3">{afterBar}</div>
           ) : null}
         </div>
       ) : null}
