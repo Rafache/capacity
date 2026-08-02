@@ -1,4 +1,4 @@
-const CACHE_NAME = "ma-capacite-v3";
+const CACHE_NAME = "ma-capacite-v4";
 const OFFLINE_FILES = [
   "./site.webmanifest",
   "./favicon.svg",
