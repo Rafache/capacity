@@ -10,13 +10,13 @@ export function ApplyToYearButton({
 }) {
   return (
     <button
-      className="grid size-11 shrink-0 place-items-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600 transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
+      className="grid size-9 shrink-0 place-items-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 sm:size-11 sm:rounded-xl"
       type="button"
       onClick={onClick}
       aria-label={`Répliquer ${label} aux 12 mois`}
       title="Répliquer sur l’année"
     >
-      <CopyPlus className="size-4.5" aria-hidden="true" />
+      <CopyPlus className="size-4" aria-hidden="true" />
     </button>
   );
 }
@@ -61,22 +61,22 @@ export function InputRow({
   const formattedUnit = unit === "%" ? "%" : unit;
 
   const controlClass =
-    "grid size-10 place-items-center text-xl font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent";
+    "grid size-8 place-items-center text-lg font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent sm:size-10 sm:text-xl";
 
   return (
-    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm transition hover:border-slate-300 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:p-4">
+    <div className="flex min-w-0 items-center gap-2 rounded-xl border border-slate-200/80 bg-white p-2.5 shadow-sm transition hover:border-slate-300 sm:gap-3 sm:rounded-2xl sm:p-4">
       <span
-        className={`grid size-11 shrink-0 place-items-center rounded-2xl ${iconClass}`}
+        className={`grid size-9 shrink-0 place-items-center rounded-xl ${iconClass} sm:size-11 sm:rounded-2xl`}
       >
-        <Icon className="size-5" aria-hidden="true" />
+        <Icon className="size-4 sm:size-5" aria-hidden="true" />
       </span>
-      <span className="min-w-0">
-        <strong className="block whitespace-nowrap text-xs font-bold leading-none text-slate-900 sm:text-sm">
+      <span className="min-w-0 flex-1">
+        <strong className="block truncate whitespace-nowrap text-[11px] font-bold leading-none text-slate-900 sm:text-sm">
           {label}
         </strong>
       </span>
-      <div className="col-span-2 flex w-full flex-nowrap items-center justify-end gap-2 sm:col-span-1">
-        <div className="grid h-11 shrink-0 grid-cols-[2.5rem_5rem_2.5rem] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+      <div className="flex shrink-0 flex-nowrap items-center gap-1.5 sm:gap-2">
+        <div className="grid h-9 shrink-0 grid-cols-[2rem_4rem_2rem] overflow-hidden rounded-lg border border-slate-200 bg-slate-50 sm:h-11 sm:grid-cols-[2.5rem_5rem_2.5rem] sm:rounded-xl">
           <button
             className={controlClass}
             disabled={value <= min}
@@ -100,7 +100,7 @@ export function InputRow({
             />
           ) : (
             <button
-              className="min-w-0 whitespace-nowrap border-x border-slate-200 bg-white px-1 text-sm font-black text-slate-950 transition hover:bg-blue-50 hover:text-blue-700"
+              className="min-w-0 whitespace-nowrap border-x border-slate-200 bg-white px-1 text-xs font-black text-slate-950 transition hover:bg-blue-50 hover:text-blue-700 sm:text-sm"
               type="button"
               onClick={() => setEditing(true)}
             >
