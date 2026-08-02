@@ -87,10 +87,6 @@ export function MonthlyView({
   const holidays = publicHolidays(year).filter(
     (item) => item.date.getUTCMonth() === month,
   );
-  const weekdayHolidays = holidays.filter(
-    (item) => ![0, 6].includes(item.date.getUTCDay()),
-  ).length;
-  const weekdays = stats.baseline + weekdayHolidays;
   const capacityRate = stats.baseline
     ? Math.round((stats.available / stats.baseline) * 100)
     : 0;
@@ -111,7 +107,7 @@ export function MonthlyView({
         </button>
         <div className="min-w-0 text-center">
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
-            Vue mensuelle
+            Synthèse du mois
           </p>
           <strong className="block truncate text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
             {MONTHS_LONG[monthIndex]} {year}
@@ -128,11 +124,7 @@ export function MonthlyView({
 
       <CapacitySummary
         title="Résumé du mois"
-        meta={`${weekdays} jours en semaine${
-          weekdayHolidays > 0
-            ? ` · ${weekdayHolidays} férié${weekdayHolidays > 1 ? "s" : ""} déduit${weekdayHolidays > 1 ? "s" : ""}`
-            : " · aucun férié déduit"
-        }`}
+        eyebrow={null}
         items={[
           {
             icon: CalendarDays,
@@ -194,7 +186,7 @@ export function MonthlyView({
       </section>
 
       <section>
-        <div className="mb-3 flex items-end justify-between gap-3">
+        <div className="mb-3">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
               Planification
@@ -202,13 +194,7 @@ export function MonthlyView({
             <h2 className="text-xl font-black tracking-tight text-slate-950">
               Mes absences
             </h2>
-            <p className="mt-1 text-xs font-medium text-slate-400">
-              Saisie par demi-journée
-            </p>
           </div>
-          <span className="text-right text-xs font-semibold text-slate-400">
-            {formatNumber(stats.contracted)} j contractuels
-          </span>
         </div>
         <div className="space-y-2.5">
           {ABSENCE_SEGMENTS.map(({ key, label, icon: Icon, softClass }) => (
@@ -226,9 +212,7 @@ export function MonthlyView({
       </section>
 
       <label className="block rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4">
-        <span className="mb-2 block text-sm font-extrabold text-slate-900">
-          Note du mois
-        </span>
+        <span className="mb-2 block text-sm font-extrabold text-slate-900">Notes</span>
         <textarea
           className="min-h-20 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
           value={entry.note}
@@ -249,17 +233,17 @@ export function MonthlyView({
             </span>
             <span className="min-w-0">
               <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-blue-600">
-                Repères
+                Évènements
               </span>
               <span className="block truncate text-lg font-black text-slate-950">
-                Calendrier du mois
+                Évènements
               </span>
             </span>
           </span>
           <span className="flex shrink-0 items-center gap-2 text-xs font-bold text-slate-400">
             {referenceCount
-              ? `${referenceCount} repère${referenceCount > 1 ? "s" : ""}`
-              : "Aucun repère"}
+              ? `${referenceCount} évènement${referenceCount > 1 ? "s" : ""}`
+              : "Aucun évènement"}
             <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
           </span>
         </summary>

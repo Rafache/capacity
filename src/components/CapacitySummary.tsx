@@ -13,7 +13,8 @@ export type SummaryItem = {
 
 type Props = {
   title: string;
-  meta: string;
+  eyebrow?: string | null;
+  meta?: string;
   items: SummaryItem[];
 };
 
@@ -43,7 +44,7 @@ const toneClasses: Record<
   },
 };
 
-export function CapacitySummary({ title, meta, items }: Props) {
+export function CapacitySummary({ title, eyebrow = "Synthèse", meta, items }: Props) {
   return (
     <section
       className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-5 text-white shadow-[0_20px_50px_rgba(15,23,42,0.24)] sm:p-6"
@@ -51,14 +52,20 @@ export function CapacitySummary({ title, meta, items }: Props) {
     >
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-300">
-            Synthèse
-          </p>
-          <h2 className="text-lg font-black">{title}</h2>
+          {eyebrow ? (
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-300">
+              {eyebrow}
+            </p>
+          ) : null}
+          <h2 className={eyebrow ? "text-lg font-black" : "text-xl font-black"}>
+            {title}
+          </h2>
         </div>
-        <p className="max-w-44 text-right text-[11px] font-medium leading-snug text-slate-400 sm:max-w-none sm:text-xs">
-          {meta}
-        </p>
+        {meta ? (
+          <p className="max-w-44 text-right text-[11px] font-medium leading-snug text-slate-400 sm:max-w-none sm:text-xs">
+            {meta}
+          </p>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-3 divide-x divide-white/15">

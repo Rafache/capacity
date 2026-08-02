@@ -55,7 +55,7 @@ export function InputRow({
         </button>
         {editing ? (
           <input
-            className="min-w-0 border-x border-slate-200 bg-white px-1 text-center text-sm font-black text-slate-950 outline-none focus:bg-blue-50"
+            className="w-full min-w-0 border-x border-slate-200 bg-white px-1 text-center text-[16px] font-black leading-none text-slate-950 outline-none focus:bg-blue-50 sm:text-sm"
             autoFocus
             inputMode="decimal"
             defaultValue={formattedValue}

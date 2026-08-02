@@ -331,7 +331,6 @@ export default function App() {
               entries={entries}
               stats={stats}
               annualBaseline={annualBaseline}
-              annualAvailable={annualAvailable}
               annualUnavailable={annualUnavailable}
               annualRate={annualRate}
               annualWorkRate={annualWorkRate}
