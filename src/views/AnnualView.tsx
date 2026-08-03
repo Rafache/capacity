@@ -1,6 +1,4 @@
-import { Fragment } from "react";
 import { CalendarDays, CalendarX2, Gauge } from "lucide-react";
-import { CapacityBar } from "../components/CapacityBar";
 import { CapacityEvolutionChart } from "../components/CapacityEvolutionChart";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { CAPACITY_SEGMENTS } from "../components/capacitySegments";
@@ -89,45 +87,34 @@ export function AnnualView({ startYear, stats, summary, onMonthOpen }: Props) {
             <tbody>
               {stats.map((item, index) => {
                 const month = formatMonthName(startYear, index, "short");
-                const rowTotal = Math.max(
-                  item.contracted,
-                  item.available + getAbsenceTotal(item),
-                );
 
                 return (
-                  <Fragment key={month}>
-                    <tr className="border-b border-slate-100">
-                      <th
-                        className="sticky left-0 z-10 bg-white px-2 py-2 text-left sm:px-3 sm:py-2.5"
-                        scope="row"
+                  <tr className="border-b border-slate-100" key={month}>
+                    <th
+                      className="sticky left-0 z-10 bg-white px-2 py-2 text-left sm:px-3 sm:py-2.5"
+                      scope="row"
+                    >
+                      <button
+                        className="w-full truncate whitespace-nowrap text-left text-[11px] font-black leading-none text-slate-950 transition hover:text-blue-700 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:text-xs"
+                        type="button"
+                        onClick={() => onMonthOpen(index)}
+                        aria-label={`${t.months.open} ${month}`}
                       >
-                        <button
-                          className="w-full truncate whitespace-nowrap text-left text-[11px] font-black leading-none text-slate-950 transition hover:text-blue-700 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:text-xs"
-                          type="button"
-                          onClick={() => onMonthOpen(index)}
-                          aria-label={`${t.months.open} ${month}`}
-                        >
-                          {month}
-                        </button>
-                      </th>
-                      {CAPACITY_SEGMENTS.map((segment) => (
-                        <td
-                          className={`min-w-0 whitespace-nowrap px-1 text-center text-[10px] font-extrabold leading-none sm:text-xs ${segment.textClass}`}
-                          key={segment.key}
-                        >
-                          {formatNumber(item[segment.key])}
-                          <small className="ml-px text-[8px] text-slate-400">
-                            {t.units.day}
-                          </small>
-                        </td>
-                      ))}
-                    </tr>
-                    <tr className="border-b border-slate-100">
-                      <td className="px-2 pb-2 sm:px-3" colSpan={6}>
-                        <CapacityBar values={item} total={rowTotal} label={month} />
+                        {month}
+                      </button>
+                    </th>
+                    {CAPACITY_SEGMENTS.map((segment) => (
+                      <td
+                        className={`min-w-0 whitespace-nowrap px-1 text-center text-[10px] font-extrabold leading-none sm:text-xs ${segment.textClass}`}
+                        key={segment.key}
+                      >
+                        {formatNumber(item[segment.key])}
+                        <small className="ml-px text-[8px] text-slate-400">
+                          {t.units.day}
+                        </small>
                       </td>
-                    </tr>
-                  </Fragment>
+                    ))}
+                  </tr>
                 );
               })}
               <tr className="bg-slate-950 text-white">
