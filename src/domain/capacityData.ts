@@ -5,6 +5,9 @@ export const STORAGE_KEY = "ma-capacite-v3";
 export const DATA_VERSION = 3 as const;
 const LEGACY_STORAGE_KEYS = ["ma-capacite-v2", "ma-capacite-v1"];
 const YEAR_KEY = /^\d{4}$/;
+const MIN_FISCAL_YEAR = 2000;
+const MAX_FISCAL_YEAR = 9999;
+const MAX_ABSENCE_DAYS = 366;
 const ABSENCE_FIELDS = ["leave", "rtt", "training", "other"] as const;
 
 export const EMPTY_ENTRY: Entry = {
@@ -72,10 +75,10 @@ export function normalizeMonthlyEntry(input: unknown, limits: MonthlyLimits = {}
   const value = isRecord(input) ? input : {};
   const entry: Entry = {
     workRate: normalizeNumber(value.workRate, 100, 20, 100, 5),
-    leave: normalizeNumber(value.leave, 0, 0, Number.MAX_SAFE_INTEGER, 0.5),
-    rtt: normalizeNumber(value.rtt, 0, 0, Number.MAX_SAFE_INTEGER, 0.5),
-    training: normalizeNumber(value.training, 0, 0, Number.MAX_SAFE_INTEGER, 0.5),
-    other: normalizeNumber(value.other, 0, 0, Number.MAX_SAFE_INTEGER, 0.5),
+    leave: normalizeNumber(value.leave, 0, 0, MAX_ABSENCE_DAYS, 0.5),
+    rtt: normalizeNumber(value.rtt, 0, 0, MAX_ABSENCE_DAYS, 0.5),
+    training: normalizeNumber(value.training, 0, 0, MAX_ABSENCE_DAYS, 0.5),
+    other: normalizeNumber(value.other, 0, 0, MAX_ABSENCE_DAYS, 0.5),
     note: typeof value.note === "string" ? value.note : "",
   };
 
@@ -143,12 +146,17 @@ export function parseCapacityData(raw: unknown): ParsedCapacityData {
   const entries: Record<string, Entry[]> = {};
 
   for (const [yearKey, months] of Object.entries(rawEntries)) {
-    if (!YEAR_KEY.test(yearKey) || !Array.isArray(months)) {
+    const year = Number(yearKey);
+    if (
+      !YEAR_KEY.test(yearKey) ||
+      year < MIN_FISCAL_YEAR ||
+      year > MAX_FISCAL_YEAR ||
+      !Array.isArray(months)
+    ) {
       repaired = true;
       continue;
     }
 
-    const year = Number(yearKey);
     const normalizedMonths = Array.from({ length: 12 }, (_, index) => {
       const normalized = normalizeMonthlyEntry(months[index], getFiscalMonthLimits(year, index));
       if (JSON.stringify(normalized) !== JSON.stringify(months[index])) repaired = true;
