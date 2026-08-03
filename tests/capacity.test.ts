@@ -61,12 +61,31 @@ test("le calcul mensuel distingue temps partiel et capacité", () => {
   assert.equal(stats.available, roundHalf(stats.contracted - 2));
 });
 
-test("les anciennes données sont migrées vers la version 3", () => {
-  const migrated = migrateData({ zone: "B", entries: { 2026: [{ workRate: 80 }] } });
+test("les anciennes données sont migrées vers la version courante sans perte", () => {
+  const migrated = migrateData({
+    version: 2,
+    zone: "B",
+    entries: {
+      2026: Array.from({ length: 12 }, (_, index) => ({
+        workRate: 80,
+        leave: index / 2,
+        rtt: 1,
+        training: 0,
+        other: 0,
+        note: `Month ${index + 1}`,
+      })),
+    },
+  });
   assert.equal(migrated.version, 3);
   assert.equal(migrated.zone, "B");
   assert.equal(migrated.entries["2026"].length, 12);
-  assert.equal(migrated.entries["2026"][0].note, "");
+  assert.deepEqual(migrated.entries["2026"][11], {
+    ...EMPTY_ENTRY,
+    workRate: 80,
+    leave: 5.5,
+    rtt: 1,
+    note: "Month 12",
+  });
 });
 
 test("les entrées mensuelles sont normalisées et plafonnées à la capacité contractuelle", () => {
@@ -107,6 +126,32 @@ test("les données locales corrompues sont réparées avant les calculs", () => 
   assert.deepEqual(Object.keys(parsed.data.entries), ["2026"]);
   assert.equal(parsed.data.entries["2026"].length, 12);
   assert.deepEqual(parsed.data.entries["2026"][0], EMPTY_ENTRY);
+});
+
+test("les entrées inconnues, incomplètes ou hors format ne franchissent pas la frontière métier", () => {
+  const parsed = parseCapacityData({
+    version: 3,
+    zone: "A",
+    entries: {
+      1999: Array.from({ length: 12 }, () => ({})),
+      2026: [
+        "invalid",
+        [],
+        { workRate: 10_000, leave: 10_000, rtt: Number.NEGATIVE_INFINITY },
+      ],
+    },
+  });
+
+  assert.equal(parsed.repaired, true);
+  assert.deepEqual(Object.keys(parsed.data.entries), ["2026"]);
+  assert.equal(parsed.data.entries["2026"].length, 12);
+  assert.deepEqual(parsed.data.entries["2026"][0], EMPTY_ENTRY);
+  assert.deepEqual(parsed.data.entries["2026"][1], EMPTY_ENTRY);
+  assert.deepEqual(parsed.data.entries["2026"][2], {
+    ...EMPTY_ENTRY,
+    workRate: 100,
+    leave: 22,
+  });
 });
 
 test("le stockage indisponible ne fait pas échouer le chargement ou la sauvegarde", () => {
