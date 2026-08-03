@@ -16,7 +16,11 @@ import {
   parseCapacityData,
   saveData,
 } from "../src/domain/capacityData.ts";
-import { exportCapacityCsv, importCapacityCsv } from "../src/domain/csv.ts";
+import {
+  CsvImportError,
+  exportCapacityCsv,
+  importCapacityCsv,
+} from "../src/domain/csv.ts";
 
 test("l’année 2026–2027 compte 254 jours ouvrés", () => {
   const total = Array.from({ length: 12 }, (_, index) => {
@@ -72,7 +76,6 @@ test("les anciennes données sont migrées vers la version courante sans perte",
         rtt: 1,
         training: 0,
         other: 0,
-        note: `Month ${index + 1}`,
       })),
     },
   });
@@ -84,7 +87,6 @@ test("les anciennes données sont migrées vers la version courante sans perte",
     workRate: 80,
     leave: 5.5,
     rtt: 1,
-    note: "Month 12",
   });
 });
 
@@ -106,7 +108,6 @@ test("les entrées mensuelles sont normalisées et plafonnées à la capacité c
     rtt: 6,
     training: 0,
     other: 0,
-    note: "",
   });
 });
 
@@ -174,37 +175,70 @@ test("le stockage indisponible ne fait pas échouer le chargement ou la sauvegar
   });
 });
 
-test("un export CSV version 3 peut être réimporté sans dépendre des libellés français", () => {
+test("un export CSV version 3 est indépendant de la langue et réimportable", () => {
   const entries = Array.from({ length: 12 }, (_, index) => ({
     ...EMPTY_ENTRY,
-    leave: index / 2,
-    note: index === 0 ? "=SUM(A1:A2)" : "",
+    workRate: index === 0 ? 80 : 100,
+    leave: index === 0 ? 2.5 : 0,
+    training: index === 0 ? 1 : 0,
   }));
   const stats = entries.map((entry, index) => getMonthStats(2026, index, entry));
-  const csv = exportCapacityCsv(entries, stats);
+  const csv = exportCapacityCsv(2026, entries, stats);
+  assert.match(csv, /"month";"workRate";"available";"paidLeave"/);
   const imported = importCapacityCsv(csv, 2026);
-
-  assert.match(csv, /^\uFEFF# capacity;version=3/m);
-  assert.match(csv, /month;workRate;available;paidLeave/);
-  assert.equal(csv.includes("=SUM"), false);
   assert.equal(imported.length, 12);
-  assert.equal(imported[11].leave, 5.5);
-  assert.equal(imported[0].note, "");
+  assert.deepEqual(imported[0], entries[0]);
 });
 
-test("un export CSV version 2 français reste importable avec champs cités et colonnes réordonnées", () => {
-  const rows = Array.from({ length: 12 }, (_, index) =>
-    `"Note ${index === 0 ? "sur\ndeux lignes" : ""}";"${index}";"0";"1";"${index / 2}";"80 %";"Mois ${index + 1}"`,
-  );
-  const csv = [
+test("un export CSV français version 2 reste importable", () => {
+  const legacyRows = Array.from({ length: 12 }, (_, index) => {
+    const month = [
+      "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+      "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    ][index];
+    return `"${month}";"80 %";"0 j";"2,5 j";"1 j";"0,5 j";"0 j";"note; ligne ${index + 1}"`;
+  });
+  const legacy = [
     "# ma-capacite;version=2",
-    "Note;Autres;Formations;RTT;Congés payés;Temps de travail;Mois",
-    ...rows,
+    "Mois;Temps de travail;Disponible;Congés payés;RTT;Formations;Autres;Note",
+    ...legacyRows,
   ].join("\r\n");
-  const imported = importCapacityCsv(csv, 2026);
 
+  const imported = importCapacityCsv(`\uFEFF${legacy}`, 2026);
   assert.equal(imported.length, 12);
-  assert.equal(imported[0].note, "Note sur\ndeux lignes");
-  assert.equal(imported[11].leave, 5.5);
-  assert.equal(imported[11].other, 11);
+  assert.deepEqual(imported[0], {
+    ...EMPTY_ENTRY,
+    workRate: 80,
+    leave: 2.5,
+    rtt: 1,
+    training: 0.5,
+  });
+});
+
+test("un CSV malformé, incohérent ou contenant une formule est rejeté", () => {
+  const rows = Array.from({ length: 12 }, (_, index) =>
+    `202${index < 6 ? 6 : 7}-${String(((index + 6) % 12) + 1).padStart(2, "0")};100;20;0;0;0;0`,
+  );
+  const invalidFormula = [
+    "# capacity;version=3",
+    "month;workRate;available;paidLeave;rtt;training;other",
+    ...rows.map((row, index) => (index === 0 ? row.replace(";0;0;0;0", ";=1;0;0;0") : row)),
+  ].join("\n");
+
+  assert.throws(
+    () => importCapacityCsv(invalidFormula, 2026),
+    (error) => error instanceof CsvImportError && error.code === "invalid-value",
+  );
+  assert.throws(
+    () => importCapacityCsv(invalidFormula.replace("other", "rtt"), 2026),
+    (error) => error instanceof CsvImportError && error.code === "invalid-columns",
+  );
+  assert.throws(
+    () => importCapacityCsv(invalidFormula.replace("2026-07", "2026-08"), 2026),
+    (error) => error instanceof CsvImportError && error.code === "invalid-months",
+  );
+  assert.throws(
+    () => importCapacityCsv("x".repeat(1_000_001), 2026),
+    (error) => error instanceof CsvImportError && error.code === "file-too-large",
+  );
 });
