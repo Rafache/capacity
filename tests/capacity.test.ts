@@ -10,7 +10,11 @@ import {
   EMPTY_ENTRY,
   availableFiscalYears,
   getMonthStats,
+  loadData,
   migrateData,
+  normalizeMonthlyEntry,
+  parseCapacityData,
+  saveData,
 } from "../src/domain/capacityData.ts";
 import { exportCapacityCsv, importCapacityCsv } from "../src/domain/csv.ts";
 
@@ -57,12 +61,72 @@ test("le calcul mensuel distingue temps partiel et capacité", () => {
   assert.equal(stats.available, roundHalf(stats.contracted - 2));
 });
 
-test("les anciennes données sont migrées vers la version 2", () => {
+test("les anciennes données sont migrées vers la version 3", () => {
   const migrated = migrateData({ zone: "B", entries: { 2026: [{ workRate: 80 }] } });
-  assert.equal(migrated.version, 2);
+  assert.equal(migrated.version, 3);
   assert.equal(migrated.zone, "B");
   assert.equal(migrated.entries["2026"].length, 12);
   assert.equal(migrated.entries["2026"][0].note, "");
+});
+
+test("les entrées mensuelles sont normalisées et plafonnées à la capacité contractuelle", () => {
+  const entry = normalizeMonthlyEntry(
+    {
+      workRate: 87,
+      leave: 11.24,
+      rtt: 11.26,
+      training: -1,
+      other: Number.POSITIVE_INFINITY,
+    },
+    { baselineDays: 20 },
+  );
+
+  assert.deepEqual(entry, {
+    workRate: 85,
+    leave: 11,
+    rtt: 6,
+    training: 0,
+    other: 0,
+    note: "",
+  });
+});
+
+test("les données locales corrompues sont réparées avant les calculs", () => {
+  const parsed = parseCapacityData({
+    version: 2,
+    zone: "invalid",
+    entries: {
+      invalid: [{}],
+      2026: [{ workRate: Number.NaN, leave: -2, rtt: "4" }, null],
+    },
+  });
+
+  assert.equal(parsed.repaired, true);
+  assert.equal(parsed.data.version, 3);
+  assert.equal(parsed.data.zone, "C");
+  assert.deepEqual(Object.keys(parsed.data.entries), ["2026"]);
+  assert.equal(parsed.data.entries["2026"].length, 12);
+  assert.deepEqual(parsed.data.entries["2026"][0], EMPTY_ENTRY);
+});
+
+test("le stockage indisponible ne fait pas échouer le chargement ou la sauvegarde", () => {
+  const unavailable = {
+    getItem() {
+      throw new Error("unavailable");
+    },
+    setItem() {
+      throw new Error("quota exceeded");
+    },
+  } as unknown as Storage;
+
+  const loaded = loadData(unavailable);
+  assert.equal(loaded.success, false);
+  assert.equal(loaded.warning, "unavailable");
+  assert.deepEqual(loaded.data, { version: 3, zone: "C", entries: {} });
+  assert.deepEqual(saveData(unavailable, loaded.data), {
+    success: false,
+    warning: "unavailable",
+  });
 });
 
 test("un export CSV version 2 peut être réimporté", () => {
