@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { ActionMenu } from "./components/ActionMenu";
-import { exportCapacityCsv, importCapacityCsv } from "./domain/csv";
+import { CsvImportError, exportCapacityCsv, importCapacityCsv } from "./domain/csv";
 import {
   STORAGE_KEY,
   availableFiscalYears,
@@ -28,7 +28,6 @@ import {
   saveData,
 } from "./domain/capacityData";
 import { ConfirmDialog } from "./components/ConfirmDialog";
-import { MONTHS_SHORT } from "./data/months";
 import { AnnualView } from "./views/AnnualView";
 import { MonthlyView } from "./views/MonthlyView";
 import type { CapacityData, Entry, EntryNumericKey, SegmentKey } from "./types";
@@ -179,7 +178,7 @@ export default function App() {
   };
 
   const exportCsv = () => {
-    const text = exportCapacityCsv(MONTHS_SHORT, entries, stats);
+    const text = exportCapacityCsv(entries, stats);
     const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -193,15 +192,22 @@ export default function App() {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
-      const imported = importCapacityCsv(await file.text());
+      if (file.size > 1024 * 1024) throw new CsvImportError("file-too-large");
+      const imported = importCapacityCsv(await file.text(), startYear);
       replaceYear(imported);
       setNotice({
         message: "Import terminé : 12 mois ont été chargés.",
         type: "success",
       });
     } catch (error) {
+      const messages: Record<CsvImportError["code"], string> = {
+        "file-too-large": "Le fichier CSV dépasse la taille maximale autorisée.",
+        "invalid-format": "Le format CSV est invalide.",
+        "invalid-columns": "Les colonnes CSV sont invalides ou incomplètes.",
+        "invalid-months": "Le fichier CSV doit contenir exactement 12 mois.",
+      };
       setNotice({
-        message: error instanceof Error ? error.message : "Import impossible.",
+        message: error instanceof CsvImportError ? messages[error.code] : "Import impossible.",
         type: "error",
       });
     } finally {
