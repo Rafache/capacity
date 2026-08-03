@@ -10,7 +10,6 @@ import type { SegmentKey } from "../types";
 
 export type CapacitySegment = {
   key: SegmentKey;
-  label: string;
   icon: LucideIcon;
   textClass: string;
   softClass: string;
@@ -20,7 +19,6 @@ export type CapacitySegment = {
 export const CAPACITY_SEGMENTS: CapacitySegment[] = [
   {
     key: "available",
-    label: "Disponible",
     icon: CircleCheckBig,
     textClass: "text-capacity-available",
     softClass: "bg-capacity-available-soft text-capacity-available",
@@ -28,7 +26,6 @@ export const CAPACITY_SEGMENTS: CapacitySegment[] = [
   },
   {
     key: "leave",
-    label: "Congés payés",
     icon: CalendarRange,
     textClass: "text-capacity-leave",
     softClass: "bg-capacity-leave-soft text-capacity-leave",
@@ -36,7 +33,6 @@ export const CAPACITY_SEGMENTS: CapacitySegment[] = [
   },
   {
     key: "rtt",
-    label: "RTT",
     icon: Coffee,
     textClass: "text-capacity-rtt",
     softClass: "bg-capacity-rtt-soft text-capacity-rtt",
@@ -44,7 +40,6 @@ export const CAPACITY_SEGMENTS: CapacitySegment[] = [
   },
   {
     key: "training",
-    label: "Formations",
     icon: GraduationCap,
     textClass: "text-capacity-training",
     softClass: "bg-capacity-training-soft text-capacity-training",
@@ -52,7 +47,6 @@ export const CAPACITY_SEGMENTS: CapacitySegment[] = [
   },
   {
     key: "other",
-    label: "Autres",
     icon: BriefcaseBusiness,
     textClass: "text-capacity-other",
     softClass: "bg-capacity-other-soft text-capacity-other",

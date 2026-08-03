@@ -1,13 +1,6 @@
 import { CalendarRange, Download, MoreVertical, Trash2, Upload } from "lucide-react";
-import { createPortal } from "react-dom";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from "react";
+import { useCallback, useEffect, useId, useRef, type ChangeEvent } from "react";
+import { t } from "../i18n/translate";
 import type { Zone } from "../types";
 
 type Props = {
@@ -41,69 +34,41 @@ export function ActionMenu({
   onClear,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [menuPosition, setMenuPosition] = useState<{
-    top: number;
-    right: number;
-  } | null>(null);
+  const menuId = useId();
 
-  const updateMenuPosition = useCallback(() => {
-    const trigger = triggerRef.current;
-    if (!trigger) return;
-
-    const triggerRect = trigger.getBoundingClientRect();
-    const appHeader = trigger.closest("[data-app-header]");
-    const headerBottom = appHeader?.getBoundingClientRect().bottom;
-
-    setMenuPosition({
-      top: Math.max(headerBottom ?? 0, triggerRect.bottom) + 8,
-      right: Math.max(12, window.innerWidth - triggerRect.right),
-    });
-  }, []);
+  const close = useCallback(() => {
+    onClose();
+    triggerRef.current?.focus();
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
 
+    const firstControl = containerRef.current?.querySelector<HTMLElement>(
+      "[data-action-menu-focus]",
+    );
+    firstControl?.focus();
+
     const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (!containerRef.current?.contains(target) && !menuRef.current?.contains(target)) {
-        onClose();
-      }
+      if (!containerRef.current?.contains(event.target as Node)) close();
     };
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") close();
     };
 
     document.addEventListener("pointerdown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [open, onClose]);
-
-  useLayoutEffect(() => {
-    if (!open) {
-      setMenuPosition(null);
-      return;
-    }
-
-    updateMenuPosition();
-    window.addEventListener("resize", updateMenuPosition);
-    document.addEventListener("scroll", updateMenuPosition, true);
-
-    return () => {
-      window.removeEventListener("resize", updateMenuPosition);
-      document.removeEventListener("scroll", updateMenuPosition, true);
-    };
-  }, [open, updateMenuPosition]);
+  }, [close, open]);
 
   const runAction = (action: () => void) => {
     action();
-    onClose();
+    close();
   };
 
   return (
@@ -116,130 +81,113 @@ export function ActionMenu({
         }`}
         type="button"
         onClick={onToggle}
-        aria-label={open ? "Fermer le menu des actions" : "Ouvrir le menu des actions"}
-        aria-haspopup="menu"
+        aria-label={open ? t.actions.closeMenu : t.actions.openMenu}
+        aria-controls={menuId}
         aria-expanded={open}
         ref={triggerRef}
       >
         <MoreVertical className="size-5" aria-hidden="true" />
       </button>
 
-      {open &&
-        typeof document !== "undefined" &&
-        createPortal(
+      {open ? (
+        <div
+          className="absolute right-0 top-full z-[90] mt-2 max-h-[calc(100dvh-1.5rem)] w-72 max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_60px_rgba(15,23,42,0.18)]"
+          id={menuId}
+          aria-label={t.actions.menuLabel}
+        >
+          <p className="px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+            {t.actions.fiscalYear}
+          </p>
+          <label className="relative block px-1 pb-2">
+            <span className="sr-only">{t.actions.fiscalYear}</span>
+            <select
+              className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-8 text-sm font-extrabold text-slate-900 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              data-action-menu-focus
+              value={startYear}
+              onChange={(event) =>
+                runAction(() => onFiscalYearChange(Number(event.target.value)))
+              }
+            >
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year} — {year + 1}
+                </option>
+              ))}
+            </select>
+            <span
+              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500"
+              aria-hidden="true"
+            >
+              ▾
+            </span>
+          </label>
+
+          <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+            {t.actions.schoolBreaks}
+          </p>
           <div
-            className="fixed z-[90] max-h-[calc(100dvh-1.5rem)] w-72 max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_60px_rgba(15,23,42,0.18)]"
-            role="menu"
-            aria-label="Actions"
-            ref={menuRef}
-            style={{
-              top: menuPosition?.top ?? 0,
-              right: menuPosition?.right ?? 12,
-              visibility: menuPosition ? "visible" : "hidden",
+            className="grid grid-cols-3 gap-1 px-1 pb-1"
+            aria-label={t.actions.schoolZone}
+          >
+            {(["A", "B", "C"] as const).map((schoolZone) => (
+              <button
+                className={`rounded-xl px-2 py-2 text-xs font-extrabold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                  zone === schoolZone
+                    ? "bg-slate-950 text-white"
+                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+                key={schoolZone}
+                type="button"
+                aria-pressed={zone === schoolZone}
+                onClick={() => runAction(() => onZoneChange(schoolZone))}
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  {zone === schoolZone ? (
+                    <CalendarRange className="size-3.5" aria-hidden="true" />
+                  ) : null}
+                  {t.actions.zone} {schoolZone}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+            {t.actions.data}
+          </p>
+          <button
+            className={itemClass}
+            type="button"
+            onClick={() => {
+              close();
+              fileRef.current?.click();
             }}
           >
-            <p className="px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-              Année fiscale
-            </p>
-            <label className="relative block px-1 pb-2">
-              <span className="sr-only">Année fiscale</span>
-              <select
-                className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-8 text-sm font-extrabold text-slate-900 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                value={startYear}
-                onChange={(event) =>
-                  runAction(() => onFiscalYearChange(Number(event.target.value)))
-                }
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year} — {year + 1}
-                  </option>
-                ))}
-              </select>
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-                ▾
-              </span>
-            </label>
+            <Upload className="size-4 text-blue-600" aria-hidden="true" />
+            <span>{t.actions.importCsv}</span>
+          </button>
+          <button className={itemClass} type="button" onClick={() => runAction(onExport)}>
+            <Download className="size-4 text-blue-600" aria-hidden="true" />
+            <span>{t.actions.exportCsv}</span>
+          </button>
 
-            <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-              Vacances scolaires
-            </p>
-            <div
-              className="grid grid-cols-3 gap-1 px-1 pb-1"
-              role="group"
-              aria-label="Zone scolaire"
-            >
-              {["A", "B", "C"].map((item) => {
-                const schoolZone = item as Zone;
-
-                return (
-                  <button
-                    className={`rounded-xl px-2 py-2 text-xs font-extrabold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
-                      zone === schoolZone
-                        ? "bg-slate-950 text-white"
-                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                    }`}
-                    key={schoolZone}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={zone === schoolZone}
-                    onClick={() => runAction(() => onZoneChange(schoolZone))}
-                  >
-                    <span className="inline-flex items-center gap-1.5">
-                      {zone === schoolZone ? (
-                        <CalendarRange className="size-3.5" aria-hidden="true" />
-                      ) : null}
-                      Zone {schoolZone}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-              Données
-            </p>
-            <button
-              className={itemClass}
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                onClose();
-                fileRef.current?.click();
-              }}
-            >
-              <Upload className="size-4 text-blue-600" aria-hidden="true" />
-              <span>Importer</span>
-            </button>
-            <button
-              className={itemClass}
-              type="button"
-              role="menuitem"
-              onClick={() => runAction(onExport)}
-            >
-              <Download className="size-4 text-blue-600" aria-hidden="true" />
-              <span>Exporter</span>
-            </button>
-
-            <div className="my-2 h-px bg-slate-200" role="separator" />
-            <button
-              className={`${itemClass} text-red-700 hover:bg-red-50 hover:text-red-800`}
-              type="button"
-              role="menuitem"
-              onClick={() => runAction(onClear)}
-            >
-              <Trash2 className="size-4" aria-hidden="true" />
-              <span>Effacer toutes les données</span>
-            </button>
-          </div>,
-          document.body,
-        )}
+          <div className="my-2 h-px bg-slate-200" role="separator" />
+          <button
+            className={`${itemClass} text-red-700 hover:bg-red-50 hover:text-red-800`}
+            type="button"
+            onClick={() => runAction(onClear)}
+          >
+            <Trash2 className="size-4" aria-hidden="true" />
+            <span>{t.actions.clearData}</span>
+          </button>
+        </div>
+      ) : null}
 
       <input
         ref={fileRef}
         className="sr-only"
         type="file"
         accept=".csv,text/csv"
+        aria-label={t.actions.importCsv}
         onChange={onImport}
       />
     </div>

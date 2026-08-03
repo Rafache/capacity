@@ -1,45 +1,45 @@
-import { MONTHS_LONG } from "../data/months";
 import { ABSENCE_SEGMENTS } from "./capacitySegments";
+import { formatMonthName, formatNumber } from "../i18n/formatters";
+import { t } from "../i18n/translate";
 import type { MonthStats } from "../types";
 
 type Props = {
+  startYear: number;
   stats: MonthStats[];
 };
 
-const formatNumber = (value: number) =>
-  Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
-
-export function CapacityEvolutionChart({ stats }: Props) {
+/** Show the monthly balance without introducing a charting dependency. */
+export function CapacityEvolutionChart({ startYear, stats }: Props) {
   const absenceTotals = stats.map((item) =>
     ABSENCE_SEGMENTS.reduce((sum, segment) => sum + item[segment.key], 0),
   );
   const availableTotal = stats.reduce((sum, item) => sum + item.available, 0);
   const absenceTotal = absenceTotals.reduce((sum, value) => sum + value, 0);
   const scale = Math.max(
-    ...stats.map((item, index) => Math.max(item.available, absenceTotals[index])),
+    ...stats.map((item, index) => Math.max(item.available, absenceTotals[index] ?? 0)),
     1,
   );
 
   return (
     <section
       className="mt-3.5 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:mt-5 sm:rounded-3xl sm:p-5"
-      aria-label="Équilibre mensuel"
+      aria-label={t.summary.monthlyBalance}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-black tracking-tight text-slate-950 sm:text-base">
-            Équilibre mensuel
+            {t.summary.monthlyBalance}
           </h3>
           <p className="mt-0.5 text-[10px] font-medium text-slate-500 sm:text-xs">
-            Capacité disponible et absences par mois
+            {t.summary.monthlyBalanceDescription}
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-1 text-right">
           <span className="whitespace-nowrap rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-extrabold text-emerald-700 sm:px-2.5 sm:text-[10px]">
-            + {formatNumber(availableTotal)} j
+            + {formatNumber(availableTotal)} {t.units.day}
           </span>
           <span className="whitespace-nowrap rounded-full bg-red-50 px-2 py-1 text-[9px] font-extrabold text-red-700 sm:px-2.5 sm:text-[10px]">
-            − {formatNumber(absenceTotal)} j
+            − {formatNumber(absenceTotal)} {t.units.day}
           </span>
         </div>
       </div>
@@ -47,26 +47,27 @@ export function CapacityEvolutionChart({ stats }: Props) {
       <div
         className="mt-4 grid h-72 grid-cols-12 gap-1 sm:mt-5 sm:h-80 sm:gap-2.5"
         role="list"
-        aria-label="Capacité et absences par mois"
+        aria-label={t.summary.monthlyBalance}
       >
         {stats.map((item, index) => {
-          const absenceTotalForMonth = absenceTotals[index];
+          const month = formatMonthName(startYear, index, "short");
+          const absenceTotalForMonth = absenceTotals[index] ?? 0;
           const availableHeight = (item.available / scale) * 100;
           const absenceHeight = (absenceTotalForMonth / scale) * 100;
 
           return (
             <div
               className="flex min-w-0 flex-col items-center"
-              key={MONTHS_LONG[index]}
+              key={month}
               role="listitem"
-              aria-label={`${MONTHS_LONG[index]} : ${formatNumber(item.available)} jours disponibles, ${formatNumber(absenceTotalForMonth)} jours d’absence`}
+              aria-label={`${month} : ${formatNumber(item.available)} ${t.units.day} ${t.summary.capacity.toLowerCase()}, ${formatNumber(absenceTotalForMonth)} ${t.units.day} ${t.summary.absences.toLowerCase()}`}
             >
               <div className="flex min-h-0 w-full flex-1 flex-col">
                 <div className="flex min-h-0 flex-1 items-end">
                   <span
                     className="flex w-full items-center justify-center overflow-hidden rounded-t-lg bg-capacity-available px-px text-center text-[7px] font-black leading-none text-white sm:rounded-t-xl sm:text-[9px]"
                     style={{ height: `${availableHeight}%` }}
-                    title={`Disponible : ${formatNumber(item.available)} j`}
+                    title={`${t.summary.capacity} : ${formatNumber(item.available)} ${t.units.day}`}
                   >
                     {item.available >= 2 ? formatNumber(item.available) : null}
                   </span>
@@ -92,7 +93,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
                           className={`flex min-h-0 w-full items-center justify-center overflow-hidden px-px text-center text-[7px] font-black leading-none text-white sm:text-[9px] ${segment.barClass}`}
                           key={segment.key}
                           style={{ height: `${segmentHeight}%` }}
-                          title={`${segment.label} : ${formatNumber(value)} j`}
+                          title={`${t.segments[segment.key]} : ${formatNumber(value)} ${t.units.day}`}
                         >
                           {canShowValue ? formatNumber(value) : null}
                         </span>
@@ -104,7 +105,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
 
               <span className="mt-1.5 flex h-14 w-full shrink-0 items-start justify-center sm:mt-2 sm:h-16">
                 <span className="chart-month-label text-center text-[8px] font-bold leading-tight text-slate-500 sm:text-[10px]">
-                  {MONTHS_LONG[index]}
+                  {month}
                 </span>
               </span>
             </div>
@@ -115,7 +116,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
       <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 border-t border-slate-100 pt-3">
         <span className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-500 sm:text-[10px]">
           <span className="size-1.5 shrink-0 rounded-full bg-capacity-available" />
-          Disponible
+          {t.segments.available}
         </span>
         {ABSENCE_SEGMENTS.map((segment) => (
           <span
@@ -123,7 +124,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
             key={segment.key}
           >
             <span className={`size-1.5 shrink-0 rounded-full ${segment.barClass}`} />
-            {segment.label}
+            {t.segments[segment.key]}
           </span>
         ))}
       </div>
