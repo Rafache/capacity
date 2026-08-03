@@ -144,7 +144,6 @@ export function AnnualView({
         </div>
 
         <CapacityEvolutionChart stats={stats} />
-        <CapacityEvolutionChart stats={stats} variant="absence" />
       </section>
     </div>
   );
