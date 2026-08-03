@@ -174,18 +174,37 @@ test("le stockage indisponible ne fait pas échouer le chargement ou la sauvegar
   });
 });
 
-test("un export CSV version 2 peut être réimporté", () => {
+test("un export CSV version 3 peut être réimporté sans dépendre des libellés français", () => {
   const entries = Array.from({ length: 12 }, (_, index) => ({
     ...EMPTY_ENTRY,
-    note: index === 0 ? "Formation; interne" : "",
+    leave: index / 2,
+    note: index === 0 ? "=SUM(A1:A2)" : "",
   }));
   const stats = entries.map((entry, index) => getMonthStats(2026, index, entry));
-  const csv = exportCapacityCsv(
-    Array.from({ length: 12 }, (_, index) => String(index + 1)),
-    entries,
-    stats,
-  );
-  const imported = importCapacityCsv(csv);
+  const csv = exportCapacityCsv(entries, stats);
+  const imported = importCapacityCsv(csv, 2026);
+
+  assert.match(csv, /^\uFEFF# capacity;version=3/m);
+  assert.match(csv, /month;workRate;available;paidLeave/);
+  assert.equal(csv.includes("=SUM"), false);
   assert.equal(imported.length, 12);
-  assert.equal(imported[0].note, "Formation; interne");
+  assert.equal(imported[11].leave, 5.5);
+  assert.equal(imported[0].note, "");
+});
+
+test("un export CSV version 2 français reste importable avec champs cités et colonnes réordonnées", () => {
+  const rows = Array.from({ length: 12 }, (_, index) =>
+    `"Note ${index === 0 ? "sur\ndeux lignes" : ""}";"${index}";"0";"1";"${index / 2}";"80 %";"Mois ${index + 1}"`,
+  );
+  const csv = [
+    "# ma-capacite;version=2",
+    "Note;Autres;Formations;RTT;Congés payés;Temps de travail;Mois",
+    ...rows,
+  ].join("\r\n");
+  const imported = importCapacityCsv(csv, 2026);
+
+  assert.equal(imported.length, 12);
+  assert.equal(imported[0].note, "Note sur\ndeux lignes");
+  assert.equal(imported[11].leave, 5.5);
+  assert.equal(imported[11].other, 11);
 });
