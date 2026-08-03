@@ -15,3 +15,6 @@ The importer accepts the French version 2 exports created by earlier app version
 The former free-text `Note` column is ignored on import and is no longer exported.
 CSV files are limited to 1 MB and malformed files, unknown or duplicate columns,
 missing months, and formula-like numeric values are rejected.
+
+The file uses RFC 4180-style escaping: fields are quoted and embedded double quotes
+are doubled.
