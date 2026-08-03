@@ -16,10 +16,7 @@ export const EMPTY_ENTRY: Entry = {
   rtt: 0,
   training: 0,
   other: 0,
-  note: "",
 };
-
-export const createEntries = () => Array.from({ length: 12 }, () => ({ ...EMPTY_ENTRY }));
 
 type MonthlyLimits = {
   baselineDays?: number;
@@ -79,17 +76,12 @@ export function normalizeMonthlyEntry(input: unknown, limits: MonthlyLimits = {}
     rtt: normalizeNumber(value.rtt, 0, 0, MAX_ABSENCE_DAYS, 0.5),
     training: normalizeNumber(value.training, 0, 0, MAX_ABSENCE_DAYS, 0.5),
     other: normalizeNumber(value.other, 0, 0, MAX_ABSENCE_DAYS, 0.5),
-    note: typeof value.note === "string" ? value.note : "",
   };
 
   if (limits.baselineDays === undefined) return entry;
 
   const contractedDays = roundHalf(limits.baselineDays * (entry.workRate / 100));
   return capAbsences(entry, contractedDays);
-}
-
-export function normalizeEntry(input?: unknown): Entry {
-  return normalizeMonthlyEntry(input);
 }
 
 export function validateMonthlyEntry(entry: Entry, contractedDays: number) {
