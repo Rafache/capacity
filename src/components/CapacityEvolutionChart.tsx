@@ -45,7 +45,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
       </div>
 
       <div
-        className="mt-4 grid h-60 grid-cols-12 gap-1 sm:mt-5 sm:h-72 sm:gap-2.5"
+        className="mt-4 grid h-72 grid-cols-12 gap-1 sm:mt-5 sm:h-80 sm:gap-2.5"
         role="list"
         aria-label="Capacité et absences par mois"
       >
