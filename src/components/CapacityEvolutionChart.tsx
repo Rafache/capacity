@@ -22,7 +22,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
 
   return (
     <section
-      className="mt-4 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm sm:mt-5 sm:rounded-3xl sm:p-5"
+      className="mt-3.5 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:mt-5 sm:rounded-3xl sm:p-5"
       aria-label="Équilibre mensuel"
     >
       <div className="flex items-start justify-between gap-3">
@@ -45,7 +45,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
       </div>
 
       <div
-        className="mt-4 grid h-52 grid-cols-12 gap-1 sm:mt-5 sm:h-60 sm:gap-2.5"
+        className="mt-4 grid h-60 grid-cols-12 gap-1 sm:mt-5 sm:h-72 sm:gap-2.5"
         role="list"
         aria-label="Capacité et absences par mois"
       >
