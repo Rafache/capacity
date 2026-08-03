@@ -187,7 +187,7 @@ export function MonthlyView({
         items={[
           {
             icon: CalendarDays,
-            label: "Ouvrés",
+            label: "Jours ouvrés",
             value: stats.baseline,
             unit: "j",
             tone: "neutral",
