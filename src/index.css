@@ -87,6 +87,10 @@
   backdrop-filter: blur(16px);
 }
 
+.monthly-swipe-surface {
+  touch-action: pan-y;
+}
+
 @media (min-width: 640px) {
   .monthly-month-nav {
     position: static;

@@ -8,6 +8,7 @@ import {
   Gauge,
   Sun,
 } from "lucide-react";
+import { useRef, type TouchEvent } from "react";
 import { publicHolidays } from "../capacity";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
@@ -16,27 +17,25 @@ import { SCHOOL_BREAKS } from "../data/schoolBreaks";
 import { MONTHS_LONG } from "../data/months";
 import type { Entry, EntryNumericKey, MonthStats, SchoolBreak, Zone } from "../types";
 
-const WEEKDAY = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
-
 const formatNumber = (value: number) =>
   Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
 
 const formatDate = (date: Date) =>
-  `${WEEKDAY[date.getUTCDay()]} ${date.getUTCDate()} ${new Intl.DateTimeFormat("fr-FR", {
-    month: "short",
+  new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
     timeZone: "UTC",
-  })
-    .format(date)
-    .replace(".", "")}.`;
+  }).format(date);
 
 const formatRange = (item: SchoolBreak) => {
   const fmt = (date: Date) =>
-    `${date.getUTCDate()} ${new Intl.DateTimeFormat("fr-FR", {
-      month: "short",
+    new Intl.DateTimeFormat("fr-FR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
       timeZone: "UTC",
-    })
-      .format(date)
-      .replace(".", "")}.`;
+    }).format(date);
   const labels: Record<string, string> = {
     "Vacances d’été": "Été",
     Toussaint: "Toussaint",
@@ -45,9 +44,9 @@ const formatRange = (item: SchoolBreak) => {
     Printemps: "Printemps",
   };
 
-  return `${labels[item.name] ?? item.name} · ${fmt(
+  return `${labels[item.name] ?? item.name} : du ${fmt(
     new Date(`${item.start}T00:00:00Z`),
-  )} — ${fmt(new Date(`${item.end}T00:00:00Z`))}`;
+  )} au ${fmt(new Date(`${item.end}T00:00:00Z`))}`;
 };
 
 type Props = {
@@ -83,9 +82,49 @@ export function MonthlyView({
     (item) => item.date.getUTCMonth() === month,
   );
   const absenceTotal = stats.leave + stats.rtt + stats.training + stats.other;
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length !== 1) {
+      touchStart.current = null;
+      return;
+    }
+
+    const target = event.target;
+    if (
+      target instanceof HTMLElement &&
+      target.closest("button, input, select, textarea, a")
+    ) {
+      touchStart.current = null;
+      return;
+    }
+
+    const touch = event.touches[0];
+    touchStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start || event.changedTouches.length !== 1) return;
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    if (Math.abs(deltaX) < 48 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) return;
+
+    onMonthChange((monthIndex + (deltaX < 0 ? 1 : 11)) % 12);
+  };
 
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <div
+      className="monthly-swipe-surface space-y-4 sm:space-y-5"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={() => {
+        touchStart.current = null;
+      }}
+    >
       <div className="monthly-month-nav grid grid-cols-[3rem_minmax(0,1fr)_3rem] items-center gap-3">
         <button
           className="grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
@@ -153,8 +192,8 @@ export function MonthlyView({
                   </strong>
                   <span className="font-medium">
                     {holidays
-                      .map((item) => `${item.name} · ${formatDate(item.date)}`)
-                      .join(" · ")}
+                      .map((item) => `${item.name} (${formatDate(item.date)})`)
+                      .join(", ")}
                   </span>
                 </span>
               </p>
@@ -169,7 +208,7 @@ export function MonthlyView({
                 <span className="min-w-0 flex-1">
                   <strong className="font-extrabold text-white/90">Vacances : </strong>
                   <span className="font-medium">
-                    {schoolBreaks.map(formatRange).join(" · ")}
+                    {schoolBreaks.map(formatRange).join(", ")}
                   </span>
                 </span>
               </p>

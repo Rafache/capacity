@@ -1,18 +1,15 @@
 import { CalendarDays, CalendarX2, Gauge } from "lucide-react";
-import { CapacityBar } from "../components/CapacityBar";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { CAPACITY_SEGMENTS } from "../components/capacitySegments";
-import { MONTHS_SHORT } from "../data/months";
+import { CapacityEvolutionChart } from "../components/CapacityEvolutionChart";
+import { MONTHS_LONG } from "../data/months";
 import type { MonthStats, SegmentKey } from "../types";
 
 const formatNumber = (value: number) =>
   Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
 
 const TABLE_GRID =
-  "grid w-full grid-cols-[4rem_repeat(5,minmax(0,1fr))] items-center sm:grid-cols-[7rem_repeat(5,minmax(0,1fr))]";
-
-const segmentTotal = (values: Record<SegmentKey, number>) =>
-  CAPACITY_SEGMENTS.reduce((sum, segment) => sum + values[segment.key], 0);
+  "grid w-full grid-cols-[5rem_repeat(5,minmax(0,1fr))] items-center sm:grid-cols-[8rem_repeat(5,minmax(0,1fr))]";
 
 type Props = {
   stats: MonthStats[];
@@ -95,62 +92,58 @@ export function AnnualView({
               ))}
             </div>
 
-            {stats.map((item, index) => {
-              const rowTotal = Math.max(item.contracted, segmentTotal(item));
-
-              return (
-                <button
-                  className={`${TABLE_GRID} group border-b border-slate-100 bg-white text-left transition hover:bg-blue-50/60 focus-visible:bg-blue-50 focus-visible:outline-none`}
-                  type="button"
-                  role="row"
-                  key={MONTHS_SHORT[index]}
-                  onClick={() => onMonthOpen(index)}
-                  aria-label={`Ouvrir ${MONTHS_SHORT[index]}`}
-                >
-                  <span className="sticky left-0 z-10 row-start-1 flex items-center bg-white px-2 py-2 text-left transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-3 sm:py-2.5">
-                    <strong className="truncate whitespace-nowrap text-[11px] font-black leading-none text-slate-950 sm:text-xs">
-                      {MONTHS_SHORT[index]}
-                    </strong>
+            {stats.map((item, index) => (
+              <button
+                className={`${TABLE_GRID} group border-b border-slate-100 bg-white text-left transition hover:bg-blue-50/60 focus-visible:bg-blue-50 focus-visible:outline-none`}
+                type="button"
+                role="row"
+                key={MONTHS_LONG[index]}
+                onClick={() => onMonthOpen(index)}
+                aria-label={`Ouvrir ${MONTHS_LONG[index]}`}
+              >
+                <span className="sticky left-0 z-10 row-start-1 flex min-w-0 items-center bg-white px-1.5 py-3 text-left transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-3 sm:py-3">
+                  <strong className="min-w-0 break-words whitespace-normal text-[10px] font-black leading-tight text-slate-950 sm:text-sm">
+                    {MONTHS_LONG[index]}
+                  </strong>
+                </span>
+                {CAPACITY_SEGMENTS.map((segment) => (
+                  <span
+                    className={`row-start-1 min-w-0 whitespace-nowrap text-center text-[11px] font-extrabold leading-none sm:text-sm ${segment.textClass}`}
+                    role="cell"
+                    key={segment.key}
+                  >
+                    {formatNumber(item[segment.key])}
+                    <small className="ml-px text-[9px] text-slate-400 sm:text-[10px]">
+                      j
+                    </small>
                   </span>
-                  {CAPACITY_SEGMENTS.map((segment) => (
-                    <span
-                      className={`row-start-1 min-w-0 whitespace-nowrap text-center text-[10px] font-extrabold leading-none sm:text-xs ${segment.textClass}`}
-                      role="cell"
-                      key={segment.key}
-                    >
-                      {formatNumber(item[segment.key])}
-                      <small className="ml-px text-[8px] text-slate-400">j</small>
-                    </span>
-                  ))}
-                  <CapacityBar
-                    className="col-span-6 mb-2"
-                    values={item}
-                    total={rowTotal}
-                    label={`Répartition de ${MONTHS_SHORT[index]}`}
-                  />
-                </button>
-              );
-            })}
+                ))}
+              </button>
+            ))}
 
             <div className={`${TABLE_GRID} bg-slate-950 text-white`} role="row">
-              <span className="sticky left-0 z-10 row-start-1 flex items-center bg-slate-950 px-2 py-2.5 sm:px-3 sm:py-3">
-                <strong className="text-[11px] font-black leading-none sm:text-xs">
+              <span className="sticky left-0 z-10 row-start-1 flex items-center bg-slate-950 px-1.5 py-3 sm:px-3 sm:py-3">
+                <strong className="text-[10px] font-black leading-none sm:text-sm">
                   Total
                 </strong>
               </span>
               {CAPACITY_SEGMENTS.map((segment) => (
                 <span
-                  className="row-start-1 min-w-0 whitespace-nowrap text-center text-[10px] font-black leading-none sm:text-xs"
+                  className="row-start-1 min-w-0 whitespace-nowrap text-center text-[11px] font-black leading-none sm:text-sm"
                   role="cell"
                   key={segment.key}
                 >
                   {formatNumber(annualStats[segment.key])}
-                  <small className="ml-px text-[8px] text-slate-400">j</small>
+                  <small className="ml-px text-[9px] text-slate-400 sm:text-[10px]">
+                    j
+                  </small>
                 </span>
               ))}
             </div>
           </div>
         </div>
+
+        <CapacityEvolutionChart stats={stats} />
       </section>
     </div>
   );

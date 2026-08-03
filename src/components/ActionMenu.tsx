@@ -209,7 +209,7 @@ export function ActionMenu({
               }}
             >
               <Upload className="size-4 text-blue-600" aria-hidden="true" />
-              <span>Importer un CSV</span>
+              <span>Importer</span>
             </button>
             <button
               className={itemClass}
@@ -218,7 +218,7 @@ export function ActionMenu({
               onClick={() => runAction(onExport)}
             >
               <Download className="size-4 text-blue-600" aria-hidden="true" />
-              <span>Exporter en CSV</span>
+              <span>Exporter</span>
             </button>
 
             <div className="my-2 h-px bg-slate-200" role="separator" />
