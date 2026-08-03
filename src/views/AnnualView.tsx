@@ -98,14 +98,14 @@ export function AnnualView({
 
             {stats.map((item, index) => (
               <button
-                className={`${TABLE_GRID} group min-h-8 border-b border-slate-100 bg-white text-left transition hover:bg-blue-50/60 focus-visible:bg-blue-50 focus-visible:outline-none`}
+                className={`${TABLE_GRID} group min-h-[1.875rem] border-b border-slate-100 bg-white text-left transition hover:bg-blue-50/60 focus-visible:bg-blue-50 focus-visible:outline-none`}
                 type="button"
                 role="row"
                 key={MONTHS_LONG[index]}
                 onClick={() => onMonthOpen(index)}
                 aria-label={`Ouvrir ${MONTHS_LONG[index]}`}
               >
-                <span className="sticky left-0 z-10 row-start-1 flex min-h-8 min-w-0 items-center justify-center bg-white px-1 transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-2">
+                <span className="sticky left-0 z-10 row-start-1 flex min-h-[1.875rem] min-w-0 items-center justify-center bg-white px-1 transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-2">
                   <strong className="whitespace-nowrap text-[10px] font-black leading-none text-slate-950 sm:text-xs">
                     {MONTHS_LONG[index]}
                   </strong>
@@ -126,7 +126,7 @@ export function AnnualView({
             ))}
 
             <div className={`${TABLE_GRID} bg-slate-950 text-white`} role="row">
-              <span className="sticky left-0 z-10 row-start-1 flex items-center bg-slate-950 px-1.5 py-1 sm:px-3 sm:py-1.5">
+              <span className="sticky left-0 z-10 row-start-1 flex items-center justify-center bg-slate-950 px-1.5 py-1 sm:px-3 sm:py-1.5">
                 <strong className="text-[10px] font-black leading-none sm:text-sm">
                   Total
                 </strong>

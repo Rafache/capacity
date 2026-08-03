@@ -102,7 +102,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
                 </div>
               </div>
 
-              <span className="mt-1.5 flex h-14 w-full shrink-0 items-end justify-center sm:mt-2 sm:h-16">
+              <span className="mt-1.5 flex h-14 w-full shrink-0 items-start justify-center sm:mt-2 sm:h-16">
                 <span className="chart-month-label text-center text-[8px] font-bold leading-tight text-slate-500 sm:text-[10px]">
                   {MONTHS_LONG[index]}
                 </span>

@@ -31,20 +31,19 @@ const formatDate = (date: Date) =>
 const formatRange = (item: SchoolBreak) => {
   const fmt = (date: Date) =>
     new Intl.DateTimeFormat("fr-FR", {
-      weekday: "short",
       day: "numeric",
       month: "long",
       timeZone: "UTC",
     }).format(date);
   const labels: Record<string, string> = {
-    "Vacances d’été": "Été",
-    Toussaint: "Toussaint",
-    Noël: "Noël",
-    Hiver: "Hiver",
-    Printemps: "Printemps",
+    "Vacances d’été": "Vacances d’été",
+    Toussaint: "Vacances de la Toussaint",
+    Noël: "Vacances de Noël",
+    Hiver: "Vacances d’hiver",
+    Printemps: "Vacances de printemps",
   };
 
-  return `${labels[item.name] ?? item.name} : du ${fmt(
+  return `${labels[item.name] ?? item.name} du ${fmt(
     new Date(`${item.start}T00:00:00Z`),
   )} au ${fmt(new Date(`${item.end}T00:00:00Z`))}`;
 };
@@ -238,7 +237,6 @@ export function MonthlyView({
                   aria-hidden="true"
                 />
                 <span className="min-w-0 flex-1">
-                  <strong className="font-extrabold text-white/90">Vacances : </strong>
                   <span className="font-medium">
                     {schoolBreaks.map(formatRange).join(", ")}
                   </span>
