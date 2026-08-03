@@ -98,7 +98,7 @@ export function CapacityEvolutionChart({ stats, variant = "capacity" }: Props) {
                   })}
                 </div>
               </div>
-              <span className="mt-2 w-full break-words text-center text-[8px] font-bold leading-tight text-slate-500 sm:text-[10px]">
+              <span className="chart-month-label mt-2 text-center text-[8px] font-bold leading-tight text-slate-500 sm:text-[10px]">
                 {MONTHS_LONG[index]}
               </span>
             </div>

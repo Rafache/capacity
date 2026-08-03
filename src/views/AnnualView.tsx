@@ -102,7 +102,7 @@ export function AnnualView({
                 aria-label={`Ouvrir ${MONTHS_LONG[index]}`}
               >
                 <span className="sticky left-0 z-10 row-start-1 flex min-h-16 min-w-0 items-center justify-center bg-white px-1 transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-2">
-                  <strong className="annual-month-label whitespace-nowrap text-[10px] font-black leading-tight text-slate-950 sm:text-xs">
+                  <strong className="whitespace-nowrap text-[10px] font-black leading-tight text-slate-950 sm:text-xs">
                     {MONTHS_LONG[index]}
                   </strong>
                 </span>

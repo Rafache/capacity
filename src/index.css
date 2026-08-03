@@ -135,7 +135,7 @@
   animation: monthly-swipe-feedback-next 650ms ease-out;
 }
 
-.annual-month-label {
+.chart-month-label {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
 }
