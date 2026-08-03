@@ -1,4 +1,6 @@
 import { CAPACITY_SEGMENTS } from "./capacitySegments";
+import { formatNumber } from "../i18n/formatters";
+import { t } from "../i18n/translate";
 import type { SegmentKey } from "../types";
 
 type Props = {
@@ -8,13 +10,10 @@ type Props = {
   className?: string;
 };
 
-const formatNumber = (value: number) =>
-  Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
-
 export function CapacityBar({
   values,
   total,
-  label = "Répartition de la capacité",
+  label = t.summary.distribution,
   className = "",
 }: Props) {
   const valuesTotal = CAPACITY_SEGMENTS.reduce(
@@ -23,7 +22,8 @@ export function CapacityBar({
   );
   const scale = Math.max(0, total ?? valuesTotal, valuesTotal);
   const description = CAPACITY_SEGMENTS.map(
-    (segment) => `${segment.label} : ${formatNumber(values[segment.key])} j`,
+    (segment) =>
+      `${t.segments[segment.key]} : ${formatNumber(values[segment.key])} ${t.units.day}`,
   ).join(", ");
 
   return (
@@ -41,7 +41,7 @@ export function CapacityBar({
             className={`h-full min-w-0 ${segment.barClass}`}
             key={segment.key}
             style={{ width: `${width}%` }}
-            title={`${segment.label} : ${formatNumber(value)} j`}
+            title={`${t.segments[segment.key]} : ${formatNumber(value)} ${t.units.day}`}
           />
         );
       })}

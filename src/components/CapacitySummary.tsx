@@ -2,9 +2,10 @@ import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { CapacityBar } from "./CapacityBar";
 import { CAPACITY_SEGMENTS } from "./capacitySegments";
+import { t } from "../i18n/translate";
 import type { SegmentKey } from "../types";
 
-type SummaryTone = "neutral" | "positive" | "negative" | "accent";
+type SummaryTone = "neutral" | "positive" | "negative";
 
 export type SummaryItem = {
   icon: LucideIcon;
@@ -16,13 +17,8 @@ export type SummaryItem = {
 
 type Props = {
   title: string;
-  eyebrow?: string | null;
-  meta?: string;
   items: SummaryItem[];
-  barValues?: Record<SegmentKey, number>;
-  barTotal?: number;
-  barLabel?: string;
-  showLegend?: boolean;
+  barValues: Record<SegmentKey, number>;
   afterBar?: ReactNode;
 };
 
@@ -39,47 +35,15 @@ const toneClasses: Record<SummaryTone, { label: string; value: string }> = {
     label: "text-red-300",
     value: "text-red-300",
   },
-  accent: {
-    label: "text-blue-300",
-    value: "text-blue-300",
-  },
 };
 
-export function CapacitySummary({
-  title,
-  eyebrow = "Synthèse",
-  meta,
-  items,
-  barValues,
-  barTotal,
-  barLabel,
-  showLegend = true,
-  afterBar,
-}: Props) {
-  const distributionLabel = barLabel ?? `Répartition de ${title.toLowerCase()}`;
-
+export function CapacitySummary({ title, items, barValues, afterBar }: Props) {
   return (
     <section
       className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-5 text-white shadow-[0_20px_50px_rgba(15,23,42,0.24)] sm:p-6"
       aria-label={title}
     >
-      <div className="mb-5 flex items-start justify-between gap-4">
-        <div>
-          {eyebrow ? (
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-300">
-              {eyebrow}
-            </p>
-          ) : null}
-          <h2 className={eyebrow ? "text-lg font-black" : "text-xl font-black"}>
-            {title}
-          </h2>
-        </div>
-        {meta ? (
-          <p className="max-w-44 text-right text-[11px] font-medium leading-snug text-slate-400 sm:max-w-none sm:text-xs">
-            {meta}
-          </p>
-        ) : null}
-      </div>
+      <h2 className="mb-5 text-xl font-black">{title}</h2>
 
       <div className="grid grid-cols-3 divide-x divide-white/15">
         {items.map((item) => {
@@ -113,35 +77,26 @@ export function CapacitySummary({
         })}
       </div>
 
-      {barValues ? (
-        <div className="mt-5 border-t border-white/10 pt-4">
-          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-            Répartition
-          </p>
-          <CapacityBar
-            values={barValues}
-            total={barTotal}
-            label={distributionLabel}
-            className="h-3 bg-white/10"
-          />
-          {showLegend ? (
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
-              {CAPACITY_SEGMENTS.map(({ key, label, barClass }) => (
-                <span
-                  className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 sm:text-[10px]"
-                  key={key}
-                >
-                  <span className={`size-1.5 shrink-0 rounded-full ${barClass}`} />
-                  {label}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          {afterBar ? (
-            <div className="mt-4 border-t border-white/10 pt-3">{afterBar}</div>
-          ) : null}
+      <div className="mt-5 border-t border-white/10 pt-4">
+        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+          {t.summary.distribution}
+        </p>
+        <CapacityBar values={barValues} className="h-3 bg-white/10" />
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
+          {CAPACITY_SEGMENTS.map(({ key, barClass }) => (
+            <span
+              className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 sm:text-[10px]"
+              key={key}
+            >
+              <span className={`size-1.5 shrink-0 rounded-full ${barClass}`} />
+              {t.segments[key]}
+            </span>
+          ))}
         </div>
-      ) : null}
+        {afterBar ? (
+          <div className="mt-4 border-t border-white/10 pt-3">{afterBar}</div>
+        ) : null}
+      </div>
     </section>
   );
 }

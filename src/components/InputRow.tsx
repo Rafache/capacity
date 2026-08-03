@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CopyPlus, type LucideIcon } from "lucide-react";
+import { formatNumber } from "../i18n/formatters";
+import { t } from "../i18n/translate";
 
 export function ApplyToYearButton({
   label,
@@ -13,8 +15,8 @@ export function ApplyToYearButton({
       className="grid size-9 shrink-0 place-items-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 sm:size-11 sm:rounded-xl"
       type="button"
       onClick={onClick}
-      aria-label={`Répliquer ${label} aux 12 mois`}
-      title="Répliquer sur l’année"
+      aria-label={`${t.inputs.applyToYear} ${label} ${t.inputs.year}`}
+      title={t.inputs.applyToYear}
     >
       <CopyPlus className="size-4" aria-hidden="true" />
     </button>
@@ -29,7 +31,7 @@ export function InputRow({
   min = 0,
   max,
   step = 0.5,
-  unit = "j",
+  unit,
   onChange,
   onApplyToYear,
 }: {
@@ -40,14 +42,16 @@ export function InputRow({
   min?: number;
   max: number;
   step?: number;
-  unit?: string;
+  unit: string;
   onChange: (value: number) => void;
   onApplyToYear: () => void;
 }) {
   const [editing, setEditing] = useState(false);
-  const formattedValue = Number.isInteger(value)
-    ? String(value)
-    : value.toFixed(1).replace(".", ",");
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+  const formattedValue = formatNumber(value);
 
   const commit = (raw: string) => {
     const parsed = Number(raw.replace(",", "."));
@@ -57,8 +61,6 @@ export function InputRow({
     }
     setEditing(false);
   };
-
-  const formattedUnit = unit === "%" ? "%" : unit;
 
   const controlClass =
     "grid size-8 place-items-center text-lg font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent sm:size-10 sm:text-xl";
@@ -79,19 +81,20 @@ export function InputRow({
         <div className="grid h-9 shrink-0 grid-cols-[2rem_4rem_2rem] overflow-hidden rounded-lg border border-slate-200 bg-slate-50 sm:h-11 sm:grid-cols-[2.5rem_5rem_2.5rem] sm:rounded-xl">
           <button
             className={controlClass}
+            type="button"
             disabled={value <= min}
             onClick={() => onChange(Math.max(min, value - step))}
-            aria-label={`Réduire ${label}`}
+            aria-label={`${t.inputs.reduce} ${label}`}
           >
             −
           </button>
           {editing ? (
             <input
               className="w-full min-w-0 whitespace-nowrap border-x border-slate-200 bg-white px-1 text-center text-[16px] font-black leading-none text-slate-950 outline-none focus:bg-blue-50 sm:text-sm"
-              autoFocus
+              ref={inputRef}
               inputMode="decimal"
               defaultValue={formattedValue}
-              aria-label={`${label} en ${unit === "%" ? "pourcentage" : "jours"}`}
+              aria-label={`${label} ${t.inputs.valueIn} ${unit === t.units.percent ? t.inputs.valueInPercent : t.inputs.valueInDays}`}
               onBlur={(event) => commit(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") commit(event.currentTarget.value);
@@ -104,14 +107,15 @@ export function InputRow({
               type="button"
               onClick={() => setEditing(true)}
             >
-              {formattedValue} {formattedUnit}
+              {formattedValue} {unit}
             </button>
           )}
           <button
             className={controlClass}
+            type="button"
             disabled={value >= max}
             onClick={() => onChange(Math.min(max, value + step))}
-            aria-label={`Augmenter ${label}`}
+            aria-label={`${t.inputs.increase} ${label}`}
           >
             +
           </button>

@@ -1,153 +1,158 @@
+import { Fragment } from "react";
 import { CalendarDays, CalendarX2, Gauge } from "lucide-react";
+import { CapacityBar } from "../components/CapacityBar";
+import { CapacityEvolutionChart } from "../components/CapacityEvolutionChart";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { CAPACITY_SEGMENTS } from "../components/capacitySegments";
-import { CapacityEvolutionChart } from "../components/CapacityEvolutionChart";
-import { MONTHS_LONG } from "../data/months";
-import type { MonthStats, SegmentKey } from "../types";
-
-const formatNumber = (value: number) =>
-  Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
-
-const TABLE_GRID =
-  "grid w-full grid-cols-[4.25rem_repeat(5,minmax(0,1fr))] items-center sm:grid-cols-[5rem_repeat(5,minmax(0,1fr))]";
+import { getAbsenceTotal } from "../domain/capacityData";
+import { formatMonthName, formatNumber } from "../i18n/formatters";
+import { t } from "../i18n/translate";
+import type { AnnualSummary, MonthStats, SegmentKey } from "../types";
 
 type Props = {
+  startYear: number;
   stats: MonthStats[];
-  annualBaseline: number;
-  annualUnavailable: number;
-  annualAvailable: number;
-  annualStats: Record<SegmentKey, number>;
+  summary: AnnualSummary;
   onMonthOpen: (index: number) => void;
 };
 
-export function AnnualView({
-  stats,
-  annualBaseline,
-  annualUnavailable,
-  annualAvailable,
-  annualStats,
-  onMonthOpen,
-}: Props) {
+export function AnnualView({ startYear, stats, summary, onMonthOpen }: Props) {
+  const annualStats = {
+    available: summary.available,
+    leave: summary.leave,
+    rtt: summary.rtt,
+    training: summary.training,
+    other: summary.other,
+  } satisfies Record<SegmentKey, number>;
+
   return (
     <div className="space-y-3 sm:space-y-5">
       <CapacitySummary
-        title="Synthèse de l’année"
-        eyebrow={null}
+        title={t.summary.year}
         barValues={annualStats}
-        barLabel="Répartition de l’année"
         items={[
           {
             icon: CalendarDays,
-            label: "Ouvrés",
-            value: annualBaseline,
-            unit: "j",
+            label: t.summary.workingDays,
+            value: summary.baseline,
+            unit: t.units.day,
             tone: "neutral",
           },
           {
             icon: CalendarX2,
-            label: "Absences",
-            value: formatNumber(annualUnavailable),
-            unit: "j",
+            label: t.summary.absences,
+            value: formatNumber(getAbsenceTotal(summary)),
+            unit: t.units.day,
             tone: "negative",
           },
           {
             icon: Gauge,
-            label: "Capacité",
-            value: formatNumber(annualAvailable),
-            unit: "j",
+            label: t.summary.capacity,
+            value: formatNumber(summary.available),
+            unit: t.units.day,
             tone: "positive",
           },
         ]}
       />
 
       <section>
-        <div className="mb-1.5 sm:mb-2.5">
+        <div className="mb-2 sm:mb-3">
           <h2 className="text-base font-black tracking-tight text-slate-950 sm:text-xl">
-            Capacité par mois
+            {t.months.days}
           </h2>
         </div>
 
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:rounded-2xl">
-          <div role="table" aria-label="Capacité mensuelle en jours">
-            <div
-              className={`${TABLE_GRID} border-b border-slate-200 bg-slate-50 text-center`}
-              role="row"
-            >
-              <span
-                className="sticky left-0 z-10 flex min-h-9 items-center justify-center bg-slate-50 px-1 text-center text-[9px] font-black uppercase tracking-wide text-slate-400 sm:px-2 sm:text-[10px]"
-                role="columnheader"
-              >
-                Mois
-              </span>
-              {CAPACITY_SEGMENTS.map(({ key, label, icon: Icon, textClass }) => {
-                const HeaderIcon = key === "available" ? Gauge : Icon;
+          <table className="w-full table-fixed" aria-label={t.months.ariaLabel}>
+            <caption className="sr-only">{t.months.title}</caption>
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50 text-center">
+                <th
+                  className="sticky left-0 z-10 w-16 bg-slate-50 px-2 py-2 text-left text-[9px] font-black uppercase tracking-wide text-slate-400 sm:w-28 sm:px-3 sm:text-[10px]"
+                  scope="col"
+                >
+                  {t.months.month}
+                </th>
+                {CAPACITY_SEGMENTS.map(({ key, icon: Icon, textClass }) => (
+                  <th
+                    className={`px-1 py-2 ${textClass}`}
+                    key={key}
+                    scope="col"
+                    aria-label={t.segments[key]}
+                    title={t.segments[key]}
+                  >
+                    <Icon className="mx-auto size-3.5" aria-hidden="true" />
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {stats.map((item, index) => {
+                const month = formatMonthName(startYear, index, "short");
+                const rowTotal = Math.max(
+                  item.contracted,
+                  item.available + getAbsenceTotal(item),
+                );
 
                 return (
-                  <span
-                    className={`grid min-h-9 place-items-center whitespace-nowrap ${textClass}`}
-                    key={key}
-                    role="columnheader"
-                    aria-label={label}
-                    title={label}
-                  >
-                    <HeaderIcon className="size-3.5" aria-hidden="true" />
-                  </span>
+                  <Fragment key={month}>
+                    <tr className="border-b border-slate-100">
+                      <th
+                        className="sticky left-0 z-10 bg-white px-2 py-2 text-left sm:px-3 sm:py-2.5"
+                        scope="row"
+                      >
+                        <button
+                          className="w-full truncate whitespace-nowrap text-left text-[11px] font-black leading-none text-slate-950 transition hover:text-blue-700 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:text-xs"
+                          type="button"
+                          onClick={() => onMonthOpen(index)}
+                          aria-label={`${t.months.open} ${month}`}
+                        >
+                          {month}
+                        </button>
+                      </th>
+                      {CAPACITY_SEGMENTS.map((segment) => (
+                        <td
+                          className={`min-w-0 whitespace-nowrap px-1 text-center text-[10px] font-extrabold leading-none sm:text-xs ${segment.textClass}`}
+                          key={segment.key}
+                        >
+                          {formatNumber(item[segment.key])}
+                          <small className="ml-px text-[8px] text-slate-400">
+                            {t.units.day}
+                          </small>
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-slate-100">
+                      <td className="px-2 pb-2 sm:px-3" colSpan={6}>
+                        <CapacityBar values={item} total={rowTotal} label={month} />
+                      </td>
+                    </tr>
+                  </Fragment>
                 );
               })}
-            </div>
-
-            {stats.map((item, index) => (
-              <button
-                className={`${TABLE_GRID} group min-h-[1.875rem] border-b border-slate-100 bg-white text-left transition hover:bg-blue-50/60 focus-visible:bg-blue-50 focus-visible:outline-none`}
-                type="button"
-                role="row"
-                key={MONTHS_LONG[index]}
-                onClick={() => onMonthOpen(index)}
-                aria-label={`Ouvrir ${MONTHS_LONG[index]}`}
-              >
-                <span className="sticky left-0 z-10 row-start-1 flex min-h-[1.875rem] min-w-0 items-center justify-center bg-white px-1 transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-2">
-                  <strong className="whitespace-nowrap text-[10px] font-black leading-none text-slate-950 sm:text-xs">
-                    {MONTHS_LONG[index]}
-                  </strong>
-                </span>
+              <tr className="bg-slate-950 text-white">
+                <th
+                  className="sticky left-0 z-10 bg-slate-950 px-2 py-2.5 text-left sm:px-3 sm:py-3"
+                  scope="row"
+                >
+                  {t.months.total}
+                </th>
                 {CAPACITY_SEGMENTS.map((segment) => (
-                  <span
-                    className={`row-start-1 min-w-0 whitespace-nowrap text-center text-xs font-extrabold leading-none sm:text-sm ${segment.textClass}`}
-                    role="cell"
+                  <td
+                    className="whitespace-nowrap px-1 text-center text-[10px] font-black leading-none sm:text-xs"
                     key={segment.key}
                   >
-                    {formatNumber(item[segment.key])}
-                    <small className="ml-px text-[9px] text-slate-400 sm:text-[10px]">
-                      j
+                    {formatNumber(annualStats[segment.key])}
+                    <small className="ml-px text-[8px] text-slate-400">
+                      {t.units.day}
                     </small>
-                  </span>
+                  </td>
                 ))}
-              </button>
-            ))}
-
-            <div className={`${TABLE_GRID} bg-slate-950 text-white`} role="row">
-              <span className="sticky left-0 z-10 row-start-1 flex items-center justify-center bg-slate-950 px-1.5 py-1 sm:px-3 sm:py-1.5">
-                <strong className="text-[10px] font-black leading-none sm:text-sm">
-                  Total
-                </strong>
-              </span>
-              {CAPACITY_SEGMENTS.map((segment) => (
-                <span
-                  className="row-start-1 min-w-0 whitespace-nowrap text-center text-xs font-black leading-none sm:text-sm"
-                  role="cell"
-                  key={segment.key}
-                >
-                  {formatNumber(annualStats[segment.key])}
-                  <small className="ml-px text-[9px] text-slate-400 sm:text-[10px]">
-                    j
-                  </small>
-                </span>
-              ))}
-            </div>
-          </div>
+              </tr>
+            </tbody>
+          </table>
         </div>
-
-        <CapacityEvolutionChart stats={stats} />
+        <CapacityEvolutionChart startYear={startYear} stats={stats} />
       </section>
     </div>
   );
