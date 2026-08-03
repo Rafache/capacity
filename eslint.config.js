@@ -24,14 +24,4 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "warn",
     },
   },
-  {
-    files: ["public/sw.js"],
-    languageOptions: {
-      globals: {
-        self: "readonly",
-        caches: "readonly",
-        fetch: "readonly",
-      },
-    },
-  },
 );
