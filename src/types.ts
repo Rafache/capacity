@@ -8,10 +8,9 @@ export type Entry = {
   rtt: number;
   training: number;
   other: number;
-  note: string;
 };
 
-export type EntryNumericKey = Exclude<keyof Entry, "note">;
+export type EntryNumericKey = keyof Entry;
 
 export type MonthStats = {
   baseline: number;
