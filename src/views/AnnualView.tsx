@@ -74,7 +74,7 @@ export function AnnualView({
               role="row"
             >
               <span
-                className="sticky left-0 z-10 bg-slate-50 px-1 py-0.5 text-center text-[9px] font-black uppercase tracking-wide text-slate-400 sm:px-2 sm:text-[10px]"
+                className="sticky left-0 z-10 bg-slate-50 px-1 py-px text-center text-[9px] font-black uppercase tracking-wide text-slate-400 sm:px-2 sm:text-[10px]"
                 role="columnheader"
               >
                 Mois
@@ -84,7 +84,7 @@ export function AnnualView({
 
                 return (
                   <span
-                    className={`grid place-items-center whitespace-nowrap py-0.5 ${textClass}`}
+                    className={`grid place-items-center whitespace-nowrap py-px ${textClass}`}
                     key={key}
                     role="columnheader"
                     aria-label={label}
@@ -98,14 +98,14 @@ export function AnnualView({
 
             {stats.map((item, index) => (
               <button
-                className={`${TABLE_GRID} group min-h-10 border-b border-slate-100 bg-white text-left transition hover:bg-blue-50/60 focus-visible:bg-blue-50 focus-visible:outline-none`}
+                className={`${TABLE_GRID} group min-h-9 border-b border-slate-100 bg-white text-left transition hover:bg-blue-50/60 focus-visible:bg-blue-50 focus-visible:outline-none`}
                 type="button"
                 role="row"
                 key={MONTHS_LONG[index]}
                 onClick={() => onMonthOpen(index)}
                 aria-label={`Ouvrir ${MONTHS_LONG[index]}`}
               >
-                <span className="sticky left-0 z-10 row-start-1 flex min-h-10 min-w-0 items-center justify-center bg-white px-1 transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-2">
+                <span className="sticky left-0 z-10 row-start-1 flex min-h-9 min-w-0 items-center justify-center bg-white px-1 transition group-hover:bg-blue-50 group-focus-visible:bg-blue-50 sm:px-2">
                   <strong className="whitespace-nowrap text-[10px] font-black leading-none text-slate-950 sm:text-xs">
                     {MONTHS_LONG[index]}
                   </strong>
@@ -126,7 +126,7 @@ export function AnnualView({
             ))}
 
             <div className={`${TABLE_GRID} bg-slate-950 text-white`} role="row">
-              <span className="sticky left-0 z-10 row-start-1 flex items-center bg-slate-950 px-1.5 py-1.5 sm:px-3 sm:py-2">
+              <span className="sticky left-0 z-10 row-start-1 flex items-center bg-slate-950 px-1.5 py-1 sm:px-3 sm:py-1.5">
                 <strong className="text-[10px] font-black leading-none sm:text-sm">
                   Total
                 </strong>
