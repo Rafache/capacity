@@ -16,7 +16,12 @@ import {
   X,
 } from "lucide-react";
 import { ActionMenu } from "./components/ActionMenu";
-import { CsvImportError, exportCapacityCsv, importCapacityCsv } from "./domain/csv";
+import {
+  CsvImportError,
+  MAX_CSV_BYTES,
+  exportCapacityCsv,
+  importCapacityCsv,
+} from "./domain/csv";
 import {
   STORAGE_KEY,
   availableFiscalYears,
@@ -178,7 +183,7 @@ export default function App() {
   };
 
   const exportCsv = () => {
-    const text = exportCapacityCsv(entries, stats);
+    const text = exportCapacityCsv(startYear, entries, stats);
     const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -192,7 +197,7 @@ export default function App() {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
-      if (file.size > 1024 * 1024) throw new CsvImportError("file-too-large");
+      if (file.size > MAX_CSV_BYTES) throw new CsvImportError("file-too-large");
       const imported = importCapacityCsv(await file.text(), startYear);
       replaceYear(imported);
       setNotice({
@@ -200,14 +205,16 @@ export default function App() {
         type: "success",
       });
     } catch (error) {
-      const messages: Record<CsvImportError["code"], string> = {
-        "file-too-large": "Le fichier CSV dépasse la taille maximale autorisée.",
-        "invalid-format": "Le format CSV est invalide.",
-        "invalid-columns": "Les colonnes CSV sont invalides ou incomplètes.",
-        "invalid-months": "Le fichier CSV doit contenir exactement 12 mois.",
+      const csvMessages: Record<import("./domain/csv").CsvImportErrorCode, string> = {
+        "file-too-large": "Le fichier CSV est trop volumineux.",
+        "invalid-csv": "Le fichier CSV est mal formé.",
+        "unsupported-format": "Le format CSV n’est pas pris en charge.",
+        "invalid-columns": "Les colonnes du fichier CSV sont invalides.",
+        "invalid-months": "Le fichier doit contenir les 12 mois de l’exercice sélectionné.",
+        "invalid-value": "Le fichier CSV contient une valeur invalide.",
       };
       setNotice({
-        message: error instanceof CsvImportError ? messages[error.code] : "Import impossible.",
+        message: error instanceof CsvImportError ? csvMessages[error.code] : "Import impossible.",
         type: "error",
       });
     } finally {
