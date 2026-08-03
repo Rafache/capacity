@@ -40,19 +40,19 @@ export function formatMonthName(startYear: number, index: number, style: MonthSt
 }
 
 export function formatDateLabel(date: Date) {
-  return dateFormatter({ weekday: "short", day: "numeric", month: "short" })
-    .format(date)
-    .replaceAll(".", "");
+  return dateFormatter({ weekday: "short", day: "numeric", month: "short" }).format(date);
 }
 
 export function formatDatePart(date: Date) {
-  return dateFormatter({ day: "numeric", month: "short" })
-    .format(date)
-    .replaceAll(".", "");
+  return dateFormatter({ day: "numeric", month: "short" }).format(date);
+}
+
+function withTerminalPeriod(value: string) {
+  return value.endsWith(".") ? value : `${value}.`;
 }
 
 export function formatDateRange(start: string, end: string) {
-  return `${formatDatePart(new Date(`${start}T00:00:00Z`))} — ${formatDatePart(
-    new Date(`${end}T00:00:00Z`),
+  return `du ${formatDatePart(new Date(`${start}T00:00:00Z`))} au ${withTerminalPeriod(
+    formatDatePart(new Date(`${end}T00:00:00Z`)),
   )}`;
 }

@@ -144,18 +144,13 @@ export function MonthlyView({
                   className="mt-0.5 size-3.5 shrink-0 text-blue-300"
                   aria-hidden="true"
                 />
-                <span className="min-w-0 flex-1">
-                  <strong className="font-extrabold text-white/90">
-                    {t.summary.schoolBreaks}:{" "}
-                  </strong>
-                  <span className="font-medium">
-                    {schoolBreaks
-                      .map(
-                        ({ key, start, end }) =>
-                          `${t.schoolBreakNames[key]} · ${formatDateRange(start, end)}`,
-                      )
-                      .join(" · ")}
-                  </span>
+                <span className="min-w-0 flex-1 font-medium">
+                  {schoolBreaks
+                    .map(
+                      ({ key, start, end }) =>
+                        `${t.schoolBreakNames[key]} ${formatDateRange(start, end)}`,
+                    )
+                    .join(" · ")}
                 </span>
               </p>
             ) : null}

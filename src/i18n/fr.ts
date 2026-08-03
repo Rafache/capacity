@@ -129,10 +129,10 @@ export const fr = {
   },
   schoolBreakNames: {
     summer: "Vacances d’été",
-    allSaints: "Toussaint",
-    christmas: "Noël",
-    winter: "Hiver",
-    spring: "Printemps",
+    allSaints: "Vacances de la Toussaint",
+    christmas: "Vacances de Noël",
+    winter: "Vacances d’hiver",
+    spring: "Vacances de printemps",
   },
   units: {
     day: "j",
