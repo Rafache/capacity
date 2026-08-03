@@ -91,6 +91,55 @@
   touch-action: pan-y;
 }
 
+@keyframes monthly-swipe-feedback-previous {
+  0%,
+  100% {
+    transform: translateX(0) scale(1);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  }
+
+  35% {
+    transform: translateX(-4px) scale(1.06);
+    border-color: #60a5fa;
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    box-shadow:
+      0 0 0 5px rgb(147 197 253 / 0.3),
+      0 10px 22px rgb(37 99 235 / 0.16);
+  }
+}
+
+@keyframes monthly-swipe-feedback-next {
+  0%,
+  100% {
+    transform: translateX(0) scale(1);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  }
+
+  35% {
+    transform: translateX(4px) scale(1.06);
+    border-color: #60a5fa;
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    box-shadow:
+      0 0 0 5px rgb(147 197 253 / 0.3),
+      0 10px 22px rgb(37 99 235 / 0.16);
+  }
+}
+
+.monthly-swipe-feedback-previous {
+  animation: monthly-swipe-feedback-previous 650ms ease-out;
+}
+
+.monthly-swipe-feedback-next {
+  animation: monthly-swipe-feedback-next 650ms ease-out;
+}
+
+.annual-month-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
 @media (min-width: 640px) {
   .monthly-month-nav {
     position: static;
@@ -104,7 +153,16 @@
 
 @media (prefers-reduced-motion: reduce) {
   .toast-in,
-  .toast-progress {
+  .toast-progress,
+  .monthly-swipe-feedback-previous,
+  .monthly-swipe-feedback-next {
     animation: none;
+  }
+
+  .monthly-swipe-feedback-previous,
+  .monthly-swipe-feedback-next {
+    border-color: #60a5fa;
+    background-color: #eff6ff;
+    color: #1d4ed8;
   }
 }

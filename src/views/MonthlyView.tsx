@@ -8,7 +8,7 @@ import {
   Gauge,
   Sun,
 } from "lucide-react";
-import { useRef, type TouchEvent } from "react";
+import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { publicHolidays } from "../capacity";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
@@ -31,7 +31,7 @@ const formatDate = (date: Date) =>
 const formatRange = (item: SchoolBreak) => {
   const fmt = (date: Date) =>
     new Intl.DateTimeFormat("fr-FR", {
-      weekday: "long",
+      weekday: "short",
       day: "numeric",
       month: "long",
       timeZone: "UTC",
@@ -83,6 +83,28 @@ export function MonthlyView({
   );
   const absenceTotal = stats.leave + stats.rtt + stats.training + stats.other;
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const swipeFeedbackTimeout = useRef<number | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<"previous" | "next" | null>(null);
+
+  useEffect(
+    () => () => {
+      if (swipeFeedbackTimeout.current !== null) {
+        window.clearTimeout(swipeFeedbackTimeout.current);
+      }
+    },
+    [],
+  );
+
+  const showSwipeFeedback = (direction: "previous" | "next") => {
+    setSwipeDirection(direction);
+    if (swipeFeedbackTimeout.current !== null) {
+      window.clearTimeout(swipeFeedbackTimeout.current);
+    }
+    swipeFeedbackTimeout.current = window.setTimeout(() => {
+      setSwipeDirection(null);
+      swipeFeedbackTimeout.current = null;
+    }, 650);
+  };
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     if (event.touches.length !== 1) {
@@ -113,7 +135,9 @@ export function MonthlyView({
     const deltaY = touch.clientY - start.y;
     if (Math.abs(deltaX) < 48 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) return;
 
-    onMonthChange((monthIndex + (deltaX < 0 ? 1 : 11)) % 12);
+    const direction = deltaX < 0 ? "next" : "previous";
+    showSwipeFeedback(direction);
+    onMonthChange((monthIndex + (direction === "next" ? 1 : 11)) % 12);
   };
 
   return (
@@ -127,7 +151,11 @@ export function MonthlyView({
     >
       <div className="monthly-month-nav grid grid-cols-[3rem_minmax(0,1fr)_3rem] items-center gap-3">
         <button
-          className="grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
+          className={`grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100 ${
+            swipeDirection === "previous"
+              ? "monthly-swipe-feedback monthly-swipe-feedback-previous"
+              : ""
+          }`}
           onClick={() => onMonthChange((monthIndex + 11) % 12)}
           aria-label="Mois précédent"
         >
@@ -139,7 +167,11 @@ export function MonthlyView({
           </strong>
         </div>
         <button
-          className="grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
+          className={`grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100 ${
+            swipeDirection === "next"
+              ? "monthly-swipe-feedback monthly-swipe-feedback-next"
+              : ""
+          }`}
           onClick={() => onMonthChange((monthIndex + 1) % 12)}
           aria-label="Mois suivant"
         >
