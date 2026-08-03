@@ -25,7 +25,7 @@ export type MonthStats = {
 };
 
 export type CapacityData = {
-  version: 2;
+  version: 3;
   zone: Zone;
   entries: Record<string, Entry[]>;
 };
