@@ -45,7 +45,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
       </div>
 
       <div
-        className="mt-4 grid h-48 grid-cols-12 gap-1 sm:mt-5 sm:h-56 sm:gap-2.5"
+        className="mt-4 grid h-52 grid-cols-12 gap-1 sm:mt-5 sm:h-60 sm:gap-2.5"
         role="list"
         aria-label="Capacité et absences par mois"
       >
@@ -64,7 +64,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
               <div className="flex min-h-0 w-full flex-1 flex-col">
                 <div className="flex min-h-0 flex-1 items-end">
                   <span
-                    className="flex w-full items-end justify-center overflow-hidden rounded-t-lg bg-capacity-available px-px text-center text-[7px] font-black leading-none text-white sm:rounded-t-xl sm:text-[9px]"
+                    className="flex w-full items-center justify-center overflow-hidden rounded-t-lg bg-capacity-available px-px text-center text-[7px] font-black leading-none text-white sm:rounded-t-xl sm:text-[9px]"
                     style={{ height: `${availableHeight}%` }}
                     title={`Disponible : ${formatNumber(item.available)} j`}
                   >
@@ -89,7 +89,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
 
                       return (
                         <span
-                          className={`flex min-h-0 w-full items-start justify-center overflow-hidden px-px text-center text-[7px] font-black leading-none text-white sm:text-[9px] ${segment.barClass}`}
+                          className={`flex min-h-0 w-full items-center justify-center overflow-hidden px-px text-center text-[7px] font-black leading-none text-white sm:text-[9px] ${segment.barClass}`}
                           key={segment.key}
                           style={{ height: `${segmentHeight}%` }}
                           title={`${segment.label} : ${formatNumber(value)} j`}
