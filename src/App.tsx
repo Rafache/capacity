@@ -21,9 +21,10 @@ import {
   STORAGE_KEY,
   availableFiscalYears,
   emptyData,
+  getFiscalMonthLimits,
   getMonthStats,
   loadData,
-  normalizeEntry,
+  normalizeMonthlyEntry,
   saveData,
 } from "./domain/capacityData";
 import { ConfirmDialog } from "./components/ConfirmDialog";
@@ -83,12 +84,32 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    setData(loadData(window.localStorage));
+    const result = loadData(window.localStorage);
+    setData(result.data);
+    if (result.warning === "repaired") {
+      setNotice({
+        message: "Des données locales ont été corrigées pour respecter les limites de capacité.",
+        type: "error",
+      });
+    }
+    if (result.warning === "unavailable") {
+      setNotice({
+        message: "Le stockage local est indisponible. Vos modifications ne pourront pas être enregistrées.",
+        type: "error",
+      });
+    }
     storageReady.current = true;
   }, []);
 
   useEffect(() => {
-    if (storageReady.current) saveData(window.localStorage, data);
+    if (!storageReady.current) return;
+    const result = saveData(window.localStorage, data);
+    if (!result.success) {
+      setNotice({
+        message: "Le stockage local est indisponible. Vos modifications ne peuvent pas être enregistrées.",
+        type: "error",
+      });
+    }
   }, [data]);
 
   useEffect(() => {
@@ -100,7 +121,10 @@ export default function App() {
   const entries = useMemo(
     () =>
       Array.from({ length: 12 }, (_, index) =>
-        normalizeEntry(data.entries[String(startYear)]?.[index]),
+        normalizeMonthlyEntry(
+          data.entries[String(startYear)]?.[index],
+          getFiscalMonthLimits(startYear, index),
+        ),
       ),
     [data.entries, startYear],
   );
@@ -133,8 +157,25 @@ export default function App() {
 
   const updateEntry = (field: EntryNumericKey, value: number) => {
     const next = [...entries];
-    next[monthIndex] = { ...next[monthIndex], [field]: value } as Entry;
+    const requested = { ...next[monthIndex], [field]: value } as Entry;
+    next[monthIndex] = normalizeMonthlyEntry(
+      requested,
+      getFiscalMonthLimits(startYear, monthIndex),
+    );
     replaceYear(next);
+
+    if (
+      ["leave", "rtt", "training", "other"].some(
+        (absence) =>
+          next[monthIndex][absence as Exclude<EntryNumericKey, "workRate">] !==
+          requested[absence as Exclude<EntryNumericKey, "workRate">],
+      )
+    ) {
+      setNotice({
+        message: "Les absences ont été plafonnées aux jours prévus par votre temps de travail.",
+        type: "error",
+      });
+    }
   };
 
   const exportCsv = () => {
@@ -174,6 +215,7 @@ export default function App() {
   const confirmClearStoredData = () => {
     setData(emptyData());
     window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem("ma-capacite-v2");
     window.localStorage.removeItem("ma-capacite-v1");
     setConfirmClearOpen(false);
     setNotice({
@@ -192,10 +234,12 @@ export default function App() {
     };
 
     replaceYear(
-      entries.map((entry) => ({
-        ...entry,
-        [field]: currentEntry[field],
-      })),
+      entries.map((entry, index) =>
+        normalizeMonthlyEntry(
+          { ...entry, [field]: currentEntry[field] },
+          getFiscalMonthLimits(startYear, index),
+        ),
+      ),
     );
     setNotice({
       message: messages[field],
