@@ -25,3 +25,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Verify production asset paths
+        run: |
+          grep -q '="/assets/' dist/index.html
+          ! grep -q '/capacity/' dist/index.html
