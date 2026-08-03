@@ -186,7 +186,7 @@ export default function App() {
     anchor.download = `capacite-${startYear}-${startYear + 1}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
-    setNotice({ message: "Export terminé.", type: "success" });
+    setNotice({ message: "Export CSV créé.", type: "success" });
   };
 
   const importCsv = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -286,13 +286,11 @@ export default function App() {
                 <ChartNoAxesColumnIncreasing className="size-5" />
               </span>
               <div className="min-w-0">
-                <h1 className="leading-[1.05] tracking-tight text-slate-950">
-                  <span className="block whitespace-nowrap text-lg font-black sm:text-2xl">
-                    Ma capacité
-                  </span>
-                  <span className="block whitespace-nowrap text-sm font-bold text-slate-500 sm:text-base">
-                    {startYear} - {startYear + 1}
-                  </span>
+                <p className="truncate text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600">
+                  Planification
+                </p>
+                <h1 className="truncate text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
+                  Ma capacité
                 </h1>
               </div>
             </div>
