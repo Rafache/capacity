@@ -132,7 +132,9 @@ export function MonthlyView({
                 aria-hidden="true"
               />
               <span className="min-w-0 flex-1 font-medium">
-                <strong className="font-extrabold text-white/90">Vacances:{" "}</strong>
+                <strong className="font-extrabold text-white/90">
+                  Vacances:{" "}
+                </strong>
                 {schoolBreaks
                   .map(({ key, start, end }) => {
                     const rawName = t.schoolBreakNames[key].replace(
@@ -140,10 +142,7 @@ export function MonthlyView({
                       "",
                     );
                     const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-                    return `${formatSchoolBreakDateRange(
-                      start,
-                      end,
-                    )} (${name} - Zone ${zone})`;
+                    return `${formatSchoolBreakDateRange(start, end)} (${name} - Zone ${zone})`;
                   })
                   .join(", ")}
               </span>
