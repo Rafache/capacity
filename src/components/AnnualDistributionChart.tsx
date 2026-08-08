@@ -35,8 +35,7 @@ export function AnnualDistributionChart({ summary }: Props) {
     : "#e2e8f0";
   const description = slices
     .map(
-      ({ key, value }) =>
-        `${t.segments[key]} : ${formatNumber(value)} ${t.units.day}`,
+      ({ key, value }) => `${t.segments[key]} : ${formatNumber(value)} ${t.units.day}`,
     )
     .join(", ");
 
