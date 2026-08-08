@@ -12,6 +12,7 @@ type Props = {
   available: number;
   values: Record<SegmentKey, number>;
   children?: ReactNode;
+  showDistribution?: boolean;
 };
 
 function CapacityBar({ values }: Pick<Props, "values">) {
@@ -47,6 +48,7 @@ export function CapacitySummary({
   available,
   values,
   children,
+  showDistribution = true,
 }: Props) {
   const metrics = [
     {
@@ -104,26 +106,29 @@ export function CapacitySummary({
         ))}
       </div>
 
-      <div className="mt-5 border-t border-white/10 pt-4">
-        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
-          {t.summary.distribution}
-        </p>
-        <CapacityBar values={values} />
-        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
-          {CAPACITY_SEGMENTS.map(({ key, barClass }) => (
-            <span
-              className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 sm:text-[10px]"
-              key={key}
-            >
-              <span className={`size-1.5 shrink-0 rounded-full ${barClass}`} />
-              {t.segments[key]}
-            </span>
-          ))}
+      {showDistribution ? (
+        <div className="mt-5 border-t border-white/10 pt-4">
+          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+            {t.summary.distribution}
+          </p>
+          <CapacityBar values={values} />
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
+            {CAPACITY_SEGMENTS.map(({ key, barClass }) => (
+              <span
+                className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-400 sm:text-[10px]"
+                key={key}
+              >
+                <span className={`size-1.5 shrink-0 rounded-full ${barClass}`} />
+                {t.segments[key]}
+              </span>
+            ))}
+          </div>
         </div>
-        {children ? (
-          <div className="mt-4 border-t border-white/10 pt-3">{children}</div>
-        ) : null}
-      </div>
+      ) : null}
+
+      {children ? (
+        <div className="mt-4 border-t border-white/10 pt-3">{children}</div>
+      ) : null}
     </section>
   );
 }
