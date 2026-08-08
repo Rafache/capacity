@@ -44,7 +44,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
       </div>
 
       <div
-        className="mt-4 grid h-72 grid-cols-12 gap-1 sm:mt-5 sm:h-80 sm:gap-2.5"
+        className="mt-4 grid h-64 grid-cols-12 gap-1 sm:mt-5 sm:h-72 sm:gap-2.5"
         role="list"
         aria-label={t.summary.monthlyBalance}
       >
@@ -102,7 +102,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
                 </div>
               </div>
 
-              <span className="mt-1.5 flex h-14 w-full shrink-0 items-start justify-center sm:mt-2 sm:h-16">
+              <span className="mt-1.5 flex h-5 w-full shrink-0 items-start justify-center sm:mt-2 sm:h-6">
                 <span className="text-center text-[8px] font-bold leading-tight text-slate-500 sm:text-[10px]">
                   {month}
                 </span>
@@ -110,22 +110,6 @@ export function CapacityEvolutionChart({ stats }: Props) {
             </div>
           );
         })}
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 border-t border-slate-100 pt-3">
-        <span className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-500 sm:text-[10px]">
-          <span className="size-1.5 shrink-0 rounded-full bg-capacity-available" />
-          {t.segments.available}
-        </span>
-        {ABSENCE_SEGMENTS.map((segment) => (
-          <span
-            className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-500 sm:text-[10px]"
-            key={segment.key}
-          >
-            <span className={`size-1.5 shrink-0 rounded-full ${segment.barClass}`} />
-            {t.segments[segment.key]}
-          </span>
-        ))}
       </div>
     </section>
   );
