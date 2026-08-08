@@ -64,7 +64,7 @@
 
 .monthly-month-nav {
   position: sticky;
-  top: 8.75rem;
+  top: 4rem;
   z-index: 20;
   margin-inline: -1rem;
   padding: 0.5rem 1rem;
