@@ -132,9 +132,7 @@ export function MonthlyView({
                 aria-hidden="true"
               />
               <span className="min-w-0 flex-1 font-medium">
-                <strong className="font-extrabold text-white/90">
-                  Vacances Zone {zone} ·{" "}
-                </strong>
+                <strong className="font-extrabold text-white/90">Vacances:{" "}</strong>
                 {schoolBreaks
                   .map(({ key, start, end }) => {
                     const rawName = t.schoolBreakNames[key].replace(
@@ -153,7 +151,7 @@ export function MonthlyView({
                       .replace(/\bavr\./, "avril")
                       .replace(/\bjuil\./, "juillet")
                       .replace(/\bsept\./, "septembre");
-                    return `Vacances : ${range} (${name} - Zone ${zone})`;
+                    return `${range} (${name} - Zone ${zone})`;
                   })
                   .join(", ")}
               </span>
