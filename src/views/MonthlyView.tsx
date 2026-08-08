@@ -51,19 +51,19 @@ export function MonthlyView({
   const monthLabel = `${formatMonthName(monthIndex, "long")} ${year}`;
 
   return (
-    <div className="space-y-4 sm:space-y-5">
-      <div className="monthly-month-nav grid grid-cols-[3rem_minmax(0,1fr)_3rem] items-center gap-3">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="monthly-month-nav grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-1.5 sm:gap-2">
         <button
-          className="grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
+          className="grid size-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
           type="button"
           onClick={() => onMonthChange((monthIndex + 11) % 12)}
           aria-label={t.navigation.previousMonth}
         >
-          <ChevronLeft className="size-5" aria-hidden="true" />
+          <ChevronLeft className="size-4.5" aria-hidden="true" />
         </button>
         <label className="relative grid min-w-0 place-items-center text-center">
           <span className="sr-only">{t.navigation.chooseMonth}</span>
-          <strong className="block w-full truncate text-center text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+          <strong className="block w-full truncate text-center text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
             {monthLabel}
           </strong>
           <select
@@ -83,12 +83,12 @@ export function MonthlyView({
           </select>
         </label>
         <button
-          className="grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
+          className="grid size-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
           type="button"
           onClick={() => onMonthChange((monthIndex + 1) % 12)}
           aria-label={t.navigation.nextMonth}
         >
-          <ChevronRight className="size-5" aria-hidden="true" />
+          <ChevronRight className="size-4.5" aria-hidden="true" />
         </button>
       </div>
 
