@@ -136,7 +136,7 @@ export function MonthlyView({
                 {schoolBreaks
                   .map(({ key, start, end }) => {
                     const rawName = t.schoolBreakNames[key].replace(
-                      /^Vacances (de la |d’|d')?/u,
+                      /^Vacances (de la |de |d’|d')?/u,
                       "",
                     );
                     const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
