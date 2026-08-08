@@ -92,8 +92,7 @@ export const t = {
   notices: {
     storageUnavailable:
       "Le stockage local est indisponible. Vos modifications ne pourront pas être enregistrées.",
-    absenceClamped:
-      "La valeur a été limitée à la capacité restante du mois.",
+    absenceClamped: "La valeur a été limitée à la capacité restante du mois.",
     exportComplete: "Export terminé.",
     importComplete: "Import terminé : 12 mois ont été chargés.",
     dataCleared: "Les données locales ont été effacées.",
