@@ -111,7 +111,10 @@ export function AnnualView({
                     </th>
                     {CAPACITY_SEGMENTS.map((segment) => {
                       const value = item[segment.key];
-                      const display = segment.key !== "available" && value === 0 ? "—" : formatNumber(value);
+                      const display =
+                        segment.key !== "available" && value === 0
+                          ? "—"
+                          : formatNumber(value);
                       return (
                         <td
                           className={`min-w-0 whitespace-nowrap px-1 text-center text-[10px] font-extrabold leading-none sm:text-xs ${segment.textClass}`}
