@@ -159,7 +159,7 @@ export function AnnualView({
         <CapacityEvolutionChart stats={stats} />
         <AnnualDistributionChart summary={summary} />
 
-        <div className="mt-3 flex flex-nowrap items-center justify-between gap-1 overflow-hidden rounded-2xl border border-slate-200 bg-white px-2.5 py-3 shadow-sm sm:mt-5 sm:gap-4 sm:px-4">
+        <div className="mt-3 flex flex-nowrap items-center justify-center gap-2 overflow-hidden rounded-2xl border border-slate-200 bg-white px-2.5 py-3 shadow-sm sm:mt-5 sm:gap-4 sm:px-4">
           {CAPACITY_SEGMENTS.map(({ key, barClass }) => (
             <span
               className="flex min-w-0 items-center gap-1 whitespace-nowrap text-[9px] font-semibold text-slate-600 sm:gap-1.5 sm:text-xs"
