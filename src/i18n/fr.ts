@@ -31,18 +31,19 @@ export const t = {
     other: "Autres",
   },
   segments: {
-    available: "Disponible",
+    available: "Capacité",
     leave: "Congés payés",
     rtt: "RTT",
     training: "Formations",
     other: "Autres",
   },
-  segmentShort: {
-    available: "Cap.",
+  table: {
+    workRate: "Temps de travail",
+    available: "Capacité",
     leave: "CP",
     rtt: "RTT",
-    training: "Form.",
-    other: "Aut.",
+    training: "Formation",
+    other: "Autres",
   },
   months: {
     month: "Mois",
@@ -60,6 +61,8 @@ export const t = {
     capacity: "Capacité",
     monthlyBalance: "Équilibre mensuel",
     monthlyBalanceDescription: "Capacité disponible et absences par mois",
+    annualDistribution: "Répartition annuelle",
+    annualDistributionDescription: "Répartition de la capacité et des absences sur l’année",
     distribution: "Répartition",
     calendarDetails: "Jours fériés et vacances scolaires",
     publicHolidays: "Jours fériés",
