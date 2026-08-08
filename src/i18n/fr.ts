@@ -62,7 +62,8 @@ export const t = {
     monthlyBalance: "Équilibre mensuel",
     monthlyBalanceDescription: "Capacité disponible et absences par mois",
     annualDistribution: "Répartition annuelle",
-    annualDistributionDescription: "Répartition de la capacité et des absences sur l’année",
+    annualDistributionDescription:
+      "Répartition de la capacité et des absences sur l’année",
     distribution: "Répartition",
     calendarDetails: "Jours fériés et vacances scolaires",
     publicHolidays: "Jours fériés",
