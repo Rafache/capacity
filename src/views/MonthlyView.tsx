@@ -137,7 +137,11 @@ export function MonthlyView({
                 </strong>
                 {schoolBreaks
                   .map(({ key, start, end }) => {
-                    const name = t.schoolBreakNames[key].replace(/^Vacances (de la |d’|d')?/u, "");
+                    const rawName = t.schoolBreakNames[key].replace(
+                      /^Vacances (de la |d’|d')?/u,
+                      "",
+                    );
+                    const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
                     const range = formatDateRange(start, end)
                       .replace(/^du /, "")
                       .replace(/\.$/, "")
