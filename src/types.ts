@@ -1,6 +1,8 @@
 export type Zone = "A" | "B" | "C";
 
-export type SegmentKey = "available" | "leave" | "rtt" | "training" | "other";
+export type AbsenceKey = "leave" | "rtt" | "training" | "other";
+
+export type SegmentKey = "available" | AbsenceKey;
 
 export type BreakKey = "summer" | "allSaints" | "christmas" | "winter" | "spring";
 
@@ -25,12 +27,10 @@ export type Entry = {
   other: number;
 };
 
-export type EntryNumericKey = keyof Entry;
+export type EntryNumericKey = "workRate" | AbsenceKey;
 
-export type MonthStats = {
+export type CapacityTotals = {
   baseline: number;
-  contracted: number;
-  partTime: number;
   available: number;
   leave: number;
   rtt: number;
@@ -38,15 +38,8 @@ export type MonthStats = {
   other: number;
 };
 
-export type AnnualSummary = {
-  baseline: number;
+export type MonthStats = CapacityTotals & {
   contracted: number;
-  partTime: number;
-  available: number;
-  leave: number;
-  rtt: number;
-  training: number;
-  other: number;
 };
 
 export type CapacityData = {

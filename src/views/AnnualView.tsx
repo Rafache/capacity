@@ -1,56 +1,26 @@
-import { CalendarDays, CalendarX2, Gauge } from "lucide-react";
 import { CapacityEvolutionChart } from "../components/CapacityEvolutionChart";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { CAPACITY_SEGMENTS } from "../components/capacitySegments";
-import { getAbsenceTotal } from "../domain/capacityData";
+import { getAbsenceTotal } from "../domain/capacity";
 import { formatMonthName, formatNumber } from "../i18n/formatters";
-import { t } from "../i18n/translate";
-import type { AnnualSummary, MonthStats, SegmentKey } from "../types";
+import { t } from "../i18n/fr";
+import type { CapacityTotals, MonthStats } from "../types";
 
 type Props = {
-  startYear: number;
   stats: MonthStats[];
-  summary: AnnualSummary;
+  summary: CapacityTotals;
   onMonthOpen: (index: number) => void;
 };
 
-export function AnnualView({ startYear, stats, summary, onMonthOpen }: Props) {
-  const annualStats = {
-    available: summary.available,
-    leave: summary.leave,
-    rtt: summary.rtt,
-    training: summary.training,
-    other: summary.other,
-  } satisfies Record<SegmentKey, number>;
-
+export function AnnualView({ stats, summary, onMonthOpen }: Props) {
   return (
     <div className="space-y-3 sm:space-y-5">
       <CapacitySummary
         title={t.summary.year}
-        barValues={annualStats}
-        items={[
-          {
-            icon: CalendarDays,
-            label: t.summary.workingDays,
-            value: summary.baseline,
-            unit: t.units.day,
-            tone: "neutral",
-          },
-          {
-            icon: CalendarX2,
-            label: t.summary.absences,
-            value: formatNumber(getAbsenceTotal(summary)),
-            unit: t.units.day,
-            tone: "negative",
-          },
-          {
-            icon: Gauge,
-            label: t.summary.capacity,
-            value: formatNumber(summary.available),
-            unit: t.units.day,
-            tone: "positive",
-          },
-        ]}
+        baseline={summary.baseline}
+        absences={getAbsenceTotal(summary)}
+        available={summary.available}
+        values={summary}
       />
 
       <section>
@@ -86,7 +56,7 @@ export function AnnualView({ startYear, stats, summary, onMonthOpen }: Props) {
             </thead>
             <tbody>
               {stats.map((item, index) => {
-                const month = formatMonthName(startYear, index, "short");
+                const month = formatMonthName(index, "short");
 
                 return (
                   <tr className="border-b border-slate-100" key={month}>
@@ -129,7 +99,7 @@ export function AnnualView({ startYear, stats, summary, onMonthOpen }: Props) {
                     className="whitespace-nowrap px-1 text-center text-[10px] font-black leading-none sm:text-xs"
                     key={segment.key}
                   >
-                    {formatNumber(annualStats[segment.key])}
+                    {formatNumber(summary[segment.key])}
                     <small className="ml-px text-[8px] text-slate-400">
                       {t.units.day}
                     </small>
@@ -139,7 +109,7 @@ export function AnnualView({ startYear, stats, summary, onMonthOpen }: Props) {
             </tbody>
           </table>
         </div>
-        <CapacityEvolutionChart startYear={startYear} stats={stats} />
+        <CapacityEvolutionChart stats={stats} />
       </section>
     </div>
   );

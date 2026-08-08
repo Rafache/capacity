@@ -1,50 +1,35 @@
 import { getFiscalMonth } from "../domain/calendar";
-import { locale } from "./translate";
 
 type MonthStyle = "short" | "long";
-type DateParts = Intl.DateTimeFormatOptions;
-
-const numberFormatters = new Map<string, Intl.NumberFormat>();
-const dateFormatters = new Map<string, Intl.DateTimeFormat>();
-
-function numberFormatter(maximumFractionDigits = 1) {
-  const key = String(maximumFractionDigits);
-  let formatter = numberFormatters.get(key);
-  if (!formatter) {
-    formatter = new Intl.NumberFormat(locale, {
-      maximumFractionDigits,
-      minimumFractionDigits: 0,
-    });
-    numberFormatters.set(key, formatter);
-  }
-  return formatter;
-}
-
-function dateFormatter(options: DateParts) {
-  const key = JSON.stringify(options);
-  let formatter = dateFormatters.get(key);
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat(locale, { ...options, timeZone: "UTC" });
-    dateFormatters.set(key, formatter);
-  }
-  return formatter;
-}
+const locale = "fr-FR";
+const numberFormatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+const monthFormatters = {
+  short: new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" }),
+  long: new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" }),
+};
+const dateLabelFormatter = new Intl.DateTimeFormat(locale, {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+});
+const datePartFormatter = new Intl.DateTimeFormat(locale, {
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+});
 
 export function formatNumber(value: number) {
-  return numberFormatter().format(value);
+  return numberFormatter.format(value);
 }
 
-export function formatMonthName(startYear: number, index: number, style: MonthStyle) {
-  const { year, month } = getFiscalMonth(startYear, index);
-  return dateFormatter({ month: style }).format(new Date(Date.UTC(year, month, 1)));
+export function formatMonthName(index: number, style: MonthStyle) {
+  const { month } = getFiscalMonth(2000, index);
+  return monthFormatters[style].format(new Date(Date.UTC(2000, month, 1)));
 }
 
 export function formatDateLabel(date: Date) {
-  return dateFormatter({ weekday: "short", day: "numeric", month: "short" }).format(date);
-}
-
-export function formatDatePart(date: Date) {
-  return dateFormatter({ day: "numeric", month: "short" }).format(date);
+  return dateLabelFormatter.format(date);
 }
 
 function withTerminalPeriod(value: string) {
@@ -52,7 +37,7 @@ function withTerminalPeriod(value: string) {
 }
 
 export function formatDateRange(start: string, end: string) {
-  return `du ${formatDatePart(new Date(`${start}T00:00:00Z`))} au ${withTerminalPeriod(
-    formatDatePart(new Date(`${end}T00:00:00Z`)),
+  return `du ${datePartFormatter.format(new Date(`${start}T00:00:00Z`))} au ${withTerminalPeriod(
+    datePartFormatter.format(new Date(`${end}T00:00:00Z`)),
   )}`;
 }

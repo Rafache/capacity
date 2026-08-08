@@ -1,76 +1,60 @@
-import { useCallback, useEffect, useState, type ChangeEvent } from "react";
-import { CsvImportError, exportCapacityCsv, importCapacityCsv } from "./domain/csv";
+import { useEffect, useState, type ChangeEvent } from "react";
+import { exportCapacityCsv, importCapacityCsv } from "./domain/csv";
 import {
   availableFiscalYears,
   calculateFiscalYear,
   EMPTY_ENTRY,
-} from "./domain/capacityData";
-import { AppFeedback, type Notice } from "./components/AppFeedback";
+} from "./domain/capacity";
+import { AppFeedback, type Confirmation, type Notice } from "./components/AppFeedback";
 import { AppHeader, type ViewTab } from "./components/AppHeader";
 import { AnnualView } from "./views/AnnualView";
 import { MonthlyView } from "./views/MonthlyView";
-import { t } from "./i18n/translate";
+import { t } from "./i18n/fr";
 import { useCapacityStore } from "./hooks/useCapacityStore";
 import type { EntryNumericKey } from "./types";
 
-const csvErrorMessages: Record<CsvImportError["code"], string> = {
-  "file-too-large": t.errors.fileTooLarge,
-  "invalid-format": t.errors.invalidFormat,
-  "invalid-columns": t.errors.invalidColumns,
-  "invalid-months": t.errors.invalidMonths,
-  "invalid-value": t.errors.invalidValue,
-};
-
 export default function App() {
   const years = availableFiscalYears();
-  const defaultYear = years[0]!;
   const store = useCapacityStore();
-  const { data } = store;
   const [tab, setTab] = useState<ViewTab>("annual");
-  const [startYear, setStartYear] = useState(defaultYear);
+  const [startYear, setStartYear] = useState(years[0]!);
   const [monthIndex, setMonthIndex] = useState(0);
-  const [actionsOpen, setActionsOpen] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(() =>
-    store.loadWarning
-      ? {
-          message:
-            store.loadWarning === "repaired"
-              ? t.notices.repaired
-              : t.notices.storageUnavailable,
-          type: "error",
-        }
-      : null,
+    store.storageAvailable
+      ? null
+      : { message: t.notices.storageUnavailable, type: "error" },
   );
-  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
-  const [pendingApplyField, setPendingApplyField] = useState<EntryNumericKey | null>(
-    null,
-  );
-  const closeActions = useCallback(() => setActionsOpen(false), []);
+  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+
   useEffect(() => {
     if (!notice) return;
     const timeout = window.setTimeout(() => setNotice(null), 3000);
     return () => window.clearTimeout(timeout);
   }, [notice]);
 
-  const fiscalYear = calculateFiscalYear(startYear, data.entries[String(startYear)]);
+  const fiscalYear = calculateFiscalYear(
+    startYear,
+    store.data.entries[String(startYear)],
+  );
   const { entries, stats } = fiscalYear;
   const currentEntry = entries[monthIndex] ?? EMPTY_ENTRY;
-  const currentStats = stats[monthIndex] ?? fiscalYear.stats[0]!;
+  const currentStats = stats[monthIndex] ?? stats[0]!;
+
   const updateEntry = (field: EntryNumericKey, value: number) => {
     const result = store.updateEntry(startYear, monthIndex, field, value);
     if (!result.saved) {
-      setNotice({ message: t.notices.storageSaveUnavailable, type: "error" });
+      setNotice({ message: t.notices.storageUnavailable, type: "error" });
     } else if (result.clamped) {
-      setNotice({
-        message: t.notices.absenceClamped,
-        type: "error",
-      });
+      setNotice({ message: t.notices.absenceClamped, type: "error" });
     }
   };
 
   const exportCsv = () => {
-    const text = exportCapacityCsv(startYear, entries, stats);
-    const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+    const url = URL.createObjectURL(
+      new Blob([exportCapacityCsv(startYear, entries, stats)], {
+        type: "text/csv;charset=utf-8",
+      }),
+    );
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = `capacity-${startYear}-${startYear + 1}.csv`;
@@ -83,57 +67,36 @@ export default function App() {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
-      const imported = importCapacityCsv(await file.text(), startYear);
-      const result = store.replaceYear(startYear, imported);
+      const saved = store.replaceYear(
+        startYear,
+        importCapacityCsv(await file.text(), startYear),
+      );
       setNotice({
-        message: result.saved
-          ? t.notices.importComplete
-          : t.notices.storageSaveUnavailable,
-        type: result.saved ? "success" : "error",
+        message: saved ? t.notices.importComplete : t.notices.storageUnavailable,
+        type: saved ? "success" : "error",
       });
-    } catch (error) {
-      setNotice({
-        message:
-          error instanceof CsvImportError
-            ? csvErrorMessages[error.code]
-            : t.errors.importFailed,
-        type: "error",
-      });
+    } catch {
+      setNotice({ message: t.errors.invalidCsv, type: "error" });
     } finally {
       event.target.value = "";
-      setActionsOpen(false);
     }
   };
 
-  const clearStoredData = () => setConfirmClearOpen(true);
-
-  const confirmClearStoredData = () => {
-    const result = store.clear();
-    setConfirmClearOpen(false);
+  const confirmAction = () => {
+    if (!confirmation) return;
+    const isClear = confirmation.type === "clear";
+    const saved = isClear
+      ? store.clear()
+      : store.applyField(startYear, monthIndex, confirmation.field);
     setNotice({
-      message: result.saved ? t.notices.dataCleared : t.notices.storageSaveUnavailable,
-      type: result.saved ? "success" : "error",
+      message: saved
+        ? isClear
+          ? t.notices.dataCleared
+          : t.notices.applied[confirmation.field]
+        : t.notices.storageUnavailable,
+      type: saved ? "success" : "error",
     });
-  };
-
-  const applyFieldToYear = (field: EntryNumericKey) => {
-    const result = store.applyField(startYear, monthIndex, field);
-    setNotice({
-      message: result.saved ? t.notices.applied[field] : t.notices.storageSaveUnavailable,
-      type: result.saved ? "success" : "error",
-    });
-  };
-
-  const confirmApplyFieldToYear = () => {
-    if (!pendingApplyField) return;
-
-    applyFieldToYear(pendingApplyField);
-    setPendingApplyField(null);
-  };
-
-  const changeTab = (nextTab: ViewTab) => {
-    setTab(nextTab);
-    setActionsOpen(false);
+    setConfirmation(null);
   };
 
   return (
@@ -144,13 +107,10 @@ export default function App() {
       >
         <AppHeader
           tab={tab}
-          actionsOpen={actionsOpen}
           years={years}
           startYear={startYear}
-          zone={data.zone}
-          onTabChange={changeTab}
-          onActionsToggle={() => setActionsOpen((open) => !open)}
-          onActionsClose={closeActions}
+          zone={store.data.zone}
+          onTabChange={setTab}
           onFiscalYearChange={(year) => {
             setStartYear(year);
             setMonthIndex(0);
@@ -158,7 +118,7 @@ export default function App() {
           onImport={importCsv}
           onExport={exportCsv}
           onZoneChange={store.setZone}
-          onClear={clearStoredData}
+          onClear={() => setConfirmation({ type: "clear" })}
         />
 
         <div className="px-4 py-5 sm:px-6 sm:py-7">
@@ -168,20 +128,18 @@ export default function App() {
               monthIndex={monthIndex}
               entry={currentEntry}
               stats={currentStats}
-              zone={data.zone}
+              zone={store.data.zone}
               onMonthChange={setMonthIndex}
-              onRequestApplyToYear={setPendingApplyField}
+              onRequestApplyToYear={(field) => setConfirmation({ type: "apply", field })}
               onChange={updateEntry}
             />
           ) : (
             <AnnualView
-              startYear={startYear}
               stats={stats}
               summary={fiscalYear.summary}
               onMonthOpen={(index) => {
                 setMonthIndex(index);
                 setTab("monthly");
-                closeActions();
               }}
             />
           )}
@@ -190,14 +148,11 @@ export default function App() {
 
       <AppFeedback
         notice={notice}
-        onDismissNotice={() => setNotice(null)}
-        confirmClearOpen={confirmClearOpen}
-        onCancelClear={() => setConfirmClearOpen(false)}
-        onConfirmClear={confirmClearStoredData}
-        pendingApplyField={pendingApplyField}
+        confirmation={confirmation}
         currentEntry={currentEntry}
-        onCancelApply={() => setPendingApplyField(null)}
-        onConfirmApply={confirmApplyFieldToYear}
+        onDismissNotice={() => setNotice(null)}
+        onCancel={() => setConfirmation(null)}
+        onConfirm={confirmAction}
       />
     </main>
   );

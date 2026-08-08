@@ -29,23 +29,23 @@ npm run build
 npm run preview
 ```
 
-`npm run check` runs Prettier, ESLint with zero warnings, TypeScript for application and tests, the Node test suite, and the Vite production build.
+`npm run check` runs Prettier, ESLint with zero warnings, TypeScript, the focused Node test suite, and the Vite production build.
 
 ## Data formats
 
-- Local data is stored as `ma-capacite-v3` and is normalized at the storage boundary.
+- Local data is stored as `ma-capacite-v3` and normalized when it is loaded.
 - `ma-capacite-v1` and `ma-capacite-v2` are migrated when they are found.
 - Exported CSV files use stable English identifiers and the `# capacity;version=3` marker.
-- Version 2 French CSV files remain importable, including quoted fields and legacy `Note` columns. Notes are intentionally ignored because the application has no note feature.
+- CSV import accepts only the current format exported by the application.
 
 ## Architecture
 
 - `src/domain/` contains calendar, capacity, storage and CSV rules.
-- `src/data/` contains validated, language-independent school-calendar data.
-- `src/i18n/` contains the typed French catalogue and cached `Intl` formatters.
+- `src/data/` contains language-independent school-calendar data.
+- `src/i18n/` contains the French catalogue and shared `Intl` formatters.
 - `src/components/` contains small interactive and presentation components.
 - `src/views/` contains the monthly and annual screens.
-- `tests/` contains fast domain, CSV, calendar, storage, i18n and security tests.
+- `tests/` contains focused domain, CSV, calendar, storage and formatting tests.
 
 ## Deployment
 

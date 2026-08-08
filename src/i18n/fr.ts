@@ -1,6 +1,4 @@
-import type { TranslationCatalog } from "./types";
-
-export const fr = {
+export const t = {
   app: {
     name: "Ma capacité",
     ariaLabel: "Gestion de capacité",
@@ -46,7 +44,6 @@ export const fr = {
     title: "Capacité mensuelle en jours",
     ariaLabel: "Capacité mensuelle en jours",
     open: "Ouvrir",
-    dayUnit: "j",
   },
   summary: {
     month: "Synthèse du mois",
@@ -59,7 +56,6 @@ export const fr = {
     distribution: "Répartition",
     calendarDetails: "Jours fériés et vacances scolaires",
     publicHolidays: "Jours fériés",
-    schoolBreaks: "Vacances",
     noCalendarEvents: "Aucun jour férié ni vacances scolaires ce mois-ci.",
     calendarUnpublished:
       "Les dates scolaires de cette année ne sont pas encore publiées.",
@@ -87,12 +83,8 @@ export const fr = {
     applyConfirm: "Répliquer sur l’année",
   },
   notices: {
-    repaired:
-      "Des données locales ont été corrigées pour respecter les limites de capacité.",
     storageUnavailable:
       "Le stockage local est indisponible. Vos modifications ne pourront pas être enregistrées.",
-    storageSaveUnavailable:
-      "Le stockage local est indisponible. Vos modifications ne peuvent pas être enregistrées.",
     absenceClamped:
       "Les absences ont été plafonnées aux jours prévus par votre temps de travail.",
     exportComplete: "Export terminé.",
@@ -107,12 +99,7 @@ export const fr = {
     },
   },
   errors: {
-    fileTooLarge: "Le fichier CSV dépasse la taille maximale autorisée.",
-    invalidFormat: "Le format CSV est invalide.",
-    invalidColumns: "Les colonnes CSV sont invalides ou incomplètes.",
-    invalidMonths: "Le fichier CSV doit contenir exactement 12 mois.",
-    invalidValue: "Le fichier CSV contient une valeur invalide.",
-    importFailed: "Import impossible.",
+    invalidCsv: "Le fichier CSV est invalide.",
   },
   holidays: {
     newYear: "Jour de l’An",
@@ -138,4 +125,4 @@ export const fr = {
     day: "j",
     percent: "%",
   },
-} satisfies TranslationCatalog;
+} as const;

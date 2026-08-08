@@ -1,20 +1,17 @@
 import { ChartNoAxesColumnIncreasing } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { ActionMenu } from "./ActionMenu";
-import { t } from "../i18n/translate";
+import { t } from "../i18n/fr";
 import type { Zone } from "../types";
 
 export type ViewTab = "monthly" | "annual";
 
 type Props = {
   tab: ViewTab;
-  actionsOpen: boolean;
   years: number[];
   startYear: number;
   zone: Zone;
   onTabChange: (tab: ViewTab) => void;
-  onActionsToggle: () => void;
-  onActionsClose: () => void;
   onFiscalYearChange: (year: number) => void;
   onImport: (event: ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
@@ -25,13 +22,10 @@ type Props = {
 /** Render the application chrome and keep navigation separate from data orchestration. */
 export function AppHeader({
   tab,
-  actionsOpen,
   years,
   startYear,
   zone,
   onTabChange,
-  onActionsToggle,
-  onActionsClose,
   onFiscalYearChange,
   onImport,
   onExport,
@@ -60,11 +54,8 @@ export function AppHeader({
 
         {tab === "annual" ? (
           <ActionMenu
-            open={actionsOpen}
             years={years}
             startYear={startYear}
-            onToggle={onActionsToggle}
-            onClose={onActionsClose}
             onFiscalYearChange={onFiscalYearChange}
             onImport={onImport}
             onExport={onExport}

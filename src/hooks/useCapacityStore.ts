@@ -1,37 +1,25 @@
 import { useState } from "react";
 import {
   applyFieldToFiscalYear,
-  clearData as clearStoredData,
   emptyData,
-  loadData,
-  saveData,
   updateMonthlyEntry,
-} from "../domain/capacityData";
+} from "../domain/capacity";
+import { clearData, loadData, saveData } from "../domain/storage";
 import type { CapacityData, Entry, EntryNumericKey, Zone } from "../types";
 
-type StoreState = {
-  data: CapacityData;
-  loadWarning?: "repaired" | "unavailable";
-};
-
-type WriteResult = {
-  saved: boolean;
-};
-
-function readInitialState(): StoreState {
-  if (typeof window === "undefined") return { data: emptyData() };
-  const result = loadData(window.localStorage);
-  return { data: result.data, loadWarning: result.warning };
+function readInitialState() {
+  return typeof window === "undefined"
+    ? { data: emptyData(), storageAvailable: true }
+    : loadData(window.localStorage);
 }
 
 /** Keep capacity data in localStorage and expose explicit domain actions. */
 export function useCapacityStore() {
   const [state, setState] = useState(readInitialState);
 
-  const commit = (data: CapacityData): WriteResult => {
+  const commit = (data: CapacityData) => {
     setState((previous) => ({ ...previous, data }));
-    if (typeof window === "undefined") return { saved: true };
-    return { saved: saveData(window.localStorage, data).success };
+    return typeof window === "undefined" || saveData(window.localStorage, data);
   };
 
   const replaceYear = (startYear: number, entries: Entry[]) => {
@@ -59,7 +47,7 @@ export function useCapacityStore() {
       ...state.data,
       entries: { ...state.data.entries, [String(startYear)]: result.entries },
     };
-    return { ...commit(data), clamped: result.clamped };
+    return { saved: commit(data), clamped: result.clamped };
   };
 
   const applyField = (startYear: number, monthIndex: number, field: EntryNumericKey) => {
@@ -81,15 +69,14 @@ export function useCapacityStore() {
   const setZone = (zone: Zone) => commit({ ...state.data, zone });
 
   const clear = () => {
-    const removed =
-      typeof window === "undefined" || clearStoredData(window.localStorage).success;
+    const removed = typeof window === "undefined" || clearData(window.localStorage);
     setState((previous) => ({ ...previous, data: emptyData() }));
-    return { saved: removed };
+    return removed;
   };
 
   return {
     data: state.data,
-    loadWarning: state.loadWarning,
+    storageAvailable: state.storageAvailable,
     replaceYear,
     updateEntry,
     applyField,

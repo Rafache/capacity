@@ -1,27 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import { CopyPlus, type LucideIcon } from "lucide-react";
 import { formatNumber } from "../i18n/formatters";
-import { t } from "../i18n/translate";
-
-export function ApplyToYearButton({
-  label,
-  onClick,
-}: {
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      className="grid size-9 shrink-0 place-items-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 sm:size-11 sm:rounded-xl"
-      type="button"
-      onClick={onClick}
-      aria-label={`${t.inputs.applyToYear} ${label} ${t.inputs.year}`}
-      title={t.inputs.applyToYear}
-    >
-      <CopyPlus className="size-4" aria-hidden="true" />
-    </button>
-  );
-}
+import { t } from "../i18n/fr";
 
 export function InputRow({
   icon: Icon,
@@ -46,20 +25,13 @@ export function InputRow({
   onChange: (value: number) => void;
   onApplyToYear: () => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (editing) inputRef.current?.focus();
-  }, [editing]);
   const formattedValue = formatNumber(value);
 
-  const commit = (raw: string) => {
+  const changeValue = (raw: string) => {
     const parsed = Number(raw.replace(",", "."));
-    if (Number.isFinite(parsed)) {
-      const snapped = Math.round(parsed / step) * step;
-      onChange(Math.min(max, Math.max(min, Math.round(snapped * 100) / 100)));
-    }
-    setEditing(false);
+    if (!Number.isFinite(parsed)) return;
+    const snapped = Math.round(parsed / step) * step;
+    onChange(Math.min(max, Math.max(min, Math.round(snapped * 100) / 100)));
   };
 
   const controlClass =
@@ -88,28 +60,19 @@ export function InputRow({
           >
             −
           </button>
-          {editing ? (
+          <span className="flex min-w-0 items-center justify-center gap-1 border-x border-slate-200 bg-white px-1">
             <input
-              className="w-full min-w-0 whitespace-nowrap border-x border-slate-200 bg-white px-1 text-center text-[16px] font-black leading-none text-slate-950 outline-none focus:bg-blue-50 sm:text-sm"
-              ref={inputRef}
+              className="min-w-0 flex-1 bg-transparent text-right text-[16px] font-black leading-none text-slate-950 outline-none sm:text-sm"
+              type="text"
               inputMode="decimal"
-              defaultValue={formattedValue}
+              value={formattedValue}
               aria-label={`${label} ${t.inputs.valueIn} ${unit === t.units.percent ? t.inputs.valueInPercent : t.inputs.valueInDays}`}
-              onBlur={(event) => commit(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") commit(event.currentTarget.value);
-                if (event.key === "Escape") setEditing(false);
-              }}
+              onChange={(event) => changeValue(event.target.value)}
             />
-          ) : (
-            <button
-              className="min-w-0 whitespace-nowrap border-x border-slate-200 bg-white px-1 text-xs font-black text-slate-950 transition hover:bg-blue-50 hover:text-blue-700 sm:text-sm"
-              type="button"
-              onClick={() => setEditing(true)}
-            >
-              {formattedValue} {unit}
-            </button>
-          )}
+            <small className="shrink-0 text-xs font-black text-slate-950 sm:text-sm">
+              {unit}
+            </small>
+          </span>
           <button
             className={controlClass}
             type="button"
@@ -120,7 +83,15 @@ export function InputRow({
             +
           </button>
         </div>
-        <ApplyToYearButton label={label} onClick={onApplyToYear} />
+        <button
+          className="grid size-9 shrink-0 place-items-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 transition hover:border-blue-300 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 sm:size-11 sm:rounded-xl"
+          type="button"
+          onClick={onApplyToYear}
+          aria-label={`${t.inputs.applyToYear} ${label} ${t.inputs.year}`}
+          title={t.inputs.applyToYear}
+        >
+          <CopyPlus className="size-4" aria-hidden="true" />
+        </button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { AlertTriangle, X, type LucideIcon } from "lucide-react";
 import { useEffect, useId, useRef } from "react";
-import { t } from "../i18n/translate";
+import { t } from "../i18n/fr";
 
 type Props = {
   open: boolean;
