@@ -1,17 +1,17 @@
 import type { HolidayKey } from "../types";
 
-export type FiscalMonth = {
+type FiscalMonth = {
   month: number;
   year: number;
 };
 
-export type PublicHoliday = {
+type PublicHoliday = {
   key: HolidayKey;
   date: Date;
 };
 
 /** Create a date whose calendar fields are interpreted in UTC. */
-export function dateUTC(year: number, month: number, day: number) {
+function dateUTC(year: number, month: number, day: number) {
   return new Date(Date.UTC(year, month, day));
 }
 

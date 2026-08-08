@@ -10,7 +10,7 @@ Production: <https://capacity-a59.pages.dev/>
 - No account, backend or analytics service is used.
 - CSV import/export is the portable backup mechanism.
 - Local storage is not encrypted. Any script running on the same origin could read it, so never use the application for secrets.
-- The **Clear all data** action removes current and legacy storage keys from the device.
+- The **Clear all data** action removes the current application data from the device.
 
 ## Development
 
@@ -25,7 +25,6 @@ Validation and production build:
 
 ```bash
 npm run check
-npm run build
 npm run preview
 ```
 
@@ -33,10 +32,14 @@ npm run preview
 
 ## Data formats
 
-- Local data is stored as `ma-capacite-v3` and normalized when it is loaded.
-- `ma-capacite-v1` and `ma-capacite-v2` are migrated when they are found.
+- Local data is stored as `ma-capacite-v3`.
+- Earlier local formats are ignored rather than migrated.
 - Exported CSV files use stable English identifiers and the `# capacity;version=3` marker.
 - CSV import accepts only the current format exported by the application.
+
+The CSV is a semicolon-separated UTF-8 file containing its version marker, an exact
+English header and twelve ordered rows from July to June. The available capacity is
+exported for readability and recalculated when importing.
 
 ## Architecture
 
@@ -46,6 +49,14 @@ npm run preview
 - `src/components/` contains small interactive and presentation components.
 - `src/views/` contains the monthly and annual screens.
 - `tests/` contains focused domain, CSV, calendar, storage and formatting tests.
+
+The browser reads `localStorage` once, then writes after each explicit action. Domain
+functions normalize monthly values, cap absences and derive the monthly and annual
+statistics consumed by the views. There is no server, authentication layer or remote
+data request.
+
+The calendar covers metropolitan France, national public holidays and school zones A,
+B and C. Local Alsace-Moselle and overseas rules are outside the current scope.
 
 ## Deployment
 

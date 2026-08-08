@@ -12,26 +12,18 @@ function memoryStorage(initial: Record<string, string> = {}) {
   } as unknown as Storage;
 }
 
-test("legacy local data migrates without the removed note field", () => {
+test("legacy and incompatible local data are ignored", () => {
   const storage = memoryStorage({
-    "ma-capacite-v2": JSON.stringify({
+    "ma-capacite-v3": JSON.stringify({
       version: 2,
       zone: "B",
-      entries: {
-        2026: Array.from({ length: 12 }, (_, index) => ({
-          ...EMPTY_ENTRY,
-          leave: index / 2,
-          note: `Month ${index + 1}`,
-        })),
-      },
+      entries: { 2026: [{ ...EMPTY_ENTRY, leave: 2 }] },
     }),
+    "ma-capacite-v2": JSON.stringify({ version: 2, zone: "B", entries: {} }),
   });
   const loaded = loadData(storage);
   assert.equal(loaded.storageAvailable, true);
-  assert.equal(loaded.data.version, 3);
-  assert.equal(loaded.data.zone, "B");
-  assert.equal(loaded.data.entries["2026"]?.[11]?.leave, 5.5);
-  assert.equal("note" in (loaded.data.entries["2026"]?.[11] ?? {}), false);
+  assert.deepEqual(loaded.data, emptyData());
 });
 
 test("malformed local data is ignored", () => {

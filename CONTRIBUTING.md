@@ -46,9 +46,9 @@ Manually verify the preview for:
 - Every button that is not a form submit has an explicit `type="button"`.
 - Keep focus behavior and accessible names intact when changing interactive components.
 
-## Data compatibility
+## Data formats
 
-Changes to `localStorage` require a migration and focused tests. CSV changes must update the format marker or remain compatible with current exports. Never commit personal entries, CSV exports, credentials or production data.
+Changes to `localStorage` must use a new storage key when the current document is no longer compatible. The application intentionally does not migrate older local formats. CSV changes must update the format marker or remain compatible with current exports. Never commit personal entries, CSV exports, credentials or production data.
 
 ## Project structure
 

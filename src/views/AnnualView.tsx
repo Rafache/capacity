@@ -31,7 +31,7 @@ export function AnnualView({ stats, summary, onMonthOpen }: Props) {
         </div>
 
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:rounded-2xl">
-          <table className="w-full table-fixed" aria-label={t.months.ariaLabel}>
+          <table className="w-full table-fixed" aria-label={t.months.title}>
             <caption className="sr-only">{t.months.title}</caption>
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-center">
