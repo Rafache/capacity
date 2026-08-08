@@ -140,7 +140,10 @@ export function MonthlyView({
                       "",
                     );
                     const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-                    return `${formatSchoolBreakDateRange(start, end)} (${name} - Zone ${zone})`;
+                    return `${formatSchoolBreakDateRange(
+                      start,
+                      end,
+                    )} (${name} - Zone ${zone})`;
                   })
                   .join(", ")}
               </span>
