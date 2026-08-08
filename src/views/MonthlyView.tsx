@@ -44,6 +44,7 @@ export function MonthlyView({
   );
   const absenceTotal = getAbsenceTotal(stats);
   const limits = getEntryLimits(startYear, monthIndex, entry);
+  const monthLabel = `${formatMonthName(monthIndex, "long")} ${year}`;
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -56,11 +57,15 @@ export function MonthlyView({
         >
           <ChevronLeft className="size-5" aria-hidden="true" />
         </button>
-        <label className="relative min-w-0 text-center">
+        <label className="relative grid min-w-0 place-items-center text-center">
           <span className="sr-only">{t.navigation.chooseMonth}</span>
+          <strong className="block w-full truncate text-center text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+            {monthLabel}
+          </strong>
           <select
-            className="w-full appearance-none bg-transparent text-center text-2xl font-black tracking-tight text-slate-950 outline-none sm:text-3xl"
+            className="absolute inset-0 size-full cursor-pointer opacity-0"
             value={monthIndex}
+            aria-label={t.navigation.chooseMonth}
             onChange={(event) => onMonthChange(Number(event.target.value))}
           >
             {Array.from({ length: 12 }, (_, index) => {
@@ -123,7 +128,7 @@ export function MonthlyView({
               />
               <span className="min-w-0 flex-1 font-medium">
                 <strong className="font-extrabold text-white/90">
-                  {t.actions.schoolBreaks} · {t.actions.zone} {zone}:{" "}
+                  {t.actions.zone} {zone} ·{" "}
                 </strong>
                 {schoolBreaks
                   .map(
