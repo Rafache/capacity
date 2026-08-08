@@ -9,7 +9,7 @@ import {
 import { t } from "../src/i18n/fr";
 
 test("French labels and date formats remain stable", () => {
-  assert.equal(t.segments.available, "Disponible");
+  assert.equal(t.segments.available, "Capacité");
   assert.equal(t.schoolBreakNames.summer, "Vacances d’été");
   assert.equal(t.schoolBreakNames.allSaints, "Vacances de la Toussaint");
   assert.equal(t.schoolBreakNames.winter, "Vacances d’hiver");
