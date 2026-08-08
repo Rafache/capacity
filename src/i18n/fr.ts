@@ -9,6 +9,7 @@ export const t = {
     annual: "Annuelle",
     previousMonth: "Mois précédent",
     nextMonth: "Mois suivant",
+    chooseMonth: "Choisir le mois",
   },
   actions: {
     openMenu: "Ouvrir le menu des actions",
@@ -30,15 +31,24 @@ export const t = {
     other: "Autres",
   },
   segments: {
-    available: "Disponible",
+    available: "Capacité",
     leave: "Congés payés",
     rtt: "RTT",
     training: "Formations",
     other: "Autres",
   },
+  table: {
+    workRate: "Temps de travail",
+    available: "Capacité",
+    leave: "CP",
+    rtt: "RTT",
+    training: "Formation",
+    other: "Autres",
+  },
   months: {
     month: "Mois",
     days: "Capacité par mois",
+    inDays: "en jours",
     total: "Total",
     title: "Capacité mensuelle en jours",
     open: "Ouvrir",
@@ -51,6 +61,9 @@ export const t = {
     capacity: "Capacité",
     monthlyBalance: "Équilibre mensuel",
     monthlyBalanceDescription: "Capacité disponible et absences par mois",
+    annualDistribution: "Répartition annuelle",
+    annualDistributionDescription:
+      "Répartition de la capacité et des absences sur l’année",
     distribution: "Répartition",
     calendarDetails: "Jours fériés et vacances scolaires",
     publicHolidays: "Jours fériés",
@@ -83,8 +96,7 @@ export const t = {
   notices: {
     storageUnavailable:
       "Le stockage local est indisponible. Vos modifications ne pourront pas être enregistrées.",
-    absenceClamped:
-      "Les absences ont été plafonnées aux jours prévus par votre temps de travail.",
+    absenceClamped: "La valeur a été limitée à la capacité restante du mois.",
     exportComplete: "Export terminé.",
     importComplete: "Import terminé : 12 mois ont été chargés.",
     dataCleared: "Les données locales ont été effacées.",

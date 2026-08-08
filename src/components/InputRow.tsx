@@ -13,6 +13,7 @@ export function InputRow({
   unit,
   onChange,
   onApplyToYear,
+  grouped = false,
 }: {
   icon: LucideIcon;
   iconClass: string;
@@ -24,6 +25,7 @@ export function InputRow({
   unit: string;
   onChange: (value: number) => void;
   onApplyToYear: () => void;
+  grouped?: boolean;
 }) {
   const formattedValue = formatNumber(value);
 
@@ -36,9 +38,12 @@ export function InputRow({
 
   const controlClass =
     "grid size-8 place-items-center text-lg font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent sm:size-10 sm:text-xl";
+  const containerClass = grouped
+    ? "flex min-w-0 items-center gap-2 px-2.5 py-2.5 sm:gap-3 sm:px-4 sm:py-3"
+    : "flex min-w-0 items-center gap-2 rounded-xl border border-slate-200/80 bg-white p-2.5 shadow-sm transition hover:border-slate-300 sm:gap-3 sm:rounded-2xl sm:p-4";
 
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-xl border border-slate-200/80 bg-white p-2.5 shadow-sm transition hover:border-slate-300 sm:gap-3 sm:rounded-2xl sm:p-4">
+    <div className={containerClass}>
       <span
         className={`grid size-9 shrink-0 place-items-center rounded-xl ${iconClass} sm:size-11 sm:rounded-2xl`}
       >

@@ -13,12 +13,20 @@ import { t } from "./i18n/fr";
 import { useCapacityStore } from "./hooks/useCapacityStore";
 import type { EntryNumericKey } from "./types";
 
+function currentFiscalPosition(today = new Date()) {
+  return {
+    startYear: today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1,
+    monthIndex: (today.getMonth() + 6) % 12,
+  };
+}
+
 export default function App() {
   const years = availableFiscalYears();
+  const current = currentFiscalPosition();
   const store = useCapacityStore();
   const [tab, setTab] = useState<ViewTab>("annual");
   const [startYear, setStartYear] = useState(years[0]!);
-  const [monthIndex, setMonthIndex] = useState(0);
+  const [monthIndex, setMonthIndex] = useState(current.monthIndex);
   const [notice, setNotice] = useState<Notice | null>(() =>
     store.storageAvailable
       ? null
@@ -99,6 +107,12 @@ export default function App() {
     setConfirmation(null);
   };
 
+  const openMonth = (index: number) => {
+    setMonthIndex(index);
+    setTab("monthly");
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+  };
+
   return (
     <main className="min-h-dvh bg-slate-50 text-slate-950 antialiased sm:px-5 sm:py-6">
       <section
@@ -113,7 +127,7 @@ export default function App() {
           onTabChange={setTab}
           onFiscalYearChange={(year) => {
             setStartYear(year);
-            setMonthIndex(0);
+            setMonthIndex(year === current.startYear ? current.monthIndex : 0);
           }}
           onImport={importCsv}
           onExport={exportCsv}
@@ -121,7 +135,13 @@ export default function App() {
           onClear={() => setConfirmation({ type: "clear" })}
         />
 
-        <div className="px-4 py-5 sm:px-6 sm:py-7">
+        <div
+          className={
+            tab === "monthly"
+              ? "px-4 pb-5 pt-0 sm:px-6 sm:pb-7 sm:pt-7"
+              : "px-4 py-5 sm:px-6 sm:py-7"
+          }
+        >
           {tab === "monthly" ? (
             <MonthlyView
               startYear={startYear}
@@ -135,12 +155,13 @@ export default function App() {
             />
           ) : (
             <AnnualView
+              entries={entries}
               stats={stats}
               summary={fiscalYear.summary}
-              onMonthOpen={(index) => {
-                setMonthIndex(index);
-                setTab("monthly");
-              }}
+              currentMonthIndex={
+                startYear === current.startYear ? current.monthIndex : null
+              }
+              onMonthOpen={openMonth}
             />
           )}
         </div>
