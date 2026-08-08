@@ -1,5 +1,6 @@
 import { getFiscalMonth, roundHalf, workingDaysInMonth } from "./calendar";
 import type {
+  AbsenceKey,
   CapacityData,
   CapacityTotals,
   Entry,
@@ -84,6 +85,41 @@ function monthStats(startYear: number, index: number, entry: Entry): MonthStats 
   };
 }
 
+export function getEntryLimits(startYear: number, index: number, entry: Entry) {
+  const baseline = baselineDays(startYear, index);
+  const absenceTotal = getAbsenceTotal(entry);
+  const contracted = roundHalf(baseline * (entry.workRate / 100));
+  const requiredRate = baseline > 0 ? (absenceTotal / baseline) * 100 : 20;
+  const minWorkRate = Math.min(100, Math.max(20, Math.ceil(requiredRate / 5) * 5));
+  const absenceMax = Object.fromEntries(
+    ABSENCE_FIELDS.map((field) => [
+      field,
+      roundHalf(Math.max(0, contracted - (absenceTotal - entry[field]))),
+    ]),
+  ) as Record<AbsenceKey, number>;
+
+  return { minWorkRate, absenceMax };
+}
+
+function updateNormalizedEntry(
+  startYear: number,
+  index: number,
+  entry: Entry,
+  field: EntryNumericKey,
+  value: number,
+) {
+  const limits = getEntryLimits(startYear, index, entry);
+  const nextValue =
+    field === "workRate"
+      ? normalizeNumber(value, entry.workRate, limits.minWorkRate, 100, 5)
+      : normalizeNumber(value, entry[field], 0, limits.absenceMax[field], 0.5);
+
+  return {
+    entry: { ...entry, [field]: nextValue },
+    clamped: nextValue !== value,
+  };
+}
+
 export function calculateFiscalYear(startYear: number, source: unknown[] = []) {
   const entries = normalizeYear(startYear, source);
   const summary: CapacityTotals = {
@@ -110,12 +146,9 @@ export function updateMonthlyEntry(
   value: number,
 ) {
   const next = normalizeYear(startYear, entries);
-  const updated = normalizeEntry(
-    { ...next[index], [field]: value },
-    baselineDays(startYear, index),
-  );
-  next[index] = updated;
-  return { entries: next, clamped: updated[field] !== value };
+  const result = updateNormalizedEntry(startYear, index, next[index]!, field, value);
+  next[index] = result.entry;
+  return { entries: next, clamped: result.clamped };
 }
 
 export function applyFieldToFiscalYear(
@@ -126,8 +159,8 @@ export function applyFieldToFiscalYear(
 ) {
   const normalized = normalizeYear(startYear, entries);
   const value = normalized[sourceIndex]?.[field] ?? EMPTY_ENTRY[field];
-  return normalized.map((entry, index) =>
-    normalizeEntry({ ...entry, [field]: value }, baselineDays(startYear, index)),
+  return normalized.map(
+    (entry, index) => updateNormalizedEntry(startYear, index, entry, field, value).entry,
   );
 }
 
