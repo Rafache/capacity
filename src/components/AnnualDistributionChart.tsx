@@ -50,9 +50,10 @@ export function AnnualDistributionChart({ summary }: Props) {
     return { ...segment, value, start, end, label, percent };
   });
   const description = slices
-    .map(
-      ({ key, percent }) => `${t.segments[key]} : ${formatNumber(percent * 100)} %`,
-    )
+    .map(({ key, percent }) => {
+      const formattedPercent = formatNumber(percent * 100);
+      return `${t.segments[key]} : ${formattedPercent} %`;
+    })
     .join(", ");
 
   return (
