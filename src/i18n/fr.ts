@@ -9,6 +9,7 @@ export const t = {
     annual: "Annuelle",
     previousMonth: "Mois précédent",
     nextMonth: "Mois suivant",
+    chooseMonth: "Choisir le mois",
   },
   actions: {
     openMenu: "Ouvrir le menu des actions",
@@ -36,9 +37,17 @@ export const t = {
     training: "Formations",
     other: "Autres",
   },
+  segmentShort: {
+    available: "Cap.",
+    leave: "CP",
+    rtt: "RTT",
+    training: "Form.",
+    other: "Aut.",
+  },
   months: {
     month: "Mois",
     days: "Capacité par mois",
+    inDays: "en jours",
     total: "Total",
     title: "Capacité mensuelle en jours",
     open: "Ouvrir",
@@ -84,7 +93,7 @@ export const t = {
     storageUnavailable:
       "Le stockage local est indisponible. Vos modifications ne pourront pas être enregistrées.",
     absenceClamped:
-      "Les absences ont été plafonnées aux jours prévus par votre temps de travail.",
+      "La valeur a été limitée à la capacité restante du mois.",
     exportComplete: "Export terminé.",
     importComplete: "Import terminé : 12 mois ont été chargés.",
     dataCleared: "Les données locales ont été effacées.",
