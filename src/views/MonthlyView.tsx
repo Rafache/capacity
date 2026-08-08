@@ -5,7 +5,11 @@ import { getSchoolBreaks } from "../data/schoolBreaks";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
 import { InputRow } from "../components/InputRow";
-import { formatDateLabel, formatDateRange, formatMonthName } from "../i18n/formatters";
+import {
+  formatDateRange,
+  formatHolidayDateLabel,
+  formatMonthName,
+} from "../i18n/formatters";
 import { t } from "../i18n/fr";
 import type { Entry, EntryNumericKey, MonthStats, Zone } from "../types";
 
@@ -112,7 +116,8 @@ export function MonthlyView({
                 <span className="font-medium">
                   {holidays
                     .map(
-                      ({ key, date }) => `${t.holidays[key]}, ${formatDateLabel(date)}`,
+                      ({ key, date }) =>
+                        `${formatHolidayDateLabel(date)} (${t.holidays[key]})`,
                     )
                     .join(", ")}
                 </span>
@@ -128,7 +133,7 @@ export function MonthlyView({
               />
               <span className="min-w-0 flex-1 font-medium">
                 <strong className="font-extrabold text-white/90">
-                  {t.actions.zone} {zone}, {" "}
+                  {t.actions.zone} {zone} ·{" "}
                 </strong>
                 {schoolBreaks
                   .map(
