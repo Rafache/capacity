@@ -52,9 +52,9 @@ export function MonthlyView({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <div className="monthly-month-nav flex items-center justify-center gap-2 sm:gap-2.5">
+      <div className="monthly-month-nav grid grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] items-center gap-2">
         <button
-          className="grid size-9 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
+          className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
           type="button"
           onClick={() => onMonthChange((monthIndex + 11) % 12)}
           aria-label={t.navigation.previousMonth}
@@ -83,7 +83,7 @@ export function MonthlyView({
           </select>
         </label>
         <button
-          className="grid size-9 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
+          className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
           type="button"
           onClick={() => onMonthChange((monthIndex + 1) % 12)}
           aria-label={t.navigation.nextMonth}
