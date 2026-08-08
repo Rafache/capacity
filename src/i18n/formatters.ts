@@ -13,6 +13,12 @@ const dateLabelFormatter = new Intl.DateTimeFormat(locale, {
   month: "short",
   timeZone: "UTC",
 });
+const holidayDateLabelFormatter = new Intl.DateTimeFormat(locale, {
+  weekday: "short",
+  day: "numeric",
+  month: "long",
+  timeZone: "UTC",
+});
 const datePartFormatter = new Intl.DateTimeFormat(locale, {
   day: "numeric",
   month: "short",
@@ -30,6 +36,10 @@ export function formatMonthName(index: number, style: MonthStyle) {
 
 export function formatDateLabel(date: Date) {
   return dateLabelFormatter.format(date);
+}
+
+export function formatHolidayDateLabel(date: Date) {
+  return holidayDateLabelFormatter.format(date);
 }
 
 function withTerminalPeriod(value: string) {
