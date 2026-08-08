@@ -11,6 +11,21 @@ const COLORS: Record<SegmentKey, string> = {
   other: "var(--color-capacity-other)",
 };
 
+const polar = (angle: number, radius: number) => {
+  const radians = ((angle - 90) * Math.PI) / 180;
+  return {
+    x: 50 + radius * Math.cos(radians),
+    y: 50 + radius * Math.sin(radians),
+  };
+};
+
+const arcPath = (start: number, end: number) => {
+  const startPoint = polar(start, 48);
+  const endPoint = polar(end, 48);
+  const largeArc = end - start > 180 ? 1 : 0;
+  return `M 50 50 L ${startPoint.x} ${startPoint.y} A 48 48 0 ${largeArc} 1 ${endPoint.x} ${endPoint.y} Z`;
+};
+
 type Props = {
   summary: CapacityTotals;
 };
@@ -26,15 +41,14 @@ export function AnnualDistributionChart({ summary }: Props) {
       (sum, item) => sum + Math.max(0, summary[item.key]),
       0,
     );
-    const start = total ? (previous / total) * 100 : 0;
-    const end = total ? ((previous + value) / total) * 100 : 0;
-    return { ...segment, value, start, end };
+    const start = total ? (previous / total) * 360 : 0;
+    const end = total ? ((previous + value) / total) * 360 : 0;
+    const middle = start + (end - start) / 2;
+    const percent = total ? value / total : 0;
+    const labelRadius = percent < 0.05 ? 42 : 31;
+    const label = polar(middle, labelRadius);
+    return { ...segment, value, start, end, label, percent };
   });
-  const background = total
-    ? `conic-gradient(${slices
-        .map(({ key, start, end }) => `${COLORS[key]} ${start}% ${end}%`)
-        .join(", ")})`
-    : "#e2e8f0";
   const description = slices
     .map(({ key, value }) => `${t.segments[key]} : ${formatNumber(value)} ${t.units.day}`)
     .join(", ");
@@ -53,27 +67,39 @@ export function AnnualDistributionChart({ summary }: Props) {
         </p>
       </div>
 
-      <div className="mt-4 grid grid-cols-[8rem_minmax(0,1fr)] items-center gap-4 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-7">
-        <div
-          className="aspect-square w-full rounded-full shadow-inner ring-1 ring-slate-200"
+      <div className="mt-3 flex justify-center sm:mt-4">
+        <svg
+          className="aspect-square w-[min(82vw,22rem)] drop-shadow-sm sm:w-[24rem]"
+          viewBox="0 0 100 100"
           role="img"
           aria-label={`${t.summary.annualDistribution}. ${description}`}
-          style={{ background }}
-        />
-
-        <div className="grid gap-2 sm:grid-cols-2 sm:gap-x-4">
-          {slices.map(({ key, value, barClass }) => (
-            <div className="min-w-0" key={key}>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 sm:text-xs">
-                <span className={`size-2 shrink-0 rounded-full ${barClass}`} />
-                <span className="truncate">{t.segments[key]}</span>
-              </div>
-              <strong className="ml-4 mt-0.5 block text-sm font-black text-slate-950 sm:text-base">
-                {formatNumber(value)} {t.units.day}
-              </strong>
-            </div>
-          ))}
-        </div>
+        >
+          {total ? (
+            slices.map(({ key, value, start, end, label, percent }) =>
+              value > 0 ? (
+                <g key={key}>
+                  <path d={arcPath(start, end)} fill={COLORS[key]} />
+                  <text
+                    x={label.x}
+                    y={label.y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="white"
+                    fontSize={percent < 0.03 ? 3.2 : percent < 0.08 ? 4 : 5}
+                    fontWeight="800"
+                    stroke="rgba(15,23,42,0.28)"
+                    strokeWidth="0.35"
+                    paintOrder="stroke"
+                  >
+                    {formatNumber(value)}
+                  </text>
+                </g>
+              ) : null,
+            )
+          ) : (
+            <circle cx="50" cy="50" r="48" fill="#e2e8f0" />
+          )}
+        </svg>
       </div>
     </section>
   );
