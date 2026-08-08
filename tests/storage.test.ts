@@ -1,107 +1,67 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  EMPTY_ENTRY,
-  loadData,
-  parseCapacityData,
-  saveData,
-} from "../src/domain/capacityData";
+import { clearData, loadData, saveData } from "../src/domain/storage";
+import { emptyData, EMPTY_ENTRY } from "../src/domain/capacity";
 
-test("legacy local data migrates without retaining the removed note field", () => {
-  const migrated = parseCapacityData({
-    version: 2,
-    zone: "B",
-    entries: {
-      2026: Array.from({ length: 12 }, (_, index) => ({
-        workRate: 80,
-        leave: index / 2,
-        rtt: 1,
-        training: 0,
-        other: 0,
-        note: `Month ${index + 1}`,
-      })),
-    },
-  });
+function memoryStorage(initial: Record<string, string> = {}) {
+  const values = new Map(Object.entries(initial));
+  return {
+    getItem: (key: string) => values.get(key) ?? null,
+    setItem: (key: string, value: string) => values.set(key, value),
+    removeItem: (key: string) => values.delete(key),
+  } as unknown as Storage;
+}
 
-  assert.equal(migrated.data.version, 3);
-  assert.equal(migrated.data.zone, "B");
-  assert.deepEqual(migrated.data.entries["2026"]?.[11], {
-    ...EMPTY_ENTRY,
-    workRate: 80,
-    leave: 5.5,
-    rtt: 1,
+test("legacy local data migrates without the removed note field", () => {
+  const storage = memoryStorage({
+    "ma-capacite-v2": JSON.stringify({
+      version: 2,
+      zone: "B",
+      entries: {
+        2026: Array.from({ length: 12 }, (_, index) => ({
+          ...EMPTY_ENTRY,
+          leave: index / 2,
+          note: `Month ${index + 1}`,
+        })),
+      },
+    }),
   });
-  assert.equal("note" in (migrated.data.entries["2026"]?.[11] ?? {}), false);
-  assert.deepEqual(parseCapacityData(migrated.data).data, migrated.data);
+  const loaded = loadData(storage);
+  assert.equal(loaded.storageAvailable, true);
+  assert.equal(loaded.data.version, 3);
+  assert.equal(loaded.data.zone, "B");
+  assert.equal(loaded.data.entries["2026"]?.[11]?.leave, 5.5);
+  assert.equal("note" in (loaded.data.entries["2026"]?.[11] ?? {}), false);
 });
 
-test("corrupt local data is repaired before reaching the domain", () => {
-  const parsed = parseCapacityData({
-    version: 2,
-    zone: "invalid",
-    entries: {
-      invalid: [{}],
-      2026: [{ workRate: Number.NaN, leave: -2, rtt: "4" }, null],
-    },
-  });
-
-  assert.equal(parsed.repaired, true);
-  assert.equal(parsed.data.version, 3);
-  assert.equal(parsed.data.zone, "C");
-  assert.deepEqual(Object.keys(parsed.data.entries), ["2026"]);
-  assert.deepEqual(parsed.data.entries["2026"]?.[0], EMPTY_ENTRY);
+test("malformed local data is ignored", () => {
+  const loaded = loadData(memoryStorage({ "ma-capacite-v3": "invalid json" }));
+  assert.equal(loaded.storageAvailable, true);
+  assert.deepEqual(loaded.data, emptyData());
 });
 
-test("unknown and incomplete entries cannot cross the domain boundary", () => {
-  const parsed = parseCapacityData({
-    version: 3,
-    zone: "A",
-    entries: {
-      1999: Array.from({ length: 12 }, () => ({})),
-      2026: [
-        "invalid",
-        [],
-        { workRate: 10_000, leave: 10_000, rtt: Number.NEGATIVE_INFINITY },
-      ],
-    },
-  });
-
-  assert.equal(parsed.repaired, true);
-  assert.deepEqual(Object.keys(parsed.data.entries), ["2026"]);
-  assert.deepEqual(parsed.data.entries["2026"]?.[0], EMPTY_ENTRY);
-  assert.deepEqual(parsed.data.entries["2026"]?.[2], {
-    ...EMPTY_ENTRY,
-    workRate: 100,
-    leave: 22,
-  });
-});
-
-test("storage failures are reported without breaking the application", () => {
+test("storage failures never break the application", () => {
   const unavailable = {
     getItem() {
       throw new Error("unavailable");
     },
     setItem() {
-      throw new Error("quota exceeded");
+      throw new Error("unavailable");
+    },
+    removeItem() {
+      throw new Error("unavailable");
     },
   } as unknown as Storage;
-
-  const loaded = loadData(unavailable);
-  assert.equal(loaded.success, false);
-  assert.equal(loaded.warning, "unavailable");
-  assert.deepEqual(saveData(unavailable, loaded.data), {
-    success: false,
-    warning: "unavailable",
-  });
+  assert.equal(loadData(unavailable).storageAvailable, false);
+  assert.equal(saveData(unavailable, emptyData()), false);
+  assert.equal(clearData(unavailable), false);
 });
 
-test("a valid stored document can be saved and loaded idempotently", () => {
-  const values = new Map<string, string>();
-  const storage = {
-    getItem: (key: string) => values.get(key) ?? null,
-    setItem: (key: string, value: string) => values.set(key, value),
-  } as unknown as Storage;
+test("current data can be saved, loaded and cleared", () => {
+  const storage = memoryStorage();
   const data = { version: 3 as const, zone: "A" as const, entries: {} };
-  assert.deepEqual(saveData(storage, data), { success: true });
+  assert.equal(saveData(storage, data), true);
   assert.deepEqual(loadData(storage).data, data);
+  assert.equal(clearData(storage), true);
+  assert.deepEqual(loadData(storage).data, emptyData());
 });

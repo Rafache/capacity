@@ -1,43 +1,77 @@
-import type { LucideIcon } from "lucide-react";
+import { CalendarDays, CalendarX2, Gauge } from "lucide-react";
 import type { ReactNode } from "react";
-import { CapacityBar } from "./CapacityBar";
 import { CAPACITY_SEGMENTS } from "./capacitySegments";
-import { t } from "../i18n/translate";
+import { formatNumber } from "../i18n/formatters";
+import { t } from "../i18n/fr";
 import type { SegmentKey } from "../types";
-
-type SummaryTone = "neutral" | "positive" | "negative";
-
-export type SummaryItem = {
-  icon: LucideIcon;
-  label: string;
-  value: string | number;
-  unit?: string;
-  tone: SummaryTone;
-};
 
 type Props = {
   title: string;
-  items: SummaryItem[];
-  barValues: Record<SegmentKey, number>;
-  afterBar?: ReactNode;
+  baseline: number;
+  absences: number;
+  available: number;
+  values: Record<SegmentKey, number>;
+  children?: ReactNode;
 };
 
-const toneClasses: Record<SummaryTone, { label: string; value: string }> = {
-  neutral: {
-    label: "text-slate-400",
-    value: "text-white",
-  },
-  positive: {
-    label: "text-emerald-300",
-    value: "text-emerald-300",
-  },
-  negative: {
-    label: "text-red-300",
-    value: "text-red-300",
-  },
-};
+function CapacityBar({ values }: Pick<Props, "values">) {
+  const total = CAPACITY_SEGMENTS.reduce(
+    (sum, segment) => sum + Math.max(0, values[segment.key]),
+    0,
+  );
+  const description = CAPACITY_SEGMENTS.map(
+    ({ key }) => `${t.segments[key]} : ${formatNumber(values[key])} ${t.units.day}`,
+  ).join(", ");
 
-export function CapacitySummary({ title, items, barValues, afterBar }: Props) {
+  return (
+    <span
+      className="flex h-3 min-w-0 overflow-hidden rounded-full bg-white/10"
+      role="img"
+      aria-label={`${t.summary.distribution}. ${description}`}
+    >
+      {CAPACITY_SEGMENTS.map(({ key, barClass }) => (
+        <span
+          className={`h-full min-w-0 ${barClass}`}
+          key={key}
+          style={{ width: `${total ? (Math.max(0, values[key]) / total) * 100 : 0}%` }}
+        />
+      ))}
+    </span>
+  );
+}
+
+export function CapacitySummary({
+  title,
+  baseline,
+  absences,
+  available,
+  values,
+  children,
+}: Props) {
+  const metrics = [
+    {
+      icon: CalendarDays,
+      label: t.summary.workingDays,
+      value: baseline,
+      classes: "text-white",
+      labelClasses: "text-slate-400",
+    },
+    {
+      icon: CalendarX2,
+      label: t.summary.absences,
+      value: absences,
+      classes: "text-red-300",
+      labelClasses: "text-red-300",
+    },
+    {
+      icon: Gauge,
+      label: t.summary.capacity,
+      value: available,
+      classes: "text-emerald-300",
+      labelClasses: "text-emerald-300",
+    },
+  ];
+
   return (
     <section
       className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-5 text-white shadow-[0_20px_50px_rgba(15,23,42,0.24)] sm:p-6"
@@ -46,42 +80,35 @@ export function CapacitySummary({ title, items, barValues, afterBar }: Props) {
       <h2 className="mb-5 text-xl font-black">{title}</h2>
 
       <div className="grid grid-cols-3 divide-x divide-white/15">
-        {items.map((item) => {
-          const Icon = item.icon;
-          const tone = toneClasses[item.tone];
-
-          return (
-            <article
-              className="min-w-0 px-2 text-center sm:px-5"
-              aria-label={`${item.label} : ${item.value}${item.unit ?? ""}`}
-              key={item.label}
+        {metrics.map(({ icon: Icon, label, value, classes, labelClasses }) => (
+          <article
+            className="min-w-0 px-2 text-center sm:px-5"
+            aria-label={`${label} : ${formatNumber(value)}${t.units.day}`}
+            key={label}
+          >
+            <span
+              className={`flex items-center justify-center gap-1.5 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.08em] sm:text-xs ${labelClasses}`}
             >
-              <span
-                className={`flex items-center justify-center gap-1.5 whitespace-nowrap text-[9px] font-black uppercase tracking-[0.08em] sm:text-xs ${tone.label}`}
-              >
-                <Icon className="size-3.5 shrink-0" aria-hidden="true" />
-                {item.label}
-              </span>
-              <strong
-                className={`mt-2 block whitespace-nowrap text-3xl font-black tracking-tight sm:text-4xl ${tone.value}`}
-              >
-                {item.value}
-                {item.unit ? (
-                  <small className="ml-1 text-sm font-bold text-current opacity-70 sm:text-base">
-                    {item.unit}
-                  </small>
-                ) : null}
-              </strong>
-            </article>
-          );
-        })}
+              <Icon className="size-3.5 shrink-0" aria-hidden="true" />
+              {label}
+            </span>
+            <strong
+              className={`mt-2 block whitespace-nowrap text-3xl font-black tracking-tight sm:text-4xl ${classes}`}
+            >
+              {formatNumber(value)}
+              <small className="ml-1 text-sm font-bold text-current opacity-70 sm:text-base">
+                {t.units.day}
+              </small>
+            </strong>
+          </article>
+        ))}
       </div>
 
       <div className="mt-5 border-t border-white/10 pt-4">
         <p className="mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
           {t.summary.distribution}
         </p>
-        <CapacityBar values={barValues} className="h-3 bg-white/10" />
+        <CapacityBar values={values} />
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
           {CAPACITY_SEGMENTS.map(({ key, barClass }) => (
             <span
@@ -93,8 +120,8 @@ export function CapacitySummary({ title, items, barValues, afterBar }: Props) {
             </span>
           ))}
         </div>
-        {afterBar ? (
-          <div className="mt-4 border-t border-white/10 pt-3">{afterBar}</div>
+        {children ? (
+          <div className="mt-4 border-t border-white/10 pt-3">{children}</div>
         ) : null}
       </div>
     </section>

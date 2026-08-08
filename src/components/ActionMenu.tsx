@@ -1,14 +1,11 @@
 import { CalendarRange, Download, MoreVertical, Trash2, Upload } from "lucide-react";
-import { useCallback, useEffect, useId, useRef, type ChangeEvent } from "react";
-import { t } from "../i18n/translate";
+import { useCallback, useEffect, useId, useRef, useState, type ChangeEvent } from "react";
+import { t } from "../i18n/fr";
 import type { Zone } from "../types";
 
 type Props = {
-  open: boolean;
   years: number[];
   startYear: number;
-  onToggle: () => void;
-  onClose: () => void;
   onFiscalYearChange: (startYear: number) => void;
   onImport: (event: ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
@@ -21,11 +18,8 @@ const itemClass =
   "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-200";
 
 export function ActionMenu({
-  open,
   years,
   startYear,
-  onToggle,
-  onClose,
   onFiscalYearChange,
   onImport,
   onExport,
@@ -33,15 +27,16 @@ export function ActionMenu({
   onZoneChange,
   onClear,
 }: Props) {
+  const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const menuId = useId();
 
   const close = useCallback(() => {
-    onClose();
+    setOpen(false);
     triggerRef.current?.focus();
-  }, [onClose]);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -80,7 +75,7 @@ export function ActionMenu({
             : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
         }`}
         type="button"
-        onClick={onToggle}
+        onClick={() => setOpen((value) => !value)}
         aria-label={open ? t.actions.closeMenu : t.actions.openMenu}
         aria-controls={menuId}
         aria-expanded={open}

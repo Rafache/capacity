@@ -1,26 +1,12 @@
-import {
-  CalendarDays,
-  CalendarRange,
-  CalendarX2,
-  ChevronLeft,
-  ChevronRight,
-  Clock3,
-  Gauge,
-  Sun,
-} from "lucide-react";
+import { CalendarRange, ChevronLeft, ChevronRight, Clock3, Sun } from "lucide-react";
 import { getFiscalMonth, publicHolidays } from "../domain/calendar";
-import { getAbsenceTotal } from "../domain/capacityData";
+import { getAbsenceTotal } from "../domain/capacity";
 import { getSchoolBreaks } from "../data/schoolBreaks";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
 import { InputRow } from "../components/InputRow";
-import {
-  formatDateLabel,
-  formatDateRange,
-  formatMonthName,
-  formatNumber,
-} from "../i18n/formatters";
-import { t } from "../i18n/translate";
+import { formatDateLabel, formatDateRange, formatMonthName } from "../i18n/formatters";
+import { t } from "../i18n/fr";
 import type { Entry, EntryNumericKey, MonthStats, Zone } from "../types";
 
 type Props = {
@@ -57,7 +43,7 @@ export function MonthlyView({
     ({ date }) => date.getUTCMonth() === month,
   );
   const absenceTotal = getAbsenceTotal(stats);
-  const monthName = formatMonthName(startYear, monthIndex, "long");
+  const monthName = formatMonthName(monthIndex, "long");
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -87,85 +73,61 @@ export function MonthlyView({
 
       <CapacitySummary
         title={t.summary.month}
-        barValues={stats}
-        items={[
-          {
-            icon: CalendarDays,
-            label: t.summary.workingDays,
-            value: stats.baseline,
-            unit: t.units.day,
-            tone: "neutral",
-          },
-          {
-            icon: CalendarX2,
-            label: t.summary.absences,
-            value: formatNumber(absenceTotal),
-            unit: t.units.day,
-            tone: "negative",
-          },
-          {
-            icon: Gauge,
-            label: t.summary.capacity,
-            value: formatNumber(stats.available),
-            unit: t.units.day,
-            tone: "positive",
-          },
-        ]}
-        afterBar={
-          <div
-            className="space-y-1.5 text-[11px] leading-snug sm:space-y-2 sm:text-sm"
-            aria-label={t.summary.calendarDetails}
-          >
-            {holidays.length ? (
-              <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
-                <Sun
-                  className="mt-0.5 size-3.5 shrink-0 text-amber-300"
-                  aria-hidden="true"
-                />
-                <span className="min-w-0 flex-1">
-                  <strong className="font-extrabold text-white/90">
-                    {t.summary.publicHolidays}:{" "}
-                  </strong>
-                  <span className="font-medium">
-                    {holidays
-                      .map(
-                        ({ key, date }) =>
-                          `${t.holidays[key]} · ${formatDateLabel(date)}`,
-                      )
-                      .join(" · ")}
-                  </span>
-                </span>
-              </p>
-            ) : null}
-
-            {schoolBreaks?.length ? (
-              <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
-                <CalendarRange
-                  className="mt-0.5 size-3.5 shrink-0 text-blue-300"
-                  aria-hidden="true"
-                />
-                <span className="min-w-0 flex-1 font-medium">
-                  {schoolBreaks
+        baseline={stats.baseline}
+        absences={absenceTotal}
+        available={stats.available}
+        values={stats}
+      >
+        <div
+          className="space-y-1.5 text-[11px] leading-snug sm:space-y-2 sm:text-sm"
+          aria-label={t.summary.calendarDetails}
+        >
+          {holidays.length ? (
+            <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
+              <Sun
+                className="mt-0.5 size-3.5 shrink-0 text-amber-300"
+                aria-hidden="true"
+              />
+              <span className="min-w-0 flex-1">
+                <strong className="font-extrabold text-white/90">
+                  {t.summary.publicHolidays}:{" "}
+                </strong>
+                <span className="font-medium">
+                  {holidays
                     .map(
-                      ({ key, start, end }) =>
-                        `${t.schoolBreakNames[key]} ${formatDateRange(start, end)}`,
+                      ({ key, date }) => `${t.holidays[key]} · ${formatDateLabel(date)}`,
                     )
                     .join(" · ")}
                 </span>
-              </p>
-            ) : null}
+              </span>
+            </p>
+          ) : null}
 
-            {calendarBreaks && !holidays.length && !schoolBreaks?.length ? (
-              <p className="font-medium text-slate-400">{t.summary.noCalendarEvents}</p>
-            ) : null}
-            {!calendarBreaks ? (
-              <p className="font-medium text-slate-400">
-                {t.summary.calendarUnpublished}
-              </p>
-            ) : null}
-          </div>
-        }
-      />
+          {schoolBreaks?.length ? (
+            <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
+              <CalendarRange
+                className="mt-0.5 size-3.5 shrink-0 text-blue-300"
+                aria-hidden="true"
+              />
+              <span className="min-w-0 flex-1 font-medium">
+                {schoolBreaks
+                  .map(
+                    ({ key, start, end }) =>
+                      `${t.schoolBreakNames[key]} ${formatDateRange(start, end)}`,
+                  )
+                  .join(" · ")}
+              </span>
+            </p>
+          ) : null}
+
+          {calendarBreaks && !holidays.length && !schoolBreaks?.length ? (
+            <p className="font-medium text-slate-400">{t.summary.noCalendarEvents}</p>
+          ) : null}
+          {!calendarBreaks ? (
+            <p className="font-medium text-slate-400">{t.summary.calendarUnpublished}</p>
+          ) : null}
+        </div>
+      </CapacitySummary>
 
       <InputRow
         icon={Clock3}

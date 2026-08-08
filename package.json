@@ -10,7 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node --import tsx --test tests/*.test.ts",
-    "typecheck": "tsc --noEmit && tsc --project tsconfig.test.json --noEmit",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

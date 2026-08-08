@@ -1,15 +1,14 @@
 import { ABSENCE_SEGMENTS } from "./capacitySegments";
 import { formatMonthName, formatNumber } from "../i18n/formatters";
-import { t } from "../i18n/translate";
+import { t } from "../i18n/fr";
 import type { MonthStats } from "../types";
 
 type Props = {
-  startYear: number;
   stats: MonthStats[];
 };
 
 /** Show the monthly balance without introducing a charting dependency. */
-export function CapacityEvolutionChart({ startYear, stats }: Props) {
+export function CapacityEvolutionChart({ stats }: Props) {
   const absenceTotals = stats.map((item) =>
     ABSENCE_SEGMENTS.reduce((sum, segment) => sum + item[segment.key], 0),
   );
@@ -50,7 +49,7 @@ export function CapacityEvolutionChart({ startYear, stats }: Props) {
         aria-label={t.summary.monthlyBalance}
       >
         {stats.map((item, index) => {
-          const month = formatMonthName(startYear, index, "short");
+          const month = formatMonthName(index, "short");
           const absenceTotalForMonth = absenceTotals[index] ?? 0;
           const availableHeight = (item.available / scale) * 100;
           const absenceHeight = (absenceTotalForMonth / scale) * 100;

@@ -1,7 +1,7 @@
 import { AlertTriangle, CircleCheckBig, CopyPlus, X } from "lucide-react";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { formatNumber } from "../i18n/formatters";
-import { t } from "../i18n/translate";
+import { t } from "../i18n/fr";
 import type { Entry, EntryNumericKey } from "../types";
 
 export type Notice = {
@@ -9,33 +9,30 @@ export type Notice = {
   type: "success" | "error";
 };
 
+export type Confirmation = { type: "clear" } | { type: "apply"; field: EntryNumericKey };
+
 type Props = {
   notice: Notice | null;
-  onDismissNotice: () => void;
-  confirmClearOpen: boolean;
-  onCancelClear: () => void;
-  onConfirmClear: () => void;
-  pendingApplyField: EntryNumericKey | null;
+  confirmation: Confirmation | null;
   currentEntry: Entry;
-  onCancelApply: () => void;
-  onConfirmApply: () => void;
+  onDismissNotice: () => void;
+  onCancel: () => void;
+  onConfirm: () => void;
 };
 
-const formatEntryValue = (field: EntryNumericKey, value: number) =>
-  `${formatNumber(value)} ${field === "workRate" ? t.units.percent : t.units.day}`;
-
-/** Group transient notices and confirmations into one feedback layer. */
 export function AppFeedback({
   notice,
-  onDismissNotice,
-  confirmClearOpen,
-  onCancelClear,
-  onConfirmClear,
-  pendingApplyField,
+  confirmation,
   currentEntry,
-  onCancelApply,
-  onConfirmApply,
+  onDismissNotice,
+  onCancel,
+  onConfirm,
 }: Props) {
+  const field = confirmation?.type === "apply" ? confirmation.field : null;
+  const value = field
+    ? `${formatNumber(currentEntry[field])} ${field === "workRate" ? t.units.percent : t.units.day}`
+    : "";
+
   return (
     <>
       {notice ? (
@@ -49,9 +46,7 @@ export function AppFeedback({
           aria-live={notice.type === "error" ? "assertive" : "polite"}
         >
           <span
-            className={`grid size-9 place-items-center rounded-xl ${
-              notice.type === "error" ? "bg-red-100" : "bg-emerald-100"
-            }`}
+            className={`grid size-9 place-items-center rounded-xl ${notice.type === "error" ? "bg-red-100" : "bg-emerald-100"}`}
             aria-hidden="true"
           >
             {notice.type === "error" ? (
@@ -70,41 +65,27 @@ export function AppFeedback({
             <X className="size-4" />
           </button>
           <span
-            className={`toast-progress absolute inset-x-0 bottom-0 h-1 origin-left ${
-              notice.type === "error" ? "bg-red-500" : "bg-emerald-500"
-            }`}
+            className={`toast-progress absolute inset-x-0 bottom-0 h-1 origin-left ${notice.type === "error" ? "bg-red-500" : "bg-emerald-500"}`}
             aria-hidden="true"
           />
         </div>
       ) : null}
 
       <ConfirmDialog
-        open={confirmClearOpen}
-        title={t.dialogs.clearTitle}
-        description={t.dialogs.clearDescription}
-        confirmLabel={t.dialogs.clearConfirm}
-        onCancel={onCancelClear}
-        onConfirm={onConfirmClear}
-      />
-
-      <ConfirmDialog
-        open={pendingApplyField !== null}
-        title={t.dialogs.applyTitle}
+        open={confirmation !== null}
+        title={field ? t.dialogs.applyTitle : t.dialogs.clearTitle}
         description={
-          pendingApplyField
+          field
             ? t.dialogs.applyDescription
-                .replace(
-                  "{value}",
-                  formatEntryValue(pendingApplyField, currentEntry[pendingApplyField]),
-                )
-                .replace("{field}", t.fields[pendingApplyField].toLowerCase())
-            : ""
+                .replace("{value}", value)
+                .replace("{field}", t.fields[field].toLowerCase())
+            : t.dialogs.clearDescription
         }
-        confirmLabel={t.dialogs.applyConfirm}
-        icon={CopyPlus}
-        tone="primary"
-        onCancel={onCancelApply}
-        onConfirm={onConfirmApply}
+        confirmLabel={field ? t.dialogs.applyConfirm : t.dialogs.clearConfirm}
+        icon={field ? CopyPlus : undefined}
+        tone={field ? "primary" : "danger"}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
       />
     </>
   );
