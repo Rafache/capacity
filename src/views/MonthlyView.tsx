@@ -6,9 +6,9 @@ import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
 import { InputRow } from "../components/InputRow";
 import {
-  formatDateRange,
   formatHolidayDateLabel,
   formatMonthName,
+  formatSchoolBreakDateRange,
 } from "../i18n/formatters";
 import { t } from "../i18n/fr";
 import type { Entry, EntryNumericKey, MonthStats, Zone } from "../types";
@@ -140,18 +140,7 @@ export function MonthlyView({
                       "",
                     );
                     const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-                    const range = formatDateRange(start, end)
-                      .replace(/^du /, "")
-                      .replace(/\.$/, "")
-                      .replace(/\boct\./, "octobre")
-                      .replace(/\bnov\./, "novembre")
-                      .replace(/\bdéc\./, "décembre")
-                      .replace(/\bjanv\./, "janvier")
-                      .replace(/\bfévr\./, "février")
-                      .replace(/\bavr\./, "avril")
-                      .replace(/\bjuil\./, "juillet")
-                      .replace(/\bsept\./, "septembre");
-                    return `${range} (${name} - Zone ${zone})`;
+                    return `${formatSchoolBreakDateRange(start, end)} (${name} - Zone ${zone})`;
                   })
                   .join(", ")}
               </span>
