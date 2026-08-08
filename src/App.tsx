@@ -135,7 +135,13 @@ export default function App() {
           onClear={() => setConfirmation({ type: "clear" })}
         />
 
-        <div className="px-4 py-5 sm:px-6 sm:py-7">
+        <div
+          className={
+            tab === "monthly"
+              ? "px-4 pb-5 pt-0 sm:px-6 sm:pb-7 sm:pt-7"
+              : "px-4 py-5 sm:px-6 sm:py-7"
+          }
+        >
           {tab === "monthly" ? (
             <MonthlyView
               startYear={startYear}
