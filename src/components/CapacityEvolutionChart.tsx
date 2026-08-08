@@ -1,15 +1,17 @@
+import { ABSENCE_SEGMENTS } from "./capacitySegments";
 import { formatMonthName, formatNumber } from "../i18n/formatters";
 import { t } from "../i18n/fr";
-import { getAbsenceTotal } from "../domain/capacity";
 import type { MonthStats } from "../types";
 
 type Props = {
   stats: MonthStats[];
 };
 
-/** Compare available capacity with total absences without a charting dependency. */
+/** Show available capacity above zero and each absence category below it. */
 export function CapacityEvolutionChart({ stats }: Props) {
-  const absenceTotals = stats.map(getAbsenceTotal);
+  const absenceTotals = stats.map((item) =>
+    ABSENCE_SEGMENTS.reduce((sum, segment) => sum + item[segment.key], 0),
+  );
   const availableTotal = stats.reduce((sum, item) => sum + item.available, 0);
   const absenceTotal = absenceTotals.reduce((sum, value) => sum + value, 0);
   const scale = Math.max(
@@ -42,22 +44,22 @@ export function CapacityEvolutionChart({ stats }: Props) {
       </div>
 
       <div
-        className="mt-4 grid h-64 grid-cols-12 gap-1 sm:mt-5 sm:h-72 sm:gap-2.5"
+        className="mt-4 grid h-72 grid-cols-12 gap-1 sm:mt-5 sm:h-80 sm:gap-2.5"
         role="list"
         aria-label={t.summary.monthlyBalance}
       >
         {stats.map((item, index) => {
           const month = formatMonthName(index, "short");
-          const absences = absenceTotals[index] ?? 0;
+          const absenceTotalForMonth = absenceTotals[index] ?? 0;
           const availableHeight = (item.available / scale) * 100;
-          const absenceHeight = (absences / scale) * 100;
+          const absenceHeight = (absenceTotalForMonth / scale) * 100;
 
           return (
             <div
               className="flex min-w-0 flex-col items-center"
               key={month}
               role="listitem"
-              aria-label={`${month} : ${formatNumber(item.available)} ${t.units.day} ${t.summary.capacity.toLowerCase()}, ${formatNumber(absences)} ${t.units.day} ${t.summary.absences.toLowerCase()}`}
+              aria-label={`${month} : ${formatNumber(item.available)} ${t.units.day} ${t.summary.capacity.toLowerCase()}, ${formatNumber(absenceTotalForMonth)} ${t.units.day} ${t.summary.absences.toLowerCase()}`}
             >
               <div className="flex min-h-0 w-full flex-1 flex-col">
                 <div className="flex min-h-0 flex-1 items-end">
@@ -73,17 +75,34 @@ export function CapacityEvolutionChart({ stats }: Props) {
                 <span className="h-px w-full shrink-0 bg-slate-300" aria-hidden="true" />
 
                 <div className="flex min-h-0 flex-1 items-start">
-                  <span
-                    className="flex w-full items-center justify-center overflow-hidden rounded-b-lg bg-capacity-leave px-px text-center text-[7px] font-black leading-none text-white sm:rounded-b-xl sm:text-[9px]"
+                  <div
+                    className="flex w-full flex-col overflow-hidden rounded-b-lg sm:rounded-b-xl"
                     style={{ height: `${absenceHeight}%` }}
-                    title={`${t.summary.absences} : ${formatNumber(absences)} ${t.units.day}`}
                   >
-                    {absences >= 2 ? formatNumber(absences) : null}
-                  </span>
+                    {ABSENCE_SEGMENTS.map((segment) => {
+                      const value = item[segment.key];
+                      const segmentHeight =
+                        absenceTotalForMonth > 0
+                          ? (value / absenceTotalForMonth) * 100
+                          : 0;
+                      const canShowValue = value >= 2 && segmentHeight >= 18;
+
+                      return (
+                        <span
+                          className={`flex min-h-0 w-full items-center justify-center overflow-hidden px-px text-center text-[7px] font-black leading-none text-white sm:text-[9px] ${segment.barClass}`}
+                          key={segment.key}
+                          style={{ height: `${segmentHeight}%` }}
+                          title={`${t.segments[segment.key]} : ${formatNumber(value)} ${t.units.day}`}
+                        >
+                          {canShowValue ? formatNumber(value) : null}
+                        </span>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
-              <span className="mt-1.5 flex h-8 w-full shrink-0 items-start justify-center sm:mt-2 sm:h-10">
+              <span className="mt-1.5 flex h-14 w-full shrink-0 items-start justify-center sm:mt-2 sm:h-16">
                 <span className="text-center text-[8px] font-bold leading-tight text-slate-500 sm:text-[10px]">
                   {month}
                 </span>
@@ -93,15 +112,20 @@ export function CapacityEvolutionChart({ stats }: Props) {
         })}
       </div>
 
-      <div className="mt-3 flex gap-4 border-t border-slate-100 pt-3">
+      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 border-t border-slate-100 pt-3">
         <span className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-500 sm:text-[10px]">
           <span className="size-1.5 shrink-0 rounded-full bg-capacity-available" />
-          {t.summary.capacity}
+          {t.segments.available}
         </span>
-        <span className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-500 sm:text-[10px]">
-          <span className="size-1.5 shrink-0 rounded-full bg-capacity-leave" />
-          {t.summary.absences}
-        </span>
+        {ABSENCE_SEGMENTS.map((segment) => (
+          <span
+            className="flex items-center gap-1.5 text-[9px] font-semibold text-slate-500 sm:text-[10px]"
+            key={segment.key}
+          >
+            <span className={`size-1.5 shrink-0 rounded-full ${segment.barClass}`} />
+            {t.segments[segment.key]}
+          </span>
+        ))}
       </div>
     </section>
   );
