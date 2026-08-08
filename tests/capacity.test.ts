@@ -4,7 +4,6 @@ import {
   EMPTY_ENTRY,
   applyFieldToFiscalYear,
   calculateFiscalYear,
-  normalizeEntry,
   updateMonthlyEntry,
 } from "../src/domain/capacity";
 
@@ -16,7 +15,7 @@ test("monthly capacity respects working time and absences", () => {
 
 test("entries use valid increments and cannot exceed contracted capacity", () => {
   assert.deepEqual(
-    normalizeEntry(
+    calculateFiscalYear(2026, [
       {
         workRate: 87,
         leave: 11.24,
@@ -24,9 +23,8 @@ test("entries use valid increments and cannot exceed contracted capacity", () =>
         training: -1,
         other: Number.POSITIVE_INFINITY,
       },
-      20,
-    ),
-    { workRate: 85, leave: 11, rtt: 6, training: 0, other: 0 },
+    ]).entries[0],
+    { workRate: 85, leave: 11, rtt: 7.5, training: 0, other: 0 },
   );
 });
 

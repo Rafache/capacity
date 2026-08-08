@@ -73,6 +73,25 @@
   backdrop-filter: blur(16px);
 }
 
+.action-menu-trigger {
+  anchor-name: --action-menu;
+}
+
+.action-menu-popover {
+  position: fixed;
+  position-anchor: --action-menu;
+  top: calc(anchor(bottom) + 0.5rem);
+  left: anchor(right);
+  margin: 0;
+  transform: translateX(-100%);
+}
+
+.action-menu:has(.action-menu-popover:popover-open) > .action-menu-trigger {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
 @media (min-width: 640px) {
   .monthly-month-nav {
     position: static;

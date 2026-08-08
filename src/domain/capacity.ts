@@ -45,7 +45,7 @@ export function getAbsenceTotal(
   return ABSENCE_FIELDS.reduce((total, field) => total + value[field], 0);
 }
 
-export function normalizeEntry(input: unknown, baseline?: number): Entry {
+function normalizeEntry(input: unknown, baseline?: number): Entry {
   const value = isRecord(input) ? input : {};
   const entry: Entry = {
     workRate: normalizeNumber(value.workRate, 100, 20, 100, 5),
@@ -131,7 +131,7 @@ export function applyFieldToFiscalYear(
   );
 }
 
-export function currentFiscalYear(today = new Date()) {
+function currentFiscalYear(today = new Date()) {
   return today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1;
 }
 

@@ -8,10 +8,3 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </StrictMode>,
 );
-
-if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  void navigator.serviceWorker
-    .getRegistration()
-    .then((registration) => registration?.unregister())
-    .catch(() => undefined);
-}

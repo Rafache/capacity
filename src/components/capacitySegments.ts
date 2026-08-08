@@ -6,24 +6,17 @@ import {
   GraduationCap,
   type LucideIcon,
 } from "lucide-react";
-import type { SegmentKey } from "../types";
+import type { AbsenceKey, SegmentKey } from "../types";
 
-export type CapacitySegment = {
-  key: SegmentKey;
+type CapacitySegment<Key extends SegmentKey = SegmentKey> = {
+  key: Key;
   icon: LucideIcon;
   textClass: string;
   softClass: string;
   barClass: string;
 };
 
-export const CAPACITY_SEGMENTS: CapacitySegment[] = [
-  {
-    key: "available",
-    icon: CircleCheckBig,
-    textClass: "text-capacity-available",
-    softClass: "bg-capacity-available-soft text-capacity-available",
-    barClass: "bg-capacity-available",
-  },
+export const ABSENCE_SEGMENTS: CapacitySegment<AbsenceKey>[] = [
   {
     key: "leave",
     icon: CalendarRange,
@@ -54,10 +47,13 @@ export const CAPACITY_SEGMENTS: CapacitySegment[] = [
   },
 ];
 
-export const ABSENCE_SEGMENTS = CAPACITY_SEGMENTS.filter(
-  (
-    segment,
-  ): segment is CapacitySegment & {
-    key: Exclude<SegmentKey, "available">;
-  } => segment.key !== "available",
-);
+export const CAPACITY_SEGMENTS: CapacitySegment[] = [
+  {
+    key: "available",
+    icon: CircleCheckBig,
+    textClass: "text-capacity-available",
+    softClass: "bg-capacity-available-soft text-capacity-available",
+    barClass: "bg-capacity-available",
+  },
+  ...ABSENCE_SEGMENTS,
+];

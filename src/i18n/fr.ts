@@ -12,7 +12,6 @@ export const t = {
   },
   actions: {
     openMenu: "Ouvrir le menu des actions",
-    closeMenu: "Fermer le menu des actions",
     menuLabel: "Actions",
     fiscalYear: "Année fiscale",
     schoolBreaks: "Vacances scolaires",
@@ -42,7 +41,6 @@ export const t = {
     days: "Capacité par mois",
     total: "Total",
     title: "Capacité mensuelle en jours",
-    ariaLabel: "Capacité mensuelle en jours",
     open: "Ouvrir",
   },
   summary: {
