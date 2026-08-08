@@ -4,6 +4,7 @@ import {
   EMPTY_ENTRY,
   applyFieldToFiscalYear,
   calculateFiscalYear,
+  getEntryLimits,
   updateMonthlyEntry,
 } from "../src/domain/capacity";
 
@@ -40,6 +41,24 @@ test("updating a month reports a capped absence", () => {
   const result = updateMonthlyEntry([], 2026, 0, "leave", 100);
   assert.equal(result.clamped, true);
   assert.equal(result.entries[0]?.leave, 22);
+});
+
+test("editing one absence never reduces another absence", () => {
+  const entries = [{ ...EMPTY_ENTRY, leave: 8, rtt: 6 }];
+  const result = updateMonthlyEntry(entries, 2026, 0, "leave", 20);
+  assert.equal(result.entries[0]?.leave, 16);
+  assert.equal(result.entries[0]?.rtt, 6);
+  assert.equal(result.clamped, true);
+});
+
+test("working time cannot fall below existing absences", () => {
+  const entry = { ...EMPTY_ENTRY, leave: 10, rtt: 5 };
+  const limits = getEntryLimits(2026, 0, entry);
+  const result = updateMonthlyEntry([entry], 2026, 0, "workRate", 20);
+  assert.equal(limits.minWorkRate, 70);
+  assert.equal(result.entries[0]?.workRate, 70);
+  assert.equal(result.entries[0]?.leave, 10);
+  assert.equal(result.entries[0]?.rtt, 5);
 });
 
 test("replication preserves unrelated monthly values", () => {
