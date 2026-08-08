@@ -112,9 +112,9 @@ export function MonthlyView({
                 <span className="font-medium">
                   {holidays
                     .map(
-                      ({ key, date }) => `${t.holidays[key]} · ${formatDateLabel(date)}`,
+                      ({ key, date }) => `${t.holidays[key]}, ${formatDateLabel(date)}`,
                     )
-                    .join(" · ")}
+                    .join(", ")}
                 </span>
               </span>
             </p>
@@ -128,14 +128,14 @@ export function MonthlyView({
               />
               <span className="min-w-0 flex-1 font-medium">
                 <strong className="font-extrabold text-white/90">
-                  {t.actions.zone} {zone} ·{" "}
+                  {t.actions.zone} {zone}, {" "}
                 </strong>
                 {schoolBreaks
                   .map(
                     ({ key, start, end }) =>
                       `${t.schoolBreakNames[key]} ${formatDateRange(start, end)}`,
                   )
-                  .join(" · ")}
+                  .join(", ")}
               </span>
             </p>
           ) : null}
@@ -149,21 +149,21 @@ export function MonthlyView({
         </div>
       </CapacitySummary>
 
-      <InputRow
-        icon={Clock3}
-        iconClass="bg-blue-50 text-blue-600"
-        label={t.fields.workRate}
-        value={entry.workRate}
-        min={limits.minWorkRate}
-        max={100}
-        step={5}
-        unit={t.units.percent}
-        onChange={(value) => onChange("workRate", value)}
-        onApplyToYear={() => onRequestApplyToYear("workRate")}
-      />
-
       <section aria-label={t.inputs.absences}>
         <div className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
+          <InputRow
+            grouped
+            icon={Clock3}
+            iconClass="bg-blue-50 text-blue-600"
+            label={t.fields.workRate}
+            value={entry.workRate}
+            min={limits.minWorkRate}
+            max={100}
+            step={5}
+            unit={t.units.percent}
+            onChange={(value) => onChange("workRate", value)}
+            onApplyToYear={() => onRequestApplyToYear("workRate")}
+          />
           {ABSENCE_SEGMENTS.map(({ key, icon: Icon, softClass }) => (
             <InputRow
               grouped
