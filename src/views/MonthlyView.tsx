@@ -133,13 +133,24 @@ export function MonthlyView({
               />
               <span className="min-w-0 flex-1 font-medium">
                 <strong className="font-extrabold text-white/90">
-                  {t.actions.zone} {zone} ·{" "}
+                  Vacances Zone {zone} ·{" "}
                 </strong>
                 {schoolBreaks
-                  .map(
-                    ({ key, start, end }) =>
-                      `${t.schoolBreakNames[key]} ${formatDateRange(start, end)}`,
-                  )
+                  .map(({ key, start, end }) => {
+                    const name = t.schoolBreakNames[key].replace(/^Vacances (de la |d’|d')?/u, "");
+                    const range = formatDateRange(start, end)
+                      .replace(/^du /, "")
+                      .replace(/\.$/, "")
+                      .replace(/\boct\./, "octobre")
+                      .replace(/\bnov\./, "novembre")
+                      .replace(/\bdéc\./, "décembre")
+                      .replace(/\bjanv\./, "janvier")
+                      .replace(/\bfévr\./, "février")
+                      .replace(/\bavr\./, "avril")
+                      .replace(/\bjuil\./, "juillet")
+                      .replace(/\bsept\./, "septembre");
+                    return `Vacances : ${range} (${name} - Zone ${zone})`;
+                  })
                   .join(", ")}
               </span>
             </p>
