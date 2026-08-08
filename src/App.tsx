@@ -110,7 +110,9 @@ export default function App() {
   const openMonth = (index: number) => {
     setMonthIndex(index);
     setTab("monthly");
-    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    window.requestAnimationFrame(() =>
+      window.scrollTo({ top: 0, behavior: "smooth" }),
+    );
   };
 
   return (
@@ -144,7 +146,9 @@ export default function App() {
               stats={currentStats}
               zone={store.data.zone}
               onMonthChange={setMonthIndex}
-              onRequestApplyToYear={(field) => setConfirmation({ type: "apply", field })}
+              onRequestApplyToYear={(field) =>
+                setConfirmation({ type: "apply", field })
+              }
               onChange={updateEntry}
             />
           ) : (
@@ -152,7 +156,9 @@ export default function App() {
               entries={entries}
               stats={stats}
               summary={fiscalYear.summary}
-              currentMonthIndex={startYear === current.startYear ? current.monthIndex : null}
+              currentMonthIndex={
+                startYear === current.startYear ? current.monthIndex : null
+              }
               onMonthOpen={openMonth}
             />
           )}
