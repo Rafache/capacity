@@ -56,7 +56,7 @@ export const t = {
   summary: {
     month: "Synthèse du mois",
     year: "Synthèse de l’année",
-    workingDays: "Jours ouvrés",
+    workingDays: "Ouvrés",
     absences: "Absences",
     capacity: "Capacité",
     monthlyBalance: "Équilibre mensuel",
