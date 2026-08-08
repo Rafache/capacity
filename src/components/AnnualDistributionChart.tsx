@@ -20,12 +20,14 @@ export function AnnualDistributionChart({ summary }: Props) {
     (sum, segment) => sum + Math.max(0, summary[segment.key]),
     0,
   );
-  let cursor = 0;
-  const slices = CAPACITY_SEGMENTS.map((segment) => {
+  const slices = CAPACITY_SEGMENTS.map((segment, index) => {
     const value = Math.max(0, summary[segment.key]);
-    const start = cursor;
-    const end = total ? cursor + (value / total) * 100 : cursor;
-    cursor = end;
+    const previous = CAPACITY_SEGMENTS.slice(0, index).reduce(
+      (sum, item) => sum + Math.max(0, summary[item.key]),
+      0,
+    );
+    const start = total ? (previous / total) * 100 : 0;
+    const end = total ? ((previous + value) / total) * 100 : 0;
     return { ...segment, value, start, end };
   });
   const background = total
