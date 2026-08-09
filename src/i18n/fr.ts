@@ -72,9 +72,10 @@ export const t = {
     annualDistributionDescription:
       "Répartition de la capacité et des absences sur l’année",
     distribution: "Répartition",
-    calendarDetails: "Vacances scolaires",
+    calendarDetails: "Jours fériés et vacances scolaires",
     publicHolidays: "Jours fériés",
-    noCalendarEvents: "Aucune période de vacances scolaires ce mois-ci.",
+    schoolBreaks: "Vacances scolaires",
+    noCalendarEvents: "Aucun jour férié ni vacances scolaires ce mois-ci.",
     calendarUnpublished:
       "Les dates scolaires de cette année ne sont pas encore publiées.",
   },
