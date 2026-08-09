@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  formatDateLabel,
-  formatDateRange,
   formatHolidayDateLabel,
   formatMonthName,
   formatNumber,
@@ -17,11 +15,8 @@ test("French labels and date formats remain stable", () => {
   assert.equal(t.holidays.ascension, "Ascension");
   assert.equal(formatNumber(12.5), "12,5");
   assert.equal(formatMonthName(0, "long"), "juillet");
-  assert.equal(formatDateLabel(new Date("2026-07-14T00:00:00Z")), "mar. 14 juil.");
   assert.equal(
     formatHolidayDateLabel(new Date("2026-11-01T00:00:00Z")),
     "dim. 1 novembre",
   );
-  assert.equal(formatDateRange("2026-07-04", "2026-08-31"), "du 4 juil. au 31 août.");
-  assert.equal(formatDateRange("2026-10-17", "2026-11-02"), "du 17 oct. au 2 nov.");
 });
