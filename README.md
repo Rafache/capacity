@@ -2,7 +2,7 @@
 
 Ma capacité is a small React/Vite application for planning developer capacity over a fiscal year from July to June. It provides monthly and annual views for working time, paid leave, RTT, training and other absences.
 
-Production: <https://capacity-a59.pages.dev/>
+Production: <https://capacity.chem1.fr/>
 
 ## Privacy and data
 
