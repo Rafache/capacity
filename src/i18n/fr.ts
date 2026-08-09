@@ -39,6 +39,7 @@ export const t = {
   },
   table: {
     workRate: "Temps de travail",
+    workingDays: "Ouvrés",
     available: "Capacité",
     leave: "CP",
     rtt: "RTT",
