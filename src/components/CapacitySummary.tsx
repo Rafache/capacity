@@ -1,5 +1,4 @@
 import { CalendarDays, CalendarX2, Gauge } from "lucide-react";
-import type { ReactNode } from "react";
 import { CAPACITY_SEGMENTS } from "./capacitySegments";
 import { formatNumber } from "../i18n/formatters";
 import { t } from "../i18n/fr";
@@ -11,7 +10,6 @@ type Props = {
   absences: number;
   available: number;
   values: Record<SegmentKey, number>;
-  children?: ReactNode;
 };
 
 function CapacityBar({ values }: Pick<Props, "values">) {
@@ -61,7 +59,6 @@ export function CapacitySummary({
   absences,
   available,
   values,
-  children,
 }: Props) {
   const metrics = [
     {
@@ -136,9 +133,6 @@ export function CapacitySummary({
           ))}
         </div>
       </div>
-      {children ? (
-        <div className="mt-4 border-t border-white/10 pt-3">{children}</div>
-      ) : null}
     </section>
   );
 }
