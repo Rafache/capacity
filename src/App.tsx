@@ -165,6 +165,33 @@ export default function App() {
             />
           )}
         </div>
+
+        <footer className="border-t border-slate-100 px-4 py-4 text-center text-[10px] text-slate-400 sm:px-6 sm:py-5 sm:text-xs">
+          <p>
+            <span>© {new Date().getFullYear()} · {t.footer.madeWithLove} </span>
+            <a
+              className="font-bold text-slate-600 underline decoration-slate-300 underline-offset-2 transition hover:text-blue-600 hover:decoration-blue-300 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              href="https://github.com/Rafache"
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t.footer.profile}
+            >
+              RCH
+            </a>
+            <span className="mx-1.5" aria-hidden="true">
+              ·
+            </span>
+            <a
+              className="font-bold text-slate-600 underline decoration-slate-300 underline-offset-2 transition hover:text-blue-600 hover:decoration-blue-300 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              href="https://github.com/Rafache/capacity"
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t.footer.repository}
+            >
+              {t.footer.repository}
+            </a>
+          </p>
+        </footer>
       </section>
 
       <AppFeedback
