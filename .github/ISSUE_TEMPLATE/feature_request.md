@@ -22,21 +22,11 @@ assignees: ""
 
 <!-- Who benefits and how? -->
 
-## Out of scope
-
-<!-- Explicitly list related work that is not part of this issue. -->
-
 ## Acceptance criteria
 
 - [ ]
 - [ ]
 - [ ]
-
-## Expected validation
-
-- [ ] `npm run check` passes.
-- [ ] Relevant browser behavior has been checked.
-- [ ] Mobile and desktop layouts have been checked when the UI changes.
 
 ## Dependencies
 
