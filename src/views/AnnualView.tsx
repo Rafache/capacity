@@ -8,8 +8,8 @@ import { formatMonthName, formatNumber } from "../i18n/formatters";
 import { t } from "../i18n/fr";
 import type { CapacityTotals, Entry, MonthStats } from "../types";
 
-const TABLE_SEGMENTS = ["available", "training", "leave", "rtt", "other"].map(
-  (key) => CAPACITY_SEGMENTS.find((segment) => segment.key === key)!,
+const TABLE_SEGMENTS = ["available", "training", "leave", "rtt", "other"].map((key) =>
+  CAPACITY_SEGMENTS.find((segment) => segment.key === key)!,
 );
 
 type Props = {
@@ -65,10 +65,7 @@ export function AnnualView({
                   aria-label={t.table.workingDays}
                   title={t.table.workingDays}
                 >
-                  <CalendarDays
-                    className="mx-auto size-3.5"
-                    aria-hidden="true"
-                  />
+                  <CalendarDays className="mx-auto size-3.5" aria-hidden="true" />
                   <span className="mt-0.5 block text-[6px] font-black leading-tight sm:text-[8px]">
                     {t.table.workingDays}
                   </span>
@@ -189,9 +186,7 @@ export function AnnualView({
               className="flex min-w-0 items-center gap-1 whitespace-nowrap text-[9px] font-semibold text-slate-600 sm:gap-1.5 sm:text-xs"
               key={key}
             >
-              <span
-                className={`size-1.5 shrink-0 rounded-full sm:size-2 ${barClass}`}
-              />
+              <span className={`size-1.5 shrink-0 rounded-full sm:size-2 ${barClass}`} />
               {t.segments[key]}
             </span>
           ))}
