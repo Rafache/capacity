@@ -4,6 +4,7 @@ import {
   availableFiscalYears,
   calculateFiscalYear,
   EMPTY_ENTRY,
+  getCurrentFiscalPosition,
 } from "./domain/capacity";
 import { AppFeedback, type Confirmation, type Notice } from "./components/AppFeedback";
 import { AppHeader, type ViewTab } from "./components/AppHeader";
@@ -13,16 +14,9 @@ import { t } from "./i18n/fr";
 import { useCapacityStore } from "./hooks/useCapacityStore";
 import type { EntryNumericKey } from "./types";
 
-function currentFiscalPosition(today = new Date()) {
-  return {
-    startYear: today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1,
-    monthIndex: (today.getMonth() + 6) % 12,
-  };
-}
-
 export default function App() {
   const years = availableFiscalYears();
-  const current = currentFiscalPosition();
+  const current = getCurrentFiscalPosition();
   const store = useCapacityStore();
   const [tab, setTab] = useState<ViewTab>("annual");
   const [startYear, setStartYear] = useState(years[0]!);
