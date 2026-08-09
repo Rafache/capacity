@@ -15,17 +15,108 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
           cache: npm
-      - run: npm ci
-      - run: npm run check
+
+      - name: Install dependencies
+        id: install
+        run: npm ci
+
+      - name: Format
+        id: format
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: npm run format:check
+
+      - name: Lint
+        id: lint
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: npm run lint
+
+      - name: Typecheck
+        id: typecheck
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: npm run typecheck
+
+      - name: Tests
+        id: tests
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: npm test
+
+      - name: Build
+        id: build
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: npm run build
+
       - name: Verify production asset paths
+        id: assets
+        if: ${{ always() && steps.install.outcome == 'success' && steps.build.outcome == 'success' }}
         run: |
           grep -q '="/assets/' dist/index.html
           ! grep -q '/capacity/' dist/index.html
+
+      - name: CI summary
+        if: always()
+        env:
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          FORMAT_OUTCOME: ${{ steps.format.outcome }}
+          LINT_OUTCOME: ${{ steps.lint.outcome }}
+          TYPECHECK_OUTCOME: ${{ steps.typecheck.outcome }}
+          TESTS_OUTCOME: ${{ steps.tests.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          ASSETS_OUTCOME: ${{ steps.assets.outcome }}
+        run: |
+          status() {
+            case "$1" in
+              success) echo "✅ Passed" ;;
+              failure) echo "❌ Failed" ;;
+              cancelled) echo "🚫 Cancelled" ;;
+              skipped|"") echo "⏭️ Skipped" ;;
+              *) echo "ℹ️ $1" ;;
+            esac
+          }
+
+          {
+            echo "## CI summary"
+            echo
+            echo "| Check | Result |"
+            echo "| --- | --- |"
+            echo "| Install dependencies | $(status "$INSTALL_OUTCOME") |"
+            echo "| Formatting | $(status "$FORMAT_OUTCOME") |"
+            echo "| ESLint | $(status "$LINT_OUTCOME") |"
+            echo "| TypeScript | $(status "$TYPECHECK_OUTCOME") |"
+            echo "| Tests | $(status "$TESTS_OUTCOME") |"
+            echo "| Production build | $(status "$BUILD_OUTCOME") |"
+            echo "| Production asset paths | $(status "$ASSETS_OUTCOME") |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Annotate failures
+        if: always()
+        env:
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          FORMAT_OUTCOME: ${{ steps.format.outcome }}
+          LINT_OUTCOME: ${{ steps.lint.outcome }}
+          TYPECHECK_OUTCOME: ${{ steps.typecheck.outcome }}
+          TESTS_OUTCOME: ${{ steps.tests.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          ASSETS_OUTCOME: ${{ steps.assets.outcome }}
+        run: |
+          annotate_failure() {
+            if [ "$1" = "failure" ]; then
+              echo "::error title=$2::$3"
+            fi
+          }
+
+          annotate_failure "$INSTALL_OUTCOME" "Dependency installation failed" "npm ci failed. See the Install dependencies step for details."
+          annotate_failure "$FORMAT_OUTCOME" "Formatting check failed" "Run npm run format locally to fix formatting issues."
+          annotate_failure "$LINT_OUTCOME" "Lint check failed" "ESLint reported errors. See inline annotations and the Lint step for details."
+          annotate_failure "$TYPECHECK_OUTCOME" "Typecheck failed" "TypeScript reported errors. See inline annotations and the Typecheck step for details."
+          annotate_failure "$TESTS_OUTCOME" "Tests failed" "One or more tests failed. See the Tests step for details."
+          annotate_failure "$BUILD_OUTCOME" "Build failed" "The production build failed. See the Build step for details."
+          annotate_failure "$ASSETS_OUTCOME" "Asset path verification failed" "The production output contains unexpected asset paths."
