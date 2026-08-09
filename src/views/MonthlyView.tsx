@@ -1,4 +1,4 @@
-import { CalendarRange, ChevronLeft, ChevronRight, Clock3, Sun } from "lucide-react";
+import { CalendarRange, ChevronLeft, ChevronRight, Clock3, Sun, type LucideIcon } from "lucide-react";
 import { getFiscalMonth, publicHolidays } from "../domain/calendar";
 import { ENTRY_RULES, getAbsenceTotal, getEntryLimits } from "../domain/capacity";
 import { getSchoolBreaks } from "../data/schoolBreaks";
@@ -24,6 +24,75 @@ type Props = {
   onChange: (field: EntryNumericKey, value: number) => void;
 };
 
+type CalendarItem = {
+  key: string;
+  dateTime?: string;
+  label: string;
+  detail: string;
+};
+
+type CalendarSection = {
+  key: string;
+  title: string;
+  icon: LucideIcon;
+  iconClass: string;
+  items: CalendarItem[];
+};
+
+function CalendarDetails({
+  sections,
+  emptyMessage,
+}: {
+  sections: CalendarSection[];
+  emptyMessage: string;
+}) {
+  return (
+    <section
+      className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm sm:rounded-2xl sm:p-4"
+      aria-label={t.summary.calendarDetails}
+    >
+      <div className="flex items-center gap-2">
+        <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-700 sm:size-9">
+          <CalendarRange className="size-4" aria-hidden="true" />
+        </span>
+        <h2 className="text-sm font-black text-slate-950 sm:text-base">
+          {t.summary.calendarDetails}
+        </h2>
+      </div>
+      {sections.length ? (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {sections.map(({ key, title, icon: Icon, iconClass, items }) => (
+            <div className="min-w-0" key={key}>
+              <h3 className="flex items-center gap-1.5 text-xs font-black text-slate-950 sm:text-sm">
+                <Icon className={"size-3.5 " + iconClass} aria-hidden="true" />
+                {title}
+              </h3>
+              <ul className="mt-1.5 grid gap-1.5 text-[11px] leading-snug text-slate-600 sm:text-sm">
+                {items.map(({ key: itemKey, dateTime, label, detail }) => (
+                  <li className="flex min-w-0 items-start gap-2" key={itemKey}>
+                    <span
+                      className="mt-1.5 size-1.5 shrink-0 rounded-full bg-slate-300"
+                      aria-hidden="true"
+                    />
+                    <span className="min-w-0">
+                      {dateTime ? <time dateTime={dateTime}>{label}</time> : label}{" "}
+                      <span className="font-semibold text-slate-900">({detail})</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-3 text-[11px] font-medium text-slate-500 sm:text-sm">
+          {emptyMessage}
+        </p>
+      )}
+    </section>
+  );
+}
+
 export function MonthlyView({
   startYear,
   monthIndex,
@@ -47,7 +116,39 @@ export function MonthlyView({
   const holidays = publicHolidays(year).filter(
     ({ date }) => date.getUTCMonth() === month,
   );
-  const absenceTotal = getAbsenceTotal(stats);
+
+  const calendarSections: CalendarSection[] = [
+    holidays.length
+      ? {
+          key: "holidays",
+          title: t.summary.publicHolidays,
+          icon: Sun,
+          iconClass: "text-amber-600",
+          items: holidays.map(({ key, date }) => ({
+            key,
+            dateTime: date.toISOString().slice(0, 10),
+            label: formatHolidayDateLabel(date),
+            detail: t.holidays[key],
+          })),
+        }
+      : null,
+    schoolBreaks?.length
+      ? {
+          key: "school-breaks",
+          title: t.summary.schoolBreaks,
+          icon: CalendarRange,
+          iconClass: "text-blue-600",
+          items: schoolBreaks.map(({ key, start, end }) => ({
+            key,
+            label:
+              t.schoolBreakNames[key] +
+              " du " +
+              formatSchoolBreakDateRange(start, end),
+            detail: "Zone " + zone,
+          })),
+        }
+      : null,
+  ].filter((section): section is CalendarSection => section !== null);  const absenceTotal = getAbsenceTotal(stats);
   const limits = getEntryLimits(startYear, monthIndex, entry);
   const monthLabel = `${formatMonthName(monthIndex, "long")} ${year}`;
 
@@ -99,42 +200,7 @@ export function MonthlyView({
         absences={absenceTotal}
         available={stats.available}
         values={stats}
-      >
-        <div
-          className="space-y-1.5 text-[11px] leading-snug sm:space-y-2 sm:text-sm"
-          aria-label={t.summary.calendarDetails}
-        >
-          {schoolBreaks?.length ? (
-            <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
-              <CalendarRange
-                className="mt-0.5 size-3.5 shrink-0 text-blue-300"
-                aria-hidden="true"
-              />
-              <span className="min-w-0 flex-1 font-medium">
-                <strong className="font-extrabold text-white/90">Vacances: </strong>
-                {schoolBreaks
-                  .map(({ key, start, end }) => {
-                    const rawName = t.schoolBreakNames[key].replace(
-                      /^Vacances (de la |de |d’|d')?/u,
-                      "",
-                    );
-                    const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-                    return `${formatSchoolBreakDateRange(start, end)} (${name} - Zone ${zone})`;
-                  })
-                  .join(", ")}
-              </span>
-            </p>
-          ) : null}
-
-          {calendarBreaks && !schoolBreaks?.length ? (
-            <p className="font-medium text-slate-400">{t.summary.noCalendarEvents}</p>
-          ) : null}
-          {!calendarBreaks ? (
-            <p className="font-medium text-slate-400">{t.summary.calendarUnpublished}</p>
-          ) : null}
-        </div>
-      </CapacitySummary>
-
+      />
       <section aria-label={t.inputs.absences}>
         <div className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
           <InputRow
@@ -169,39 +235,14 @@ export function MonthlyView({
         </div>
       </section>
 
-      {isFrench && holidays.length ? (
-        <section
-          className="rounded-xl border border-amber-200/80 bg-amber-50/70 p-3 shadow-sm sm:rounded-2xl sm:p-4"
-          aria-label={t.summary.publicHolidays}
-        >
-          <div className="flex items-center gap-2">
-            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-700 sm:size-9">
-              <Sun className="size-4" aria-hidden="true" />
-            </span>
-            <h2 className="text-sm font-black text-slate-950 sm:text-base">
-              {t.summary.publicHolidays}
-            </h2>
-          </div>
-          <ul className="mt-2 grid gap-1.5 text-[11px] leading-snug text-slate-600 sm:grid-cols-2 sm:text-sm">
-            {holidays.map(({ key, date }) => (
-              <li className="flex min-w-0 items-start gap-2" key={key}>
-                <span
-                  className="mt-1.5 size-1.5 shrink-0 rounded-full bg-amber-400"
-                  aria-hidden="true"
-                />
-                <span className="min-w-0">
-                  <time dateTime={date.toISOString().slice(0, 10)}>
-                    {formatHolidayDateLabel(date)}
-                  </time>{" "}
-                  <span className="font-semibold text-slate-900">
-                    ({t.holidays[key]})
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      {isFrench ? (
+        <CalendarDetails
+          sections={calendarSections}
+          emptyMessage={
+            calendarBreaks ? t.summary.noCalendarEvents : t.summary.calendarUnpublished
+          }
+        />
+      ) : null}}
     </div>
   );
 }
