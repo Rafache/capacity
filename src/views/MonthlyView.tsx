@@ -7,11 +7,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getFiscalMonth, publicHolidays } from "../domain/calendar";
-import {
-  ENTRY_RULES,
-  getAbsenceTotal,
-  getEntryLimits,
-} from "../domain/capacity";
+import { ENTRY_RULES, getAbsenceTotal, getEntryLimits } from "../domain/capacity";
 import { getSchoolBreaks } from "../data/schoolBreaks";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
@@ -86,14 +82,8 @@ function CalendarDetails({
                       aria-hidden="true"
                     />
                     <span className="min-w-0">
-                      {dateTime ? (
-                        <time dateTime={dateTime}>{label}</time>
-                      ) : (
-                        label
-                      )}{" "}
-                      <span className="font-semibold text-slate-900">
-                        ({detail})
-                      </span>
+                      {dateTime ? <time dateTime={dateTime}>{label}</time> : label}{" "}
+                      <span className="font-semibold text-slate-900">({detail})</span>
                     </span>
                   </li>
                 ))}
@@ -158,9 +148,7 @@ export function MonthlyView({
           items: schoolBreaks.map(({ key, start, end }) => ({
             key,
             label:
-              t.schoolBreakNames[key] +
-              " du " +
-              formatSchoolBreakDateRange(start, end),
+              t.schoolBreakNames[key] + " du " + formatSchoolBreakDateRange(start, end),
             detail: "Zone " + zone,
           })),
         }
@@ -263,9 +251,7 @@ export function MonthlyView({
         <CalendarDetails
           sections={visibleCalendarSections}
           emptyMessage={
-            calendarBreaks
-              ? t.summary.noCalendarEvents
-              : t.summary.calendarUnpublished
+            calendarBreaks ? t.summary.noCalendarEvents : t.summary.calendarUnpublished
           }
         />
       ) : null}
