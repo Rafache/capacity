@@ -1,6 +1,6 @@
 import { CalendarRange, ChevronLeft, ChevronRight, Clock3, Sun } from "lucide-react";
 import { getFiscalMonth, publicHolidays } from "../domain/calendar";
-import { getAbsenceTotal, getEntryLimits } from "../domain/capacity";
+import { ENTRY_RULES, getAbsenceTotal, getEntryLimits } from "../domain/capacity";
 import { getSchoolBreaks } from "../data/schoolBreaks";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
@@ -165,8 +165,8 @@ export function MonthlyView({
             label={t.fields.workRate}
             value={entry.workRate}
             min={limits.minWorkRate}
-            max={100}
-            step={5}
+            max={ENTRY_RULES.workRate.max}
+            step={ENTRY_RULES.workRate.step}
             unit={t.units.percent}
             onChange={(value) => onChange("workRate", value)}
             onApplyToYear={() => onRequestApplyToYear("workRate")}
@@ -179,7 +179,9 @@ export function MonthlyView({
               key={key}
               label={t.fields[key]}
               value={entry[key]}
+              min={ENTRY_RULES.absence.min}
               max={limits.absenceMax[key]}
+              step={ENTRY_RULES.absence.step}
               unit={t.units.day}
               onChange={(value) => onChange(key, value)}
               onApplyToYear={() => onRequestApplyToYear(key)}
