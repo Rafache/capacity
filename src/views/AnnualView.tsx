@@ -1,5 +1,4 @@
 import { CalendarDays, Clock3 } from "lucide-react";
-import { AnnualDistributionChart } from "../components/AnnualDistributionChart";
 import { CapacityEvolutionChart } from "../components/CapacityEvolutionChart";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { CAPACITY_SEGMENTS } from "../components/capacitySegments";
@@ -35,7 +34,6 @@ export function AnnualView({
         absences={getAbsenceTotal(summary)}
         available={summary.available}
         values={summary}
-        showDistribution={false}
       />
 
       <section>
@@ -178,19 +176,6 @@ export function AnnualView({
         </div>
 
         <CapacityEvolutionChart stats={stats} />
-        <AnnualDistributionChart summary={summary} />
-
-        <div className="mt-3 flex flex-nowrap items-center justify-center gap-2 overflow-hidden rounded-2xl border border-slate-200 bg-white px-2.5 py-3 shadow-sm sm:mt-5 sm:gap-4 sm:px-4">
-          {CAPACITY_SEGMENTS.map(({ key, barClass }) => (
-            <span
-              className="flex min-w-0 items-center gap-1 whitespace-nowrap text-[9px] font-semibold text-slate-600 sm:gap-1.5 sm:text-xs"
-              key={key}
-            >
-              <span className={`size-1.5 shrink-0 rounded-full sm:size-2 ${barClass}`} />
-              {t.segments[key]}
-            </span>
-          ))}
-        </div>
       </section>
     </div>
   );
