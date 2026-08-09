@@ -44,7 +44,7 @@ function CapacityBar({ values }: Pick<Props, "values">) {
               aria-hidden="true"
               className="truncate whitespace-nowrap px-0.5 text-[8px] font-black leading-none text-white sm:text-[9px]"
             >
-              {formatNumber(percentage)}%
+              {Math.round(percentage)}%
             </span>
           </span>
         );
