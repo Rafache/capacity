@@ -43,27 +43,22 @@ export function useCapacityStore() {
       field,
       value,
     );
-    const data = {
-      ...state.data,
-      entries: { ...state.data.entries, [String(startYear)]: result.entries },
+    return {
+      saved: replaceYear(startYear, result.entries),
+      clamped: result.clamped,
     };
-    return { saved: commit(data), clamped: result.clamped };
   };
 
   const applyField = (startYear: number, monthIndex: number, field: EntryNumericKey) => {
-    const data = {
-      ...state.data,
-      entries: {
-        ...state.data.entries,
-        [String(startYear)]: applyFieldToFiscalYear(
-          state.data.entries[String(startYear)] ?? [],
-          startYear,
-          monthIndex,
-          field,
-        ),
-      },
-    };
-    return commit(data);
+    return replaceYear(
+      startYear,
+      applyFieldToFiscalYear(
+        state.data.entries[String(startYear)] ?? [],
+        startYear,
+        monthIndex,
+        field,
+      ),
+    );
   };
 
   const setZone = (zone: Zone) => commit({ ...state.data, zone });
