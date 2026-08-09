@@ -20,7 +20,7 @@ Local storage is not encrypted, so the application must not be used to store sec
 
 ## Development
 
-Requires Node.js `>=22 <23` and npm.
+Requires Node.js `>=24 <25` and npm.
 
 ```bash
 npm ci

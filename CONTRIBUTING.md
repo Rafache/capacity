@@ -4,7 +4,7 @@ Ma capacité is intentionally small and browser-only. Prefer simple changes that
 
 ## Setup
 
-Requirements: Node.js `>=22 <23` and npm.
+Requirements: Node.js `>=24 <25` and npm.
 
 ```bash
 git clone https://github.com/Rafache/capacity.git
