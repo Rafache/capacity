@@ -7,7 +7,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getFiscalMonth, publicHolidays } from "../domain/calendar";
-import { ENTRY_RULES, getAbsenceTotal, getEntryLimits } from "../domain/capacity";
+import {
+  ENTRY_RULES,
+  getAbsenceTotal,
+  getEntryLimits,
+} from "../domain/capacity";
 import { getSchoolBreaks } from "../data/schoolBreaks";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
@@ -82,8 +86,14 @@ function CalendarDetails({
                       aria-hidden="true"
                     />
                     <span className="min-w-0">
-                      {dateTime ? <time dateTime={dateTime}>{label}</time> : label}{" "}
-                      <span className="font-semibold text-slate-900">({detail})</span>
+                      {dateTime ? (
+                        <time dateTime={dateTime}>{label}</time>
+                      ) : (
+                        label
+                      )}{" "}
+                      <span className="font-semibold text-slate-900">
+                        ({detail})
+                      </span>
                     </span>
                   </li>
                 ))}
@@ -124,7 +134,7 @@ export function MonthlyView({
     ({ date }) => date.getUTCMonth() === month,
   );
 
-  const calendarSections: CalendarSection[] = [
+  const calendarSections: Array<CalendarSection | null> = [
     holidays.length
       ? {
           key: "holidays",
@@ -155,7 +165,11 @@ export function MonthlyView({
           })),
         }
       : null,
-  ].filter((section): section is CalendarSection => section !== null);
+  ];
+
+  const visibleCalendarSections = calendarSections.filter(
+    (section): section is CalendarSection => section !== null,
+  );
 
   const absenceTotal = getAbsenceTotal(stats);
   const limits = getEntryLimits(startYear, monthIndex, entry);
@@ -247,7 +261,7 @@ export function MonthlyView({
 
       {isFrench ? (
         <CalendarDetails
-          sections={calendarSections}
+          sections={visibleCalendarSections}
           emptyMessage={
             calendarBreaks
               ? t.summary.noCalendarEvents
