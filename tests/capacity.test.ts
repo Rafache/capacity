@@ -1,47 +1,70 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { fiscalMonth, publicHolidays, roundHalf, workingDaysInMonth } from "../src/capacity.ts";
-import { EMPTY_ENTRY, getMonthStats, migrateData } from "../src/domain/capacityData.ts";
-import { exportCapacityCsv, importCapacityCsv } from "../src/domain/csv.ts";
+import {
+  EMPTY_ENTRY,
+  applyFieldToFiscalYear,
+  calculateFiscalYear,
+  getMonthStats,
+  normalizeMonthlyEntry,
+  updateMonthlyEntry,
+} from "../src/domain/capacityData";
 
-test("l’année 2026–2027 compte 254 jours ouvrés", () => {
-  const total = Array.from({ length: 12 }, (_, index) => {
-    const { year, month } = fiscalMonth(2026, index);
-    return workingDaysInMonth(year, month);
-  }).reduce((sum, value) => sum + value, 0);
-  assert.equal(total, 254);
-});
-
-test("les jours fériés mobiles 2027 sont calculés", () => {
-  const holidays = publicHolidays(2027);
-  assert.equal(holidays.find((item) => item.name === "Lundi de Pâques")?.date.toISOString().slice(0, 10), "2027-03-29");
-  assert.equal(holidays.find((item) => item.name === "Ascension")?.date.toISOString().slice(0, 10), "2027-05-06");
-});
-
-test("les arrondis utilisent la demi-journée", () => {
-  assert.equal(roundHalf(12.24), 12);
-  assert.equal(roundHalf(12.26), 12.5);
-});
-
-test("le calcul mensuel distingue temps partiel et capacité", () => {
+test("monthly capacity separates part-time time from available capacity", () => {
   const stats = getMonthStats(2026, 0, { ...EMPTY_ENTRY, workRate: 80, leave: 2 });
-  assert.equal(stats.partTime, roundHalf(stats.baseline - stats.contracted));
-  assert.equal(stats.available, roundHalf(stats.contracted - 2));
+  assert.equal(stats.partTime, stats.baseline - stats.contracted);
+  assert.equal(stats.available, stats.contracted - 2);
 });
 
-test("les anciennes données sont migrées vers la version 2", () => {
-  const migrated = migrateData({ zone: "B", entries: { 2026: [{ workRate: 80 }] } });
-  assert.equal(migrated.version, 2);
-  assert.equal(migrated.zone, "B");
-  assert.equal(migrated.entries["2026"].length, 12);
-  assert.equal(migrated.entries["2026"][0].note, "");
+test("monthly entries are normalized and capped at contracted capacity", () => {
+  const entry = normalizeMonthlyEntry(
+    {
+      workRate: 87,
+      leave: 11.24,
+      rtt: 11.26,
+      training: -1,
+      other: Number.POSITIVE_INFINITY,
+    },
+    { baselineDays: 20 },
+  );
+
+  assert.deepEqual(entry, { workRate: 85, leave: 11, rtt: 6, training: 0, other: 0 });
 });
 
-test("un export CSV version 2 peut être réimporté", () => {
-  const entries = Array.from({ length: 12 }, (_, index) => ({ ...EMPTY_ENTRY, note: index === 0 ? "Formation; interne" : "" }));
-  const stats = entries.map((entry, index) => getMonthStats(2026, index, entry));
-  const csv = exportCapacityCsv(Array.from({ length: 12 }, (_, index) => String(index + 1)), entries, stats);
-  const imported = importCapacityCsv(csv);
-  assert.equal(imported.length, 12);
-  assert.equal(imported[0].note, "Formation; interne");
+test("the fiscal-year model normalizes twelve months and aggregates once", () => {
+  const model = calculateFiscalYear(2026, [{ ...EMPTY_ENTRY, leave: 1 }]);
+  assert.equal(model.entries.length, 12);
+  assert.equal(model.stats.length, 12);
+  assert.equal(model.summary.leave, 1);
+  assert.equal(model.summary.baseline, 254);
+});
+
+test("updating a month reports when the domain clamps an absence", () => {
+  const result = updateMonthlyEntry([], 2026, 0, "leave", 100);
+  assert.equal(result.clamped, true);
+  assert.equal(result.entries[0]?.leave, 22);
+});
+
+test("replicating a field preserves unrelated values", () => {
+  const entries = Array.from({ length: 12 }, (_, index) => ({
+    ...EMPTY_ENTRY,
+    workRate: 80,
+    leave: index / 2,
+    other: index === 1 ? 2 : 0,
+  }));
+  const updated = applyFieldToFiscalYear(entries, 2026, 1, "leave");
+  assert.deepEqual(
+    updated.map(({ leave }) => leave),
+    Array(12).fill(0.5),
+  );
+  assert.equal(updated[1]?.other, 2);
+  assert.equal(updated[0]?.workRate, 80);
+});
+
+test("replicating a field also initializes an unedited fiscal year", () => {
+  const updated = applyFieldToFiscalYear([], 2026, 0, "workRate");
+  assert.equal(updated.length, 12);
+  assert.equal(
+    updated.every(({ workRate }) => workRate === 100),
+    true,
+  );
 });

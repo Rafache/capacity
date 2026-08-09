@@ -10,9 +10,8 @@ createRoot(document.getElementById("root")!).render(
 );
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
-      // L’application reste utilisable en ligne si l’enregistrement échoue.
-    });
-  });
+  void navigator.serviceWorker
+    .getRegistration()
+    .then((registration) => registration?.unregister())
+    .catch(() => undefined);
 }

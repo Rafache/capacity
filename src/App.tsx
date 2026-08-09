@@ -1,315 +1,165 @@
+import { useCallback, useEffect, useState, type ChangeEvent } from "react";
+import { CsvImportError, exportCapacityCsv, importCapacityCsv } from "./domain/csv";
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from "react";
-import {
-  AlertTriangle,
-  ChartNoAxesColumnIncreasing,
-  CircleCheckBig,
-  X,
-} from "lucide-react";
-import { ActionMenu } from "./components/ActionMenu";
-import { exportCapacityCsv, importCapacityCsv } from "./domain/csv";
-import {
-  EMPTY_ENTRY,
-  STORAGE_KEY,
   availableFiscalYears,
-  emptyData,
-  getMonthStats,
-  loadData,
-  normalizeEntry,
-  saveData,
+  calculateFiscalYear,
+  EMPTY_ENTRY,
 } from "./domain/capacityData";
+import { AppFeedback, type Notice } from "./components/AppFeedback";
+import { AppHeader, type ViewTab } from "./components/AppHeader";
 import { AnnualView } from "./views/AnnualView";
 import { MonthlyView } from "./views/MonthlyView";
-import type { CapacityData, Entry, SegmentKey, Zone } from "./types";
+import { t } from "./i18n/translate";
+import { useCapacityStore } from "./hooks/useCapacityStore";
+import type { EntryNumericKey } from "./types";
 
-const MONTHS_SHORT = [
-  "Juil.",
-  "Août",
-  "Sept.",
-  "Oct.",
-  "Nov.",
-  "Déc.",
-  "Janv.",
-  "Févr.",
-  "Mars",
-  "Avr.",
-  "Mai",
-  "Juin",
-];
-
-type Notice = {
-  message: string;
-  type: "success" | "error";
+const csvErrorMessages: Record<CsvImportError["code"], string> = {
+  "file-too-large": t.errors.fileTooLarge,
+  "invalid-format": t.errors.invalidFormat,
+  "invalid-columns": t.errors.invalidColumns,
+  "invalid-months": t.errors.invalidMonths,
+  "invalid-value": t.errors.invalidValue,
 };
 
 export default function App() {
-  const years = useMemo(() => availableFiscalYears(), []);
-  const [tab, setTab] = useState<"monthly" | "annual">("annual");
-  const [startYear, setStartYear] = useState(years[1]);
+  const years = availableFiscalYears();
+  const defaultYear = years[0]!;
+  const store = useCapacityStore();
+  const { data } = store;
+  const [tab, setTab] = useState<ViewTab>("annual");
+  const [startYear, setStartYear] = useState(defaultYear);
   const [monthIndex, setMonthIndex] = useState(0);
-  const [data, setData] = useState<CapacityData>(() => emptyData());
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [notice, setNotice] = useState<Notice | null>(null);
-  const storageReady = useRef(false);
+  const [notice, setNotice] = useState<Notice | null>(() =>
+    store.loadWarning
+      ? {
+          message:
+            store.loadWarning === "repaired"
+              ? t.notices.repaired
+              : t.notices.storageUnavailable,
+          type: "error",
+        }
+      : null,
+  );
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+  const [pendingApplyField, setPendingApplyField] = useState<EntryNumericKey | null>(
+    null,
+  );
   const closeActions = useCallback(() => setActionsOpen(false), []);
-
-  useEffect(() => {
-    setData(loadData(window.localStorage));
-    storageReady.current = true;
-  }, []);
-
-  useEffect(() => {
-    if (storageReady.current) saveData(window.localStorage, data);
-  }, [data]);
-
   useEffect(() => {
     if (!notice) return;
     const timeout = window.setTimeout(() => setNotice(null), 3000);
     return () => window.clearTimeout(timeout);
   }, [notice]);
 
-  const entries = useMemo(
-    () =>
-      Array.from({ length: 12 }, (_, index) =>
-        normalizeEntry(data.entries[String(startYear)]?.[index]),
-      ),
-    [data.entries, startYear],
-  );
-  const stats = useMemo(
-    () =>
-      entries.map((entry, index) =>
-        getMonthStats(startYear, index, entry),
-      ),
-    [entries, startYear],
-  );
-  const currentEntry = entries[monthIndex];
-  const currentStats = stats[monthIndex];
-  const annualBaseline = stats.reduce(
-    (sum, item) => sum + item.baseline,
-    0,
-  );
-  const annualAvailable = stats.reduce(
-    (sum, item) => sum + item.available,
-    0,
-  );
-  const annualWorkRate = annualBaseline
-    ? Math.round(
-        (stats.reduce((sum, item) => sum + item.contracted, 0) /
-          annualBaseline) *
-          100,
-      )
-    : 0;
-  const annualRate = annualBaseline
-    ? Math.round((annualAvailable / annualBaseline) * 100)
-    : 0;
-  const annualStats = (
-    ["available", "leave", "rtt", "training", "other"] as SegmentKey[]
-  ).reduce(
-    (result, key) => ({
-      ...result,
-      [key]: stats.reduce((sum, item) => sum + item[key], 0),
-    }),
-    {} as Record<SegmentKey, number>,
-  );
-  const annualUnavailable =
-    annualStats.leave +
-    annualStats.rtt +
-    annualStats.training +
-    annualStats.other;
-
-  const replaceYear = (nextEntries: Entry[]) => {
-    setData((previous) => ({
-      ...previous,
-      entries: { ...previous.entries, [String(startYear)]: nextEntries },
-    }));
-  };
-
-  const updateEntry = (field: keyof Entry, value: number | string) => {
-    const next = [...entries];
-    next[monthIndex] = { ...next[monthIndex], [field]: value } as Entry;
-    replaceYear(next);
+  const fiscalYear = calculateFiscalYear(startYear, data.entries[String(startYear)]);
+  const { entries, stats } = fiscalYear;
+  const currentEntry = entries[monthIndex] ?? EMPTY_ENTRY;
+  const currentStats = stats[monthIndex] ?? fiscalYear.stats[0]!;
+  const updateEntry = (field: EntryNumericKey, value: number) => {
+    const result = store.updateEntry(startYear, monthIndex, field, value);
+    if (!result.saved) {
+      setNotice({ message: t.notices.storageSaveUnavailable, type: "error" });
+    } else if (result.clamped) {
+      setNotice({
+        message: t.notices.absenceClamped,
+        type: "error",
+      });
+    }
   };
 
   const exportCsv = () => {
-    const text = exportCapacityCsv(MONTHS_SHORT, entries, stats);
-    const url = URL.createObjectURL(
-      new Blob([text], { type: "text/csv;charset=utf-8" }),
-    );
+    const text = exportCapacityCsv(startYear, entries, stats);
+    const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `capacite-${startYear}-${startYear + 1}.csv`;
+    anchor.download = `capacity-${startYear}-${startYear + 1}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
-    setNotice({ message: "Export CSV créé.", type: "success" });
+    setNotice({ message: t.notices.exportComplete, type: "success" });
   };
 
   const importCsv = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
-      const imported = importCapacityCsv(await file.text());
-      replaceYear(imported);
+      const imported = importCapacityCsv(await file.text(), startYear);
+      const result = store.replaceYear(startYear, imported);
       setNotice({
-        message: "Import terminé : 12 mois ont été chargés.",
-        type: "success",
+        message: result.saved
+          ? t.notices.importComplete
+          : t.notices.storageSaveUnavailable,
+        type: result.saved ? "success" : "error",
       });
     } catch (error) {
       setNotice({
-        message: error instanceof Error ? error.message : "Import impossible.",
+        message:
+          error instanceof CsvImportError
+            ? csvErrorMessages[error.code]
+            : t.errors.importFailed,
         type: "error",
       });
     } finally {
       event.target.value = "";
-      closeActions();
+      setActionsOpen(false);
     }
   };
 
-  const clearStoredData = () => {
-    if (
-      !window.confirm("Effacer toutes les données enregistrées sur cet appareil ?")
-    )
-      return;
-    setData(emptyData());
-    window.localStorage.removeItem(STORAGE_KEY);
-    window.localStorage.removeItem("ma-capacite-v1");
+  const clearStoredData = () => setConfirmClearOpen(true);
+
+  const confirmClearStoredData = () => {
+    const result = store.clear();
+    setConfirmClearOpen(false);
     setNotice({
-      message: "Les données locales ont été effacées.",
-      type: "success",
+      message: result.saved ? t.notices.dataCleared : t.notices.storageSaveUnavailable,
+      type: result.saved ? "success" : "error",
     });
   };
 
-  const copyNext = () => {
-    const next = [...entries];
-    const target = (monthIndex + 1) % 12;
-    next[target] = { ...currentEntry };
-    replaceYear(next);
-    setMonthIndex(target);
-    setNotice({ message: "Le mois a été copié.", type: "success" });
-  };
-
-  const applyWorkRate = () => {
-    replaceYear(
-      entries.map((entry) => ({
-        ...entry,
-        workRate: currentEntry.workRate,
-      })),
-    );
+  const applyFieldToYear = (field: EntryNumericKey) => {
+    const result = store.applyField(startYear, monthIndex, field);
     setNotice({
-      message: "Le temps de travail a été appliqué aux 12 mois.",
-      type: "success",
+      message: result.saved ? t.notices.applied[field] : t.notices.storageSaveUnavailable,
+      type: result.saved ? "success" : "error",
     });
   };
 
-  const resetMonth = () => {
-    const next = [...entries];
-    next[monthIndex] = { ...EMPTY_ENTRY };
-    replaceYear(next);
-    setNotice({
-      message: "Le mois a été réinitialisé.",
-      type: "success",
-    });
+  const confirmApplyFieldToYear = () => {
+    if (!pendingApplyField) return;
+
+    applyFieldToYear(pendingApplyField);
+    setPendingApplyField(null);
   };
 
-  const changeTab = (nextTab: "monthly" | "annual") => {
+  const changeTab = (nextTab: ViewTab) => {
     setTab(nextTab);
-    closeActions();
+    setActionsOpen(false);
   };
 
   return (
     <main className="min-h-dvh bg-slate-50 text-slate-950 antialiased sm:px-5 sm:py-6">
       <section
         className="mx-auto min-h-dvh w-full max-w-5xl bg-white sm:min-h-0 sm:rounded-[2rem] sm:border sm:border-slate-200/80 sm:shadow-[0_24px_80px_rgba(15,23,42,0.10)]"
-        aria-label="Gestion de capacité"
+        aria-label={t.app.ariaLabel}
       >
-        <div className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-xl sm:rounded-t-[2rem] sm:px-6 sm:pt-5">
-          <header className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <span
-                className="hidden size-11 shrink-0 place-items-center rounded-2xl bg-slate-950 text-white shadow-sm sm:grid"
-                aria-hidden="true"
-              >
-                <ChartNoAxesColumnIncreasing className="size-5" />
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600">
-                  Planification
-                </p>
-                <h1 className="truncate text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
-                  Ma capacité
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              <label className="relative">
-                <span className="sr-only">Année budgétaire</span>
-                <select
-                  className="h-11 appearance-none rounded-2xl border border-slate-200 bg-slate-50 py-0 pl-3 pr-8 text-sm font-extrabold text-slate-900 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 sm:px-4 sm:pr-9 sm:text-base"
-                  value={startYear}
-                  onChange={(event) => {
-                    setStartYear(Number(event.target.value));
-                    setMonthIndex(0);
-                    closeActions();
-                  }}
-                >
-                  {years.map((year) => (
-                    <option key={year} value={year}>
-                      {year} — {year + 1}
-                    </option>
-                  ))}
-                </select>
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-                  ▾
-                </span>
-              </label>
-              <ActionMenu
-                open={actionsOpen}
-                showCsvActions={tab === "annual"}
-                showMonthlyActions={tab === "monthly"}
-                onToggle={() => setActionsOpen((open) => !open)}
-                onClose={closeActions}
-                onImport={importCsv}
-                onExport={exportCsv}
-                onApplyWorkRate={applyWorkRate}
-                onCopyNext={copyNext}
-                onResetMonth={resetMonth}
-                onClear={clearStoredData}
-              />
-            </div>
-          </header>
-
-          <nav
-            className="mt-4 grid grid-cols-2 rounded-2xl bg-slate-100 p-1"
-            aria-label="Vues"
-          >
-            <button
-              className={`h-11 rounded-xl text-sm font-extrabold transition sm:text-base ${
-                tab === "monthly"
-                  ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200/80"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
-              onClick={() => changeTab("monthly")}
-            >
-              Mensuelle
-            </button>
-            <button
-              className={`h-11 rounded-xl text-sm font-extrabold transition sm:text-base ${
-                tab === "annual"
-                  ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200/80"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
-              onClick={() => changeTab("annual")}
-            >
-              Annuelle
-            </button>
-          </nav>
-        </div>
+        <AppHeader
+          tab={tab}
+          actionsOpen={actionsOpen}
+          years={years}
+          startYear={startYear}
+          zone={data.zone}
+          onTabChange={changeTab}
+          onActionsToggle={() => setActionsOpen((open) => !open)}
+          onActionsClose={closeActions}
+          onFiscalYearChange={(year) => {
+            setStartYear(year);
+            setMonthIndex(0);
+          }}
+          onImport={importCsv}
+          onExport={exportCsv}
+          onZoneChange={store.setZone}
+          onClear={clearStoredData}
+        />
 
         <div className="px-4 py-5 sm:px-6 sm:py-7">
           {tab === "monthly" ? (
@@ -320,68 +170,35 @@ export default function App() {
               stats={currentStats}
               zone={data.zone}
               onMonthChange={setMonthIndex}
-              onZoneChange={(zone: Zone) =>
-                setData((previous) => ({ ...previous, zone }))
-              }
+              onRequestApplyToYear={setPendingApplyField}
               onChange={updateEntry}
             />
           ) : (
             <AnnualView
-              entries={entries}
+              startYear={startYear}
               stats={stats}
-              annualBaseline={annualBaseline}
-              annualAvailable={annualAvailable}
-              annualUnavailable={annualUnavailable}
-              annualRate={annualRate}
-              annualWorkRate={annualWorkRate}
-              annualStats={annualStats}
+              summary={fiscalYear.summary}
               onMonthOpen={(index) => {
                 setMonthIndex(index);
                 setTab("monthly");
+                closeActions();
               }}
             />
           )}
         </div>
       </section>
 
-      {notice && (
-        <div
-          className={`toast-in fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 z-[100] grid w-[min(430px,calc(100vw-1.25rem))] -translate-x-1/2 grid-cols-[2.25rem_minmax(0,1fr)_2rem] items-center gap-2.5 overflow-hidden rounded-2xl border p-3 pr-2 shadow-2xl ${
-            notice.type === "error"
-              ? "border-red-200 bg-red-50 text-red-900 shadow-red-950/15"
-              : "border-emerald-200 bg-emerald-50 text-emerald-900 shadow-emerald-950/15"
-          }`}
-          role={notice.type === "error" ? "alert" : "status"}
-          aria-live={notice.type === "error" ? "assertive" : "polite"}
-        >
-          <span
-            className={`grid size-9 place-items-center rounded-xl ${
-              notice.type === "error" ? "bg-red-100" : "bg-emerald-100"
-            }`}
-            aria-hidden="true"
-          >
-            {notice.type === "error" ? (
-              <AlertTriangle className="size-5" />
-            ) : (
-              <CircleCheckBig className="size-5" />
-            )}
-          </span>
-          <span className="text-sm font-bold leading-snug">{notice.message}</span>
-          <button
-            className="grid size-8 place-items-center rounded-lg transition hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-current/20"
-            onClick={() => setNotice(null)}
-            aria-label="Fermer la notification"
-          >
-            <X className="size-4" />
-          </button>
-          <span
-            className={`toast-progress absolute inset-x-0 bottom-0 h-1 origin-left ${
-              notice.type === "error" ? "bg-red-500" : "bg-emerald-500"
-            }`}
-            aria-hidden="true"
-          />
-        </div>
-      )}
+      <AppFeedback
+        notice={notice}
+        onDismissNotice={() => setNotice(null)}
+        confirmClearOpen={confirmClearOpen}
+        onCancelClear={() => setConfirmClearOpen(false)}
+        onConfirmClear={confirmClearStoredData}
+        pendingApplyField={pendingApplyField}
+        currentEntry={currentEntry}
+        onCancelApply={() => setPendingApplyField(null)}
+        onConfirmApply={confirmApplyFieldToYear}
+      />
     </main>
   );
 }

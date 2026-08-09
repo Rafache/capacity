@@ -1,63 +1,72 @@
-# Contribuer
+# Contributing
 
-L’application est volontairement simple : elle fonctionne entièrement dans le navigateur et est publiée automatiquement sur GitHub Pages.
+Ma capacité is intentionally small and browser-only. Contributions should reduce complexity or improve a user-visible guarantee without introducing an unnecessary framework or service.
 
-## Pré-requis
+## Prerequisites
 
-- Node.js en version LTS récente
+- Node.js `>=22 <23`
 - npm
 
-## Installer et lancer le projet
+## Install and run
 
 ```bash
 git clone https://github.com/Rafache/capacity.git
 cd capacity
-npm install
+npm ci
 npm run dev
 ```
 
-## Vérifier une modification
+## Required checks
 
-Avant de proposer une contribution, lancez :
+Run the complete check before opening a pull request:
 
 ```bash
-npm test
+npm run check
 ```
 
-Cette commande vérifie le typage, construit l’application statique et exécute les tests métier. En particulier, l’année budgétaire 2026–2027 doit conserver **254 jours ouvrés**.
+The check covers formatting, ESLint, application and test type checking, unit tests and the production build.
 
-Testez également, dans le navigateur :
+Manually verify the preview for:
 
-- la saisie mensuelle, y compris les demi-journées ;
-- les vues mensuelle et annuelle ;
-- la persistance après rechargement ;
-- l’import et l’export CSV ;
-- le rendu sur un écran mobile.
+- monthly and annual navigation;
+- half-day and part-time input limits;
+- persistence after reload;
+- CSV export, clear and re-import;
+- year and school-zone changes;
+- keyboard operation of the actions panel and confirmation dialog;
+- mobile and desktop layouts with reduced motion enabled.
 
-## Organisation du code
+## Code conventions
 
-- `src/views/` : écrans mensuel et annuel ;
-- `src/components/` : composants réutilisables ;
-- `src/capacity.ts` : règles de calcul ;
-- `src/data/schoolBreaks.ts` : vacances scolaires ;
-- `src/types.ts` : types partagés ;
-- `src/styles.css` : styles de l’application.
+- Application code, identifiers, test names, comments and JSDoc are written in English.
+- User-facing text belongs in the typed catalogue under `src/i18n/`.
+- French legacy CSV headers stay only in the compatibility parser.
+- Exported domain functions receive useful English JSDoc when their invariants or versioning are not obvious.
+- Prefer pure domain functions, native browser APIs and CSS over new dependencies.
+- Delete dead code before extracting a new abstraction.
+- Every button that is not a form submit has an explicit `type="button"`.
+- Keep focus behavior and accessible names intact when changing interactive components.
 
-Gardez les changements ciblés : évitez les dépendances et les refontes non nécessaires.
+## Data compatibility
 
-## Proposer une modification
+Changes to `localStorage` require a migration, boundary validation and tests. CSV changes must keep version 2 imports working unless a documented migration is added. Never commit personal entries, CSV exports, credentials or production data.
 
-1. Créez une branche descriptive depuis `main`, par exemple `fix/csv-import` ou `feature/school-breaks-2027`.
-2. Réalisez une modification limitée à un objectif clair.
-3. Lancez `npm test`.
-4. Ouvrez une pull request vers `main` en expliquant :
-   - le besoin traité ;
-   - les changements apportés ;
-   - les vérifications effectuées ;
-   - l’incidence éventuelle sur les données locales ou le CSV.
+## Project structure
 
-N’incluez jamais de données personnelles, d’exports CSV d’utilisateurs ou de clés dans le dépôt.
+```text
+src/
+  components/       reusable UI and interactions
+  data/             validated calendar data
+  domain/           pure business rules and persistence boundary
+  hooks/            small application stores
+  i18n/             typed catalogues and cached formatters
+  views/            monthly and annual screens
+tests/              unit and static security checks
+public/_headers     Cloudflare response headers
+```
 
-## Publication
+## Pull requests
 
-Chaque mise à jour fusionnée dans `main` est construite et publiée automatiquement sur GitHub Pages. Vérifiez que le workflow GitHub Actions est terminé avec succès après la fusion.
+Use a descriptive branch and keep one coherent objective per pull request. The description should explain the behavior, compatibility impact, checks run and any preview observations. For refactoring, include before/after measurements for lines, hooks, listeners, bundle size and check duration when relevant.
+
+Cloudflare creates a preview for the branch. Check the generated site and its response headers before merging into `main`.
