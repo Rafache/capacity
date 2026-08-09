@@ -1,4 +1,11 @@
-import { CalendarRange, ChevronLeft, ChevronRight, Clock3, Sun, type LucideIcon } from "lucide-react";
+import {
+  CalendarRange,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Sun,
+  type LucideIcon,
+} from "lucide-react";
 import { getFiscalMonth, publicHolidays } from "../domain/calendar";
 import { ENTRY_RULES, getAbsenceTotal, getEntryLimits } from "../domain/capacity";
 import { getSchoolBreaks } from "../data/schoolBreaks";
@@ -148,7 +155,9 @@ export function MonthlyView({
           })),
         }
       : null,
-  ].filter((section): section is CalendarSection => section !== null);  const absenceTotal = getAbsenceTotal(stats);
+  ].filter((section): section is CalendarSection => section !== null);
+
+  const absenceTotal = getAbsenceTotal(stats);
   const limits = getEntryLimits(startYear, monthIndex, entry);
   const monthLabel = `${formatMonthName(monthIndex, "long")} ${year}`;
 
@@ -201,6 +210,7 @@ export function MonthlyView({
         available={stats.available}
         values={stats}
       />
+
       <section aria-label={t.inputs.absences}>
         <div className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
           <InputRow
@@ -239,10 +249,12 @@ export function MonthlyView({
         <CalendarDetails
           sections={calendarSections}
           emptyMessage={
-            calendarBreaks ? t.summary.noCalendarEvents : t.summary.calendarUnpublished
+            calendarBreaks
+              ? t.summary.noCalendarEvents
+              : t.summary.calendarUnpublished
           }
         />
-      ) : null}}
+      ) : null}
     </div>
   );
 }
