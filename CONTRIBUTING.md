@@ -64,8 +64,22 @@ tests/              focused domain and format checks
 public/_headers     Cloudflare response headers
 ```
 
+## Issues
+
+Use the appropriate template in `.github/ISSUE_TEMPLATE/`:
+
+- `Bug report` for a reproducible defect;
+- `Feature request` for a user-facing improvement;
+- `Technical improvement` for refactoring, performance, security, tooling, or CI work.
+
+Prefix issue titles with `[P0]` for blocking or critical work, or `[P1]` for high-priority work. Keep each issue focused on one coherent objective.
+
 ## Pull requests
 
-Use a descriptive branch and keep one coherent objective per pull request. The description should explain the behavior, compatibility impact, checks run and any preview observations. For refactoring, include before/after measurements for lines, hooks, listeners, bundle size and check duration when relevant.
+Use a descriptive branch and keep one coherent objective per pull request. Use `.github/PULL_REQUEST_TEMPLATE.md` and explain the behavior, compatibility impact, checks run and any preview observations. For refactoring, include before/after measurements for lines, hooks, listeners, bundle size and check duration when relevant.
 
 Cloudflare creates a preview for the branch. Check the generated site and its response headers before merging into `main`.
+
+## Language
+
+Repository artifacts—including code, identifiers, tests, comments, documentation, issues and pull requests—are written in English. User-facing application text remains French and belongs in the translation catalogue.
