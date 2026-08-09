@@ -41,11 +41,6 @@ assignees: ""
 - [ ] Existing behavior remains unchanged.
 - [ ] Relevant tests are added or updated.
 
-## Validation
-
-- [ ] `npm run check` passes.
-- [ ] Relevant browser behavior has been checked.
-
 ## Dependencies
 
 <!-- Mention related issues, pull requests, or external dependencies. -->
