@@ -15,13 +15,18 @@ type Props = {
 };
 
 function CapacityBar({ values }: Pick<Props, "values">) {
-  const total = CAPACITY_SEGMENTS.reduce(
-    (sum, segment) => sum + Math.max(0, values[segment.key]),
-    0,
-  );
-  const description = CAPACITY_SEGMENTS.map(
-    ({ key }) => `${t.segments[key]} : ${formatNumber(values[key])} ${t.units.day}`,
-  ).join(", ");
+  const segments = CAPACITY_SEGMENTS.map(({ key, barClass }) => ({
+    key,
+    barClass,
+    value: Math.max(0, values[key]),
+  }));
+  const total = segments.reduce((sum, segment) => sum + segment.value, 0);
+  const description = segments
+    .map(
+      ({ key, value }) =>
+        `${t.segments[key]} : ${formatNumber(value)} ${t.units.day}`,
+    )
+    .join(", ");
 
   return (
     <span
@@ -29,15 +34,26 @@ function CapacityBar({ values }: Pick<Props, "values">) {
       role="img"
       aria-label={`${t.summary.distribution}. ${description}`}
     >
-      {CAPACITY_SEGMENTS.map(({ key, barClass }) => (
-        <span
-          className={`h-full min-w-0 ${barClass}`}
-          key={key}
-          style={{
-            width: `${total ? (Math.max(0, values[key]) / total) * 100 : 0}%`,
-          }}
-        />
-      ))}
+      {segments.map(({ key, barClass, value }) => {
+        if (!value || !total) return null;
+
+        const percentage = (value / total) * 100;
+
+        return (
+          <span
+            className={`relative flex h-full min-w-0 items-center justify-center overflow-hidden ${barClass}`}
+            key={key}
+            style={{ width: `${percentage}%` }}
+          >
+            <span
+              aria-hidden="true"
+              className="truncate whitespace-nowrap px-0.5 text-[8px] font-black leading-none text-white sm:text-[9px]"
+            >
+              {formatNumber(percentage)}%
+            </span>
+          </span>
+        );
+      })}
     </span>
   );
 }
