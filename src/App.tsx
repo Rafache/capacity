@@ -5,11 +5,7 @@ import {
   calculateFiscalYear,
   EMPTY_ENTRY,
 } from "./domain/capacity";
-import {
-  AppFeedback,
-  type Confirmation,
-  type Notice,
-} from "./components/AppFeedback";
+import { AppFeedback, type Confirmation, type Notice } from "./components/AppFeedback";
 import { AppHeader, type ViewTab } from "./components/AppHeader";
 import { AnnualView } from "./views/AnnualView";
 import { MonthlyView } from "./views/MonthlyView";
@@ -19,8 +15,7 @@ import type { EntryNumericKey } from "./types";
 
 function currentFiscalPosition(today = new Date()) {
   return {
-    startYear:
-      today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1,
+    startYear: today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1,
     monthIndex: (today.getMonth() + 6) % 12,
   };
 }
@@ -85,9 +80,7 @@ export default function App() {
         importCapacityCsv(await file.text(), startYear),
       );
       setNotice({
-        message: saved
-          ? t.notices.importComplete
-          : t.notices.storageUnavailable,
+        message: saved ? t.notices.importComplete : t.notices.storageUnavailable,
         type: saved ? "success" : "error",
       });
     } catch {
@@ -117,9 +110,7 @@ export default function App() {
   const openMonth = (index: number) => {
     setMonthIndex(index);
     setTab("monthly");
-    window.requestAnimationFrame(() =>
-      window.scrollTo({ top: 0, behavior: "smooth" }),
-    );
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
   };
 
   return (
@@ -159,9 +150,7 @@ export default function App() {
               stats={currentStats}
               zone={store.data.zone}
               onMonthChange={setMonthIndex}
-              onRequestApplyToYear={(field) =>
-                setConfirmation({ type: "apply", field })
-              }
+              onRequestApplyToYear={(field) => setConfirmation({ type: "apply", field })}
               onChange={updateEntry}
             />
           ) : (
