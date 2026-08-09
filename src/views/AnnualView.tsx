@@ -1,4 +1,4 @@
-import { Clock3 } from "lucide-react";
+import { CalendarDays, Clock3 } from "lucide-react";
 import { AnnualDistributionChart } from "../components/AnnualDistributionChart";
 import { CapacityEvolutionChart } from "../components/CapacityEvolutionChart";
 import { CapacitySummary } from "../components/CapacitySummary";
@@ -7,6 +7,10 @@ import { getAbsenceTotal } from "../domain/capacity";
 import { formatMonthName, formatNumber } from "../i18n/formatters";
 import { t } from "../i18n/fr";
 import type { CapacityTotals, Entry, MonthStats } from "../types";
+
+const TABLE_SEGMENTS = ["available", "training", "leave", "rtt", "other"].map(
+  (key) => CAPACITY_SEGMENTS.find((segment) => segment.key === key)!,
+);
 
 type Props = {
   entries: Entry[];
@@ -56,6 +60,17 @@ export function AnnualView({
                   {t.months.month}
                 </th>
                 <th
+                  className="px-0.5 py-2 text-slate-500"
+                  scope="col"
+                  aria-label={t.table.workingDays}
+                  title={t.table.workingDays}
+                >
+                  <CalendarDays className="mx-auto size-3.5" aria-hidden="true" />
+                  <span className="mt-0.5 block text-[6px] font-black leading-tight sm:text-[8px]">
+                    {t.table.workingDays}
+                  </span>
+                </th>
+                <th
                   className="px-0.5 py-2 text-blue-600"
                   scope="col"
                   aria-label={t.table.workRate}
@@ -66,7 +81,7 @@ export function AnnualView({
                     {t.table.workRate}
                   </span>
                 </th>
-                {CAPACITY_SEGMENTS.map(({ key, icon: Icon, textClass }) => (
+                {TABLE_SEGMENTS.map(({ key, icon: Icon, textClass }) => (
                   <th
                     className={`px-0.5 py-2 ${textClass}`}
                     key={key}
@@ -112,10 +127,13 @@ export function AnnualView({
                         {month}
                       </span>
                     </th>
+                    <td className="whitespace-nowrap px-0.5 text-center text-[9px] font-extrabold leading-none text-slate-700 sm:text-xs">
+                      {formatNumber(item.baseline)}
+                    </td>
                     <td className="whitespace-nowrap px-0.5 text-center text-[9px] font-extrabold leading-none text-blue-700 sm:text-xs">
                       {formatNumber(workRate)}%
                     </td>
-                    {CAPACITY_SEGMENTS.map((segment) => {
+                    {TABLE_SEGMENTS.map((segment) => {
                       const value = item[segment.key];
                       const display =
                         segment.key !== "available" && value === 0
@@ -140,11 +158,13 @@ export function AnnualView({
                 >
                   {t.months.total}
                 </th>
+                <td className="whitespace-nowrap px-0.5 text-center text-[9px] font-black leading-none text-slate-300 sm:text-xs">
+                  {formatNumber(summary.baseline)}
+                </td>
                 <td className="whitespace-nowrap px-0.5 text-center text-[9px] font-black leading-none text-slate-400 sm:text-xs">
                   —
                 </td>
-                {CAPACITY_SEGMENTS.map((segment) => (
-                  <td
+                {TABLE_SEGMENTS.map((segment) => (                  <td
                     className="whitespace-nowrap px-0.5 text-center text-[9px] font-black leading-none sm:text-xs"
                     key={segment.key}
                   >
