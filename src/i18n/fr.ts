@@ -4,6 +4,12 @@ export const t = {
     ariaLabel: "Gestion de capacité",
     views: "Vues",
   },
+  footer: {
+    madeWithLove: "Made with ♥ by",
+    profile: "Profil GitHub de RCH",
+    repository: "Dépôt GitHub",
+  },
+
   navigation: {
     monthly: "Mensuelle",
     annual: "Annuelle",
