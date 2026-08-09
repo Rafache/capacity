@@ -47,3 +47,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the project conventions, commit forma
 Cloudflare Pages deploys `main` and creates previews for pull requests. The application is fully static and does not require a server-side runtime.
 
 Browser security and cache headers are defined in `public/_headers`.
+
+## License
+
+Licensed under the [MIT License](LICENSE).
