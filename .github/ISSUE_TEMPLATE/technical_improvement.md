@@ -38,12 +38,6 @@ assignees: ""
 - [ ]
 - [ ]
 
-## Expected validation
-
-- [ ] `npm run check` passes.
-- [ ] Affected behavior has been checked.
-- [ ] No unnecessary dependency or complexity has been introduced.
-
 ## Dependencies
 
 <!-- Mention related issues, pull requests, or external dependencies. -->
