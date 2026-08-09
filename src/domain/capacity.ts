@@ -12,6 +12,11 @@ import type {
 const ABSENCE_FIELDS = ["leave", "rtt", "training", "other"] as const;
 const TOTAL_FIELDS = ["baseline", "available", ...ABSENCE_FIELDS] as const;
 
+export const ENTRY_RULES = {
+  workRate: { min: 20, max: 100, step: 5 },
+  absence: { min: 0, max: 366, step: 0.5 },
+} as const;
+
 export const EMPTY_ENTRY: Entry = {
   workRate: 100,
   leave: 0,
@@ -46,18 +51,29 @@ export function getAbsenceTotal(
   return ABSENCE_FIELDS.reduce((total, field) => total + value[field], 0);
 }
 
+function normalizeAbsence(value: unknown) {
+  const { min, max, step } = ENTRY_RULES.absence;
+  return normalizeNumber(value, min, min, max, step);
+}
+
 function normalizeEntry(input: unknown, baseline?: number): Entry {
   const value = isRecord(input) ? input : {};
   const entry: Entry = {
-    workRate: normalizeNumber(value.workRate, 100, 20, 100, 5),
-    leave: normalizeNumber(value.leave, 0, 0, 366, 0.5),
-    rtt: normalizeNumber(value.rtt, 0, 0, 366, 0.5),
-    training: normalizeNumber(value.training, 0, 0, 366, 0.5),
-    other: normalizeNumber(value.other, 0, 0, 366, 0.5),
+    workRate: normalizeNumber(
+      value.workRate,
+      ENTRY_RULES.workRate.max,
+      ENTRY_RULES.workRate.min,
+      ENTRY_RULES.workRate.max,
+      ENTRY_RULES.workRate.step,
+    ),
+    leave: normalizeAbsence(value.leave),
+    rtt: normalizeAbsence(value.rtt),
+    training: normalizeAbsence(value.training),
+    other: normalizeAbsence(value.other),
   };
   if (baseline === undefined) return entry;
 
-  let remaining = roundHalf(baseline * (entry.workRate / 100));
+  let remaining = roundHalf(baseline * (entry.workRate / ENTRY_RULES.workRate.max));
   for (const field of ABSENCE_FIELDS) {
     entry[field] = Math.min(entry[field], remaining);
     remaining = roundHalf(remaining - entry[field]);
@@ -65,15 +81,22 @@ function normalizeEntry(input: unknown, baseline?: number): Entry {
   return entry;
 }
 
-function normalizeYear(startYear: number, source: unknown[]) {
+function yearBaselines(startYear: number) {
+  return Array.from({ length: 12 }, (_, index) => baselineDays(startYear, index));
+}
+
+function normalizeYear(
+  startYear: number,
+  source: unknown[],
+  baselines = yearBaselines(startYear),
+) {
   return Array.from({ length: 12 }, (_, index) =>
-    normalizeEntry(source[index], baselineDays(startYear, index)),
+    normalizeEntry(source[index], baselines[index]),
   );
 }
 
-function monthStats(startYear: number, index: number, entry: Entry): MonthStats {
-  const baseline = baselineDays(startYear, index);
-  const contracted = roundHalf(baseline * (entry.workRate / 100));
+function monthStats(baseline: number, entry: Entry): MonthStats {
+  const contracted = roundHalf(baseline * (entry.workRate / ENTRY_RULES.workRate.max));
   return {
     baseline,
     contracted,
@@ -88,13 +111,27 @@ function monthStats(startYear: number, index: number, entry: Entry): MonthStats 
 export function getEntryLimits(startYear: number, index: number, entry: Entry) {
   const baseline = baselineDays(startYear, index);
   const absenceTotal = getAbsenceTotal(entry);
-  const contracted = roundHalf(baseline * (entry.workRate / 100));
-  const requiredRate = baseline > 0 ? (absenceTotal / baseline) * 100 : 20;
-  const minWorkRate = Math.min(100, Math.max(20, Math.ceil(requiredRate / 5) * 5));
+  const contracted = roundHalf(baseline * (entry.workRate / ENTRY_RULES.workRate.max));
+  const requiredRate =
+    baseline > 0
+      ? (absenceTotal / baseline) * ENTRY_RULES.workRate.max
+      : ENTRY_RULES.workRate.min;
+  const minWorkRate = Math.min(
+    ENTRY_RULES.workRate.max,
+    Math.max(
+      ENTRY_RULES.workRate.min,
+      Math.ceil(requiredRate / ENTRY_RULES.workRate.step) * ENTRY_RULES.workRate.step,
+    ),
+  );
   const absenceMax = Object.fromEntries(
     ABSENCE_FIELDS.map((field) => [
       field,
-      roundHalf(Math.max(0, contracted - (absenceTotal - entry[field]))),
+      roundHalf(
+        Math.min(
+          ENTRY_RULES.absence.max,
+          Math.max(ENTRY_RULES.absence.min, contracted - (absenceTotal - entry[field])),
+        ),
+      ),
     ]),
   ) as Record<AbsenceKey, number>;
 
@@ -111,8 +148,20 @@ function updateNormalizedEntry(
   const limits = getEntryLimits(startYear, index, entry);
   const nextValue =
     field === "workRate"
-      ? normalizeNumber(value, entry.workRate, limits.minWorkRate, 100, 5)
-      : normalizeNumber(value, entry[field], 0, limits.absenceMax[field], 0.5);
+      ? normalizeNumber(
+          value,
+          entry.workRate,
+          limits.minWorkRate,
+          ENTRY_RULES.workRate.max,
+          ENTRY_RULES.workRate.step,
+        )
+      : normalizeNumber(
+          value,
+          entry[field],
+          ENTRY_RULES.absence.min,
+          limits.absenceMax[field],
+          ENTRY_RULES.absence.step,
+        );
 
   return {
     entry: { ...entry, [field]: nextValue },
@@ -121,7 +170,8 @@ function updateNormalizedEntry(
 }
 
 export function calculateFiscalYear(startYear: number, source: unknown[] = []) {
-  const entries = normalizeYear(startYear, source);
+  const baselines = yearBaselines(startYear);
+  const entries = normalizeYear(startYear, source, baselines);
   const summary: CapacityTotals = {
     baseline: 0,
     available: 0,
@@ -131,7 +181,7 @@ export function calculateFiscalYear(startYear: number, source: unknown[] = []) {
     other: 0,
   };
   const stats = entries.map((entry, index) => {
-    const stats = monthStats(startYear, index, entry);
+    const stats = monthStats(baselines[index]!, entry);
     for (const field of TOTAL_FIELDS) summary[field] += stats[field];
     return stats;
   });
@@ -164,12 +214,16 @@ export function applyFieldToFiscalYear(
   );
 }
 
-function currentFiscalYear(today = new Date()) {
-  return today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1;
+export function getCurrentFiscalPosition(today = new Date()) {
+  const month = today.getMonth();
+  return {
+    startYear: month >= 6 ? today.getFullYear() : today.getFullYear() - 1,
+    monthIndex: (month + 6) % 12,
+  };
 }
 
 export function availableFiscalYears(today = new Date()) {
-  const current = currentFiscalYear(today);
+  const { startYear: current } = getCurrentFiscalPosition(today);
   return Array.from({ length: 4 }, (_, index) => current + index);
 }
 
