@@ -193,7 +193,9 @@ export function MonthlyView({
                   <time dateTime={date.toISOString().slice(0, 10)}>
                     {formatHolidayDateLabel(date)}
                   </time>{" "}
-                  <span className="font-semibold text-slate-900">({t.holidays[key]})</span>
+                  <span className="font-semibold text-slate-900">
+                    ({t.holidays[key]})
+                  </span>
                 </span>
               </li>
             ))}
