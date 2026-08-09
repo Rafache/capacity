@@ -164,7 +164,8 @@ export function AnnualView({
                 <td className="whitespace-nowrap px-0.5 text-center text-[9px] font-black leading-none text-slate-400 sm:text-xs">
                   —
                 </td>
-                {TABLE_SEGMENTS.map((segment) => (                  <td
+                {TABLE_SEGMENTS.map((segment) => (
+                  <td
                     className="whitespace-nowrap px-0.5 text-center text-[9px] font-black leading-none sm:text-xs"
                     key={segment.key}
                   >
