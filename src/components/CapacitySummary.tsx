@@ -20,10 +20,7 @@ function CapacityBar({ values }: Pick<Props, "values">) {
   }));
   const total = segments.reduce((sum, segment) => sum + segment.value, 0);
   const description = segments
-    .map(
-      ({ key, value }) =>
-        `${t.segments[key]} : ${formatNumber(value)} ${t.units.day}`,
-    )
+    .map(({ key, value }) => `${t.segments[key]} : ${formatNumber(value)} ${t.units.day}`)
     .join(", ");
 
   return (
@@ -56,13 +53,7 @@ function CapacityBar({ values }: Pick<Props, "values">) {
   );
 }
 
-export function CapacitySummary({
-  title,
-  baseline,
-  absences,
-  available,
-  values,
-}: Props) {
+export function CapacitySummary({ title, baseline, absences, available, values }: Props) {
   const metrics = [
     {
       icon: CalendarDays,
