@@ -1,51 +1,24 @@
-## Type of change
-
-- [ ] Bug fix
-- [ ] Feature
-- [ ] Technical improvement
-- [ ] Documentation
-
 ## Summary
 
-<!-- Explain the problem and the outcome of this pull request. -->
-
-## Changes
-
--
--
--
+<!-- What changed and why? -->
 
 ## Related issue
 
-<!-- Use `Closes #123` when this pull request fully resolves an issue, or `Refs #123` when it is only related. -->
-
-## User impact
-
-<!-- Describe visible changes, or explain why there is no user-facing impact. -->
-
-## Compatibility
-
-- [ ] No impact on existing localStorage data.
-- [ ] No impact on CSV import or export.
-- [ ] Migration or compatibility work is described below if needed.
-
-<!-- Add details here when applicable. -->
+<!-- Use `Closes #123`, `Refs #123`, or `N/A`. -->
 
 ## Validation
 
-- [ ] `npm run check` passes locally.
-- [ ] Relevant browser behavior has been checked.
-- [ ] Mobile and desktop layouts have been checked when the UI changes.
-- [ ] Cloudflare Pages preview has been checked when the UI or build changes.
+- [ ] CI passes.
+- [ ] Relevant behavior has been checked locally.
+- [ ] Cloudflare preview has been checked for UI or build changes.
+- [ ] `localStorage` and CSV compatibility have been considered when relevant.
 
 ## Screenshots
 
-<!-- Add screenshots or a short recording for user-facing changes. -->
+<!-- Add screenshots only for user-facing changes. -->
 
-## Final checklist
+## Checklist
 
 - [ ] This pull request has one coherent objective.
-- [ ] Final commits follow the Conventional Commits rules in `CONTRIBUTING.md`.
-- [ ] Branch history has been cleaned of temporary or fixup commits before merge.
-- [ ] Code and documentation follow the repository conventions.
-- [ ] No personal data, credentials, or secrets are included.
+- [ ] Final commits follow `CONTRIBUTING.md` and temporary commits have been cleaned up.
+- [ ] No sensitive or personal data is included.

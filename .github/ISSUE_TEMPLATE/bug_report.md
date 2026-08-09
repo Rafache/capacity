@@ -8,39 +8,24 @@ assignees: ""
 
 ## Description
 
-<!-- What is wrong? Include the user impact. -->
+<!-- What is wrong, and what is the impact? -->
 
-## Steps to reproduce
+## Reproduction
 
 1.
 2.
 3.
 
-## Expected result
+## Expected behavior
 
-<!-- What should happen? -->
-
-## Observed result
-
-<!-- What actually happens? Include the exact error message when available. -->
+<!-- What should happen instead? -->
 
 ## Environment
 
 - Device:
 - Operating system:
 - Browser and version:
-- Application view or feature:
 
-## Screenshots or logs
+## Evidence
 
-<!-- Add screenshots, console output, or other useful evidence. Remove personal data. -->
-
-## Acceptance criteria
-
-- [ ] The reported behavior is fixed.
-- [ ] Existing behavior remains unchanged.
-- [ ] Relevant tests are added or updated.
-
-## Dependencies
-
-<!-- Mention related issues, pull requests, or external dependencies. -->
+<!-- Optional screenshots, logs or exact error messages. Remove personal data. -->

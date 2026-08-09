@@ -1,43 +1,24 @@
 ---
 name: Technical improvement
-about: Propose refactoring, performance, security, tooling, or CI work
+about: Propose refactoring, performance, security, tooling or CI work
 title: "[P1] "
 labels: ""
 assignees: ""
 ---
 
-## Technical context
-
-<!-- Describe the current implementation and the reason for the change. -->
-
 ## Problem
 
-<!-- What issue does this improvement solve? -->
+<!-- What technical issue or maintenance cost should be addressed? -->
 
-## Objective
+## Proposed change
 
-<!-- Describe the desired technical outcome. -->
+<!-- Describe the smallest useful change. -->
 
-## Proposed work
-
--
--
--
-
-## Constraints and compatibility
-
-<!-- Note compatibility requirements for the UI, localStorage, CSV, build, or deployment. -->
-
-## Measurements
-
-<!-- Add before/after measurements when relevant, such as build size or performance. -->
-
-## Acceptance criteria
+## Done when
 
 - [ ]
 - [ ]
-- [ ]
 
-## Dependencies
+## Compatibility
 
-<!-- Mention related issues, pull requests, or external dependencies. -->
+<!-- Note any UI, storage, CSV, build or deployment constraint when relevant. -->

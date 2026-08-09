@@ -6,28 +6,15 @@ labels: "enhancement"
 assignees: ""
 ---
 
-## Context
+## Problem
 
-<!-- What need or problem should this address? -->
+<!-- What user need or limitation should this address? -->
 
-## Objective
+## Proposal
 
-<!-- Describe the intended outcome in one sentence. -->
+<!-- Describe the desired behavior or experience. -->
 
-## Proposed solution
-
-<!-- Describe the expected behavior and user experience. -->
-
-## User impact
-
-<!-- Who benefits and how? -->
-
-## Acceptance criteria
+## Done when
 
 - [ ]
 - [ ]
-- [ ]
-
-## Dependencies
-
-<!-- Mention related issues, pull requests, or external dependencies. -->
