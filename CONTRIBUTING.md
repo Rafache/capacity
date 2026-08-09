@@ -1,13 +1,10 @@
 # Contributing
 
-Ma capacité is intentionally small and browser-only. Contributions should reduce complexity or improve a user-visible guarantee without introducing an unnecessary framework or service.
+Ma capacité is intentionally small and browser-only. Prefer simple changes that improve behavior or maintainability without adding unnecessary dependencies, abstractions or services.
 
-## Prerequisites
+## Setup
 
-- Node.js `>=22 <23`
-- npm
-
-## Install and run
+Requirements: Node.js `>=22 <23` and npm.
 
 ```bash
 git clone https://github.com/Rafache/capacity.git
@@ -16,56 +13,101 @@ npm ci
 npm run dev
 ```
 
-## Required checks
+## Development workflow
 
-Run the complete check before opening a pull request:
+1. Keep each issue and pull request focused on one coherent objective.
+2. Create a descriptive branch from the latest `main`.
+3. Make the smallest change that solves the problem.
+4. Run the full validation suite:
 
-```bash
-npm run check
-```
+   ```bash
+   npm run check
+   ```
 
-The check covers formatting, ESLint, application and test type checking, unit tests and the production build.
-
-Manually verify the preview for:
-
-- monthly and annual navigation;
-- half-day and part-time input limits;
-- persistence after reload;
-- CSV export, clear and re-import;
-- year and school-zone changes;
-- keyboard operation of the actions panel and confirmation dialog;
-- mobile and desktop layouts with reduced motion enabled.
+5. For UI or build changes, verify the Cloudflare pull-request preview and the relevant behavior on mobile and desktop.
 
 ## Code conventions
 
-- Application code, identifiers, test names, comments and JSDoc are written in English.
-- User-facing text belongs in the French catalogue under `src/i18n/`.
-- Exported domain functions receive useful English JSDoc when their invariants or versioning are not obvious.
-- Prefer pure domain functions, native browser APIs and CSS over new dependencies.
-- Delete dead code before extracting a new abstraction.
-- Every button that is not a form submit has an explicit `type="button"`.
-- Keep focus behavior and accessible names intact when changing interactive components.
+- Code, identifiers, tests, comments, JSDoc, issues and pull requests are written in English.
+- User-facing application text remains French and belongs in `src/i18n/`.
+- Prefer pure domain functions, native browser APIs and existing dependencies.
+- Remove dead code before introducing a new abstraction.
+- Preserve keyboard behavior, focus handling and accessible names when changing interactive UI.
+- Add JSDoc only when a public domain rule, invariant or compatibility constraint is not obvious from the code.
 
-## Data formats
+## Data compatibility
 
-Changes to `localStorage` must use a new storage key when the current document is no longer compatible. The application intentionally does not migrate older local formats. CSV changes must update the format marker or remain compatible with current exports. Never commit personal entries, CSV exports, credentials or production data.
+Application data is local to the browser.
 
-## Project structure
+- Incompatible `localStorage` changes must use a new storage key; old formats are intentionally not migrated.
+- CSV changes must remain compatible with the current export or increment the format marker.
+- Never commit personal exports, credentials, secrets or production data.
+
+## Commits
+
+Use a lightweight [Conventional Commits](https://www.conventionalcommits.org/) format:
 
 ```text
-src/
-  components/       reusable UI and interactions
-  data/             school calendar data
-  domain/           pure business rules and persistence boundary
-  hooks/            small application stores
-  i18n/             French labels and shared formatters
-  views/            monthly and annual screens
-tests/              focused domain and format checks
-public/_headers     Cloudflare response headers
+<type>: <description>
 ```
 
-## Pull requests
+Allowed types:
 
-Use a descriptive branch and keep one coherent objective per pull request. The description should explain the behavior, compatibility impact, checks run and any preview observations. For refactoring, include before/after measurements for lines, hooks, listeners, bundle size and check duration when relevant.
+- `feat` — user-facing capability;
+- `fix` — bug fix;
+- `refactor` — internal change without a functional change;
+- `test` — tests only;
+- `ci` — CI or GitHub Actions;
+- `docs` — documentation only;
+- `style` — formatting only;
+- `chore` — maintenance that does not fit another type.
 
-Cloudflare creates a preview for the branch. Check the generated site and its response headers before merging into `main`.
+Write the description in English, in imperative form, lowercase, without a trailing period. Scopes are optional and should only be used when they improve clarity.
+
+Examples:
+
+```text
+feat: add annual working days column
+fix: display full school holiday names
+refactor: simplify capacity calculation
+ci: split tests into dedicated job
+```
+
+When useful, reference an issue in the commit footer:
+
+```text
+Refs: #42
+```
+
+Use `Closes #42` in the pull request description when merging the pull request should close the issue.
+
+Use `!` for an intentional breaking change, for example `feat!: change stored capacity format`, and explain the compatibility impact.
+
+## Pull requests and merge history
+
+Development commits may be temporary, but clean the branch before merge. Fold `WIP`, typo fixes, test fixes and review-only corrections into the logical commit they belong to.
+
+Keep multiple commits when they represent distinct changes worth preserving. Each final commit must be understandable on its own and follow the commit convention above.
+
+- Prefer **Rebase and merge** for several clean, logical commits.
+- Use **Squash and merge** for one logical change or disposable intermediate history.
+- Avoid merge commits on `main` unless there is a specific reason to preserve one.
+
+The pull request template contains the final checklist. CI must be green before merge.
+
+## Issues
+
+Use the matching template for bugs, features or technical improvements. Prefix the title with `[P0]` for blocking work or `[P1]` for high-priority work when the priority is known.
+
+## Project map
+
+```text
+src/components/   UI components and interactions
+src/data/         school calendar data
+src/domain/       business rules, storage and CSV
+src/hooks/        application state hooks
+src/i18n/         French text and formatters
+src/views/        monthly and annual screens
+tests/            focused automated tests
+public/_headers   Cloudflare headers
+```

@@ -24,6 +24,11 @@ const datePartFormatter = new Intl.DateTimeFormat(locale, {
   month: "short",
   timeZone: "UTC",
 });
+const schoolBreakDatePartFormatter = new Intl.DateTimeFormat(locale, {
+  day: "numeric",
+  month: "long",
+  timeZone: "UTC",
+});
 
 export function formatNumber(value: number) {
   return numberFormatter.format(value);
@@ -49,5 +54,11 @@ function withTerminalPeriod(value: string) {
 export function formatDateRange(start: string, end: string) {
   return `du ${datePartFormatter.format(new Date(`${start}T00:00:00Z`))} au ${withTerminalPeriod(
     datePartFormatter.format(new Date(`${end}T00:00:00Z`)),
+  )}`;
+}
+
+export function formatSchoolBreakDateRange(start: string, end: string) {
+  return `${schoolBreakDatePartFormatter.format(new Date(`${start}T00:00:00Z`))} au ${schoolBreakDatePartFormatter.format(
+    new Date(`${end}T00:00:00Z`),
   )}`;
 }

@@ -4,6 +4,12 @@ export const t = {
     ariaLabel: "Gestion de capacité",
     views: "Vues",
   },
+  footer: {
+    madeWithLove: "Made with ♥ by",
+    profile: "Profil GitHub de RCH",
+    repository: "Dépôt GitHub",
+  },
+
   navigation: {
     monthly: "Mensuelle",
     annual: "Annuelle",
@@ -39,6 +45,7 @@ export const t = {
   },
   table: {
     workRate: "Temps de travail",
+    workingDays: "Ouvrés",
     available: "Capacité",
     leave: "CP",
     rtt: "RTT",
@@ -56,7 +63,7 @@ export const t = {
   summary: {
     month: "Synthèse du mois",
     year: "Synthèse de l’année",
-    workingDays: "Jours ouvrés",
+    workingDays: "Ouvrés",
     absences: "Absences",
     capacity: "Capacité",
     monthlyBalance: "Équilibre mensuel",
