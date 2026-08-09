@@ -30,22 +30,18 @@ jobs:
         run: npm ci
 
       - name: Format
-        id: format
         if: ${{ always() && steps.install.outcome == 'success' }}
         run: npm run format:check
 
       - name: Lint
-        id: lint
         if: ${{ always() && steps.install.outcome == 'success' }}
         run: npm run lint
 
       - name: Typecheck
-        id: typecheck
         if: ${{ always() && steps.install.outcome == 'success' }}
         run: npm run typecheck
 
       - name: Tests
-        id: tests
         if: ${{ always() && steps.install.outcome == 'success' }}
         run: npm test
 
@@ -55,33 +51,7 @@ jobs:
         run: npm run build
 
       - name: Verify production asset paths
-        id: assets
         if: ${{ always() && steps.install.outcome == 'success' && steps.build.outcome == 'success' }}
         run: |
           grep -q '="/assets/' dist/index.html
           ! grep -q '/capacity/' dist/index.html
-
-      - name: Annotate failures
-        if: always()
-        env:
-          INSTALL_OUTCOME: ${{ steps.install.outcome }}
-          FORMAT_OUTCOME: ${{ steps.format.outcome }}
-          LINT_OUTCOME: ${{ steps.lint.outcome }}
-          TYPECHECK_OUTCOME: ${{ steps.typecheck.outcome }}
-          TESTS_OUTCOME: ${{ steps.tests.outcome }}
-          BUILD_OUTCOME: ${{ steps.build.outcome }}
-          ASSETS_OUTCOME: ${{ steps.assets.outcome }}
-        run: |
-          annotate_failure() {
-            if [ "$1" = "failure" ]; then
-              echo "::error title=$2::$3"
-            fi
-          }
-
-          annotate_failure "$INSTALL_OUTCOME" "Dependency installation failed" "npm ci failed. See the Install dependencies step for details."
-          annotate_failure "$FORMAT_OUTCOME" "Formatting check failed" "Run npm run format locally to fix formatting issues."
-          annotate_failure "$LINT_OUTCOME" "Lint check failed" "ESLint reported errors. See inline annotations and the Lint step for details."
-          annotate_failure "$TYPECHECK_OUTCOME" "Typecheck failed" "TypeScript reported errors. See inline annotations and the Typecheck step for details."
-          annotate_failure "$TESTS_OUTCOME" "Tests failed" "One or more tests failed. See the Tests step for details."
-          annotate_failure "$BUILD_OUTCOME" "Build failed" "The production build failed. See the Build step for details."
-          annotate_failure "$ASSETS_OUTCOME" "Asset path verification failed" "The production output contains unexpected asset paths."
