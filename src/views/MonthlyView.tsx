@@ -43,6 +43,7 @@ export function MonthlyView({
       Date.parse(`${item.start}T00:00:00Z`) <= monthEnd &&
       Date.parse(`${item.end}T00:00:00Z`) >= monthStart,
   );
+  const isFrench = document.documentElement.lang.toLowerCase().startsWith("fr");
   const holidays = publicHolidays(year).filter(
     ({ date }) => date.getUTCMonth() === month,
   );
@@ -103,28 +104,6 @@ export function MonthlyView({
           className="space-y-1.5 text-[11px] leading-snug sm:space-y-2 sm:text-sm"
           aria-label={t.summary.calendarDetails}
         >
-          {holidays.length ? (
-            <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
-              <Sun
-                className="mt-0.5 size-3.5 shrink-0 text-amber-300"
-                aria-hidden="true"
-              />
-              <span className="min-w-0 flex-1">
-                <strong className="font-extrabold text-white/90">
-                  {t.summary.publicHolidays}:{" "}
-                </strong>
-                <span className="font-medium">
-                  {holidays
-                    .map(
-                      ({ key, date }) =>
-                        `${formatHolidayDateLabel(date)} (${t.holidays[key]})`,
-                    )
-                    .join(", ")}
-                </span>
-              </span>
-            </p>
-          ) : null}
-
           {schoolBreaks?.length ? (
             <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
               <CalendarRange
@@ -147,7 +126,7 @@ export function MonthlyView({
             </p>
           ) : null}
 
-          {calendarBreaks && !holidays.length && !schoolBreaks?.length ? (
+          {calendarBreaks && !schoolBreaks?.length ? (
             <p className="font-medium text-slate-400">{t.summary.noCalendarEvents}</p>
           ) : null}
           {!calendarBreaks ? (
@@ -189,6 +168,38 @@ export function MonthlyView({
           ))}
         </div>
       </section>
+
+      {isFrench && holidays.length ? (
+        <section
+          className="rounded-xl border border-amber-200/80 bg-amber-50/70 p-3 shadow-sm sm:rounded-2xl sm:p-4"
+          aria-label={t.summary.publicHolidays}
+        >
+          <div className="flex items-center gap-2">
+            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-700 sm:size-9">
+              <Sun className="size-4" aria-hidden="true" />
+            </span>
+            <h2 className="text-sm font-black text-slate-950 sm:text-base">
+              {t.summary.publicHolidays}
+            </h2>
+          </div>
+          <ul className="mt-2 grid gap-1.5 text-[11px] leading-snug text-slate-600 sm:grid-cols-2 sm:text-sm">
+            {holidays.map(({ key, date }) => (
+              <li className="flex min-w-0 items-start gap-2" key={key}>
+                <span
+                  className="mt-1.5 size-1.5 shrink-0 rounded-full bg-amber-400"
+                  aria-hidden="true"
+                />
+                <span className="min-w-0">
+                  <time dateTime={date.toISOString().slice(0, 10)}>
+                    {formatHolidayDateLabel(date)}
+                  </time>{" "}
+                  <span className="font-semibold text-slate-900">({t.holidays[key]})</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }
