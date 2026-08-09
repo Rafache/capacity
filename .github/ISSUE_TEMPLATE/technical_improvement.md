@@ -20,9 +20,9 @@ assignees: ""
 
 ## Proposed work
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Constraints and compatibility
 
