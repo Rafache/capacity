@@ -5,7 +5,11 @@ import {
   calculateFiscalYear,
   EMPTY_ENTRY,
 } from "./domain/capacity";
-import { AppFeedback, type Confirmation, type Notice } from "./components/AppFeedback";
+import {
+  AppFeedback,
+  type Confirmation,
+  type Notice,
+} from "./components/AppFeedback";
 import { AppHeader, type ViewTab } from "./components/AppHeader";
 import { AnnualView } from "./views/AnnualView";
 import { MonthlyView } from "./views/MonthlyView";
@@ -15,7 +19,8 @@ import type { EntryNumericKey } from "./types";
 
 function currentFiscalPosition(today = new Date()) {
   return {
-    startYear: today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1,
+    startYear:
+      today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1,
     monthIndex: (today.getMonth() + 6) % 12,
   };
 }
@@ -80,7 +85,9 @@ export default function App() {
         importCapacityCsv(await file.text(), startYear),
       );
       setNotice({
-        message: saved ? t.notices.importComplete : t.notices.storageUnavailable,
+        message: saved
+          ? t.notices.importComplete
+          : t.notices.storageUnavailable,
         type: saved ? "success" : "error",
       });
     } catch {
@@ -110,7 +117,9 @@ export default function App() {
   const openMonth = (index: number) => {
     setMonthIndex(index);
     setTab("monthly");
-    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    window.requestAnimationFrame(() =>
+      window.scrollTo({ top: 0, behavior: "smooth" }),
+    );
   };
 
   return (
@@ -150,7 +159,9 @@ export default function App() {
               stats={currentStats}
               zone={store.data.zone}
               onMonthChange={setMonthIndex}
-              onRequestApplyToYear={(field) => setConfirmation({ type: "apply", field })}
+              onRequestApplyToYear={(field) =>
+                setConfirmation({ type: "apply", field })
+              }
               onChange={updateEntry}
             />
           ) : (
@@ -168,7 +179,9 @@ export default function App() {
 
         <footer className="border-t border-slate-100 px-4 py-4 text-center text-[10px] text-slate-400 sm:px-6 sm:py-5 sm:text-xs">
           <p>
-            <span>© {new Date().getFullYear()} · {t.footer.madeWithLove} </span>
+            <span>
+              © {new Date().getFullYear()} · {t.footer.madeWithLove}{" "}
+            </span>
             <a
               className="font-bold text-slate-600 underline decoration-slate-300 underline-offset-2 transition hover:text-blue-600 hover:decoration-blue-300 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               href="https://github.com/Rafache"
