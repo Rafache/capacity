@@ -39,29 +39,28 @@ Manually verify the preview for:
 ## Code conventions
 
 - Application code, identifiers, test names, comments and JSDoc are written in English.
-- User-facing text belongs in the typed catalogue under `src/i18n/`.
-- French legacy CSV headers stay only in the compatibility parser.
+- User-facing text belongs in the French catalogue under `src/i18n/`.
 - Exported domain functions receive useful English JSDoc when their invariants or versioning are not obvious.
 - Prefer pure domain functions, native browser APIs and CSS over new dependencies.
 - Delete dead code before extracting a new abstraction.
 - Every button that is not a form submit has an explicit `type="button"`.
 - Keep focus behavior and accessible names intact when changing interactive components.
 
-## Data compatibility
+## Data formats
 
-Changes to `localStorage` require a migration, boundary validation and tests. CSV changes must keep version 2 imports working unless a documented migration is added. Never commit personal entries, CSV exports, credentials or production data.
+Changes to `localStorage` must use a new storage key when the current document is no longer compatible. The application intentionally does not migrate older local formats. CSV changes must update the format marker or remain compatible with current exports. Never commit personal entries, CSV exports, credentials or production data.
 
 ## Project structure
 
 ```text
 src/
   components/       reusable UI and interactions
-  data/             validated calendar data
+  data/             school calendar data
   domain/           pure business rules and persistence boundary
   hooks/            small application stores
-  i18n/             typed catalogues and cached formatters
+  i18n/             French labels and shared formatters
   views/            monthly and annual screens
-tests/              unit and static security checks
+tests/              focused domain and format checks
 public/_headers     Cloudflare response headers
 ```
 

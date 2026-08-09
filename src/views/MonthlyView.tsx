@@ -1,26 +1,16 @@
-import {
-  CalendarDays,
-  CalendarRange,
-  CalendarX2,
-  ChevronLeft,
-  ChevronRight,
-  Clock3,
-  Gauge,
-  Sun,
-} from "lucide-react";
+import { CalendarRange, ChevronLeft, ChevronRight, Clock3, Sun } from "lucide-react";
 import { getFiscalMonth, publicHolidays } from "../domain/calendar";
-import { getAbsenceTotal } from "../domain/capacityData";
+import { getAbsenceTotal, getEntryLimits } from "../domain/capacity";
 import { getSchoolBreaks } from "../data/schoolBreaks";
 import { CapacitySummary } from "../components/CapacitySummary";
 import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
 import { InputRow } from "../components/InputRow";
 import {
-  formatDateLabel,
   formatDateRange,
+  formatHolidayDateLabel,
   formatMonthName,
-  formatNumber,
 } from "../i18n/formatters";
-import { t } from "../i18n/translate";
+import { t } from "../i18n/fr";
 import type { Entry, EntryNumericKey, MonthStats, Zone } from "../types";
 
 type Props = {
@@ -57,144 +47,150 @@ export function MonthlyView({
     ({ date }) => date.getUTCMonth() === month,
   );
   const absenceTotal = getAbsenceTotal(stats);
-  const monthName = formatMonthName(startYear, monthIndex, "long");
+  const limits = getEntryLimits(startYear, monthIndex, entry);
+  const monthLabel = `${formatMonthName(monthIndex, "long")} ${year}`;
 
   return (
-    <div className="space-y-4 sm:space-y-5">
-      <div className="monthly-month-nav grid grid-cols-[3rem_minmax(0,1fr)_3rem] items-center gap-3">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="monthly-month-nav grid grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] items-center gap-2">
         <button
-          className="grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
+          className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
           type="button"
           onClick={() => onMonthChange((monthIndex + 11) % 12)}
           aria-label={t.navigation.previousMonth}
         >
-          <ChevronLeft className="size-5" aria-hidden="true" />
+          <ChevronLeft className="size-4" aria-hidden="true" />
         </button>
-        <div className="min-w-0 text-center">
-          <strong className="block truncate text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
-            {monthName} {year}
+        <label className="relative grid min-w-0 place-items-center text-center">
+          <span className="sr-only">{t.navigation.chooseMonth}</span>
+          <strong className="whitespace-nowrap text-lg font-black tracking-tight text-slate-950 sm:text-xl">
+            {monthLabel}
           </strong>
-        </div>
+          <select
+            className="absolute inset-0 size-full cursor-pointer opacity-0"
+            value={monthIndex}
+            aria-label={t.navigation.chooseMonth}
+            onChange={(event) => onMonthChange(Number(event.target.value))}
+          >
+            {Array.from({ length: 12 }, (_, index) => {
+              const fiscalMonth = getFiscalMonth(startYear, index);
+              return (
+                <option key={index} value={index}>
+                  {formatMonthName(index, "long")} {fiscalMonth.year}
+                </option>
+              );
+            })}
+          </select>
+        </label>
         <button
-          className="grid size-12 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
+          className="grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-blue-100"
           type="button"
           onClick={() => onMonthChange((monthIndex + 1) % 12)}
           aria-label={t.navigation.nextMonth}
         >
-          <ChevronRight className="size-5" aria-hidden="true" />
+          <ChevronRight className="size-4" aria-hidden="true" />
         </button>
       </div>
 
       <CapacitySummary
         title={t.summary.month}
-        barValues={stats}
-        items={[
-          {
-            icon: CalendarDays,
-            label: t.summary.workingDays,
-            value: stats.baseline,
-            unit: t.units.day,
-            tone: "neutral",
-          },
-          {
-            icon: CalendarX2,
-            label: t.summary.absences,
-            value: formatNumber(absenceTotal),
-            unit: t.units.day,
-            tone: "negative",
-          },
-          {
-            icon: Gauge,
-            label: t.summary.capacity,
-            value: formatNumber(stats.available),
-            unit: t.units.day,
-            tone: "positive",
-          },
-        ]}
-        afterBar={
-          <div
-            className="space-y-1.5 text-[11px] leading-snug sm:space-y-2 sm:text-sm"
-            aria-label={t.summary.calendarDetails}
-          >
-            {holidays.length ? (
-              <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
-                <Sun
-                  className="mt-0.5 size-3.5 shrink-0 text-amber-300"
-                  aria-hidden="true"
-                />
-                <span className="min-w-0 flex-1">
-                  <strong className="font-extrabold text-white/90">
-                    {t.summary.publicHolidays}:{" "}
-                  </strong>
-                  <span className="font-medium">
-                    {holidays
-                      .map(
-                        ({ key, date }) =>
-                          `${t.holidays[key]} · ${formatDateLabel(date)}`,
-                      )
-                      .join(" · ")}
-                  </span>
+        baseline={stats.baseline}
+        absences={absenceTotal}
+        available={stats.available}
+        values={stats}
+      >
+        <div
+          className="space-y-1.5 text-[11px] leading-snug sm:space-y-2 sm:text-sm"
+          aria-label={t.summary.calendarDetails}
+        >
+          {holidays.length ? (
+            <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
+              <Sun
+                className="mt-0.5 size-3.5 shrink-0 text-amber-300"
+                aria-hidden="true"
+              />
+              <span className="min-w-0 flex-1">
+                <strong className="font-extrabold text-white/90">
+                  {t.summary.publicHolidays}:{" "}
+                </strong>
+                <span className="font-medium">
+                  {holidays
+                    .map(
+                      ({ key, date }) =>
+                        `${formatHolidayDateLabel(date)} (${t.holidays[key]})`,
+                    )
+                    .join(", ")}
                 </span>
-              </p>
-            ) : null}
+              </span>
+            </p>
+          ) : null}
 
-            {schoolBreaks?.length ? (
-              <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
-                <CalendarRange
-                  className="mt-0.5 size-3.5 shrink-0 text-blue-300"
-                  aria-hidden="true"
-                />
-                <span className="min-w-0 flex-1">
-                  <strong className="font-extrabold text-white/90">
-                    {t.summary.schoolBreaks}:{" "}
-                  </strong>
-                  <span className="font-medium">
-                    {schoolBreaks
-                      .map(
-                        ({ key, start, end }) =>
-                          `${t.schoolBreakNames[key]} · ${formatDateRange(start, end)}`,
-                      )
-                      .join(" · ")}
-                  </span>
-                </span>
-              </p>
-            ) : null}
+          {schoolBreaks?.length ? (
+            <p className="flex min-w-0 items-start gap-1.5 text-slate-300">
+              <CalendarRange
+                className="mt-0.5 size-3.5 shrink-0 text-blue-300"
+                aria-hidden="true"
+              />
+              <span className="min-w-0 flex-1 font-medium">
+                <strong className="font-extrabold text-white/90">Vacances:{" "}</strong>
+                {schoolBreaks
+                  .map(({ key, start, end }) => {
+                    const rawName = t.schoolBreakNames[key].replace(
+                      /^Vacances (de la |d’|d')?/u,
+                      "",
+                    );
+                    const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+                    const range = formatDateRange(start, end)
+                      .replace(/^du /, "")
+                      .replace(/\.$/, "")
+                      .replace(/\boct\./, "octobre")
+                      .replace(/\bnov\./, "novembre")
+                      .replace(/\bdéc\./, "décembre")
+                      .replace(/\bjanv\./, "janvier")
+                      .replace(/\bfévr\./, "février")
+                      .replace(/\bavr\./, "avril")
+                      .replace(/\bjuil\./, "juillet")
+                      .replace(/\bsept\./, "septembre");
+                    return `${range} (${name} - Zone ${zone})`;
+                  })
+                  .join(", ")}
+              </span>
+            </p>
+          ) : null}
 
-            {calendarBreaks && !holidays.length && !schoolBreaks?.length ? (
-              <p className="font-medium text-slate-400">{t.summary.noCalendarEvents}</p>
-            ) : null}
-            {!calendarBreaks ? (
-              <p className="font-medium text-slate-400">
-                {t.summary.calendarUnpublished}
-              </p>
-            ) : null}
-          </div>
-        }
-      />
-
-      <InputRow
-        icon={Clock3}
-        iconClass="bg-blue-50 text-blue-600"
-        label={t.fields.workRate}
-        value={entry.workRate}
-        min={20}
-        max={100}
-        step={5}
-        unit={t.units.percent}
-        onChange={(value) => onChange("workRate", value)}
-        onApplyToYear={() => onRequestApplyToYear("workRate")}
-      />
+          {calendarBreaks && !holidays.length && !schoolBreaks?.length ? (
+            <p className="font-medium text-slate-400">{t.summary.noCalendarEvents}</p>
+          ) : null}
+          {!calendarBreaks ? (
+            <p className="font-medium text-slate-400">{t.summary.calendarUnpublished}</p>
+          ) : null}
+        </div>
+      </CapacitySummary>
 
       <section aria-label={t.inputs.absences}>
-        <div className="space-y-2.5">
+        <div className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
+          <InputRow
+            grouped
+            icon={Clock3}
+            iconClass="bg-blue-50 text-blue-600"
+            label={t.fields.workRate}
+            value={entry.workRate}
+            min={limits.minWorkRate}
+            max={100}
+            step={5}
+            unit={t.units.percent}
+            onChange={(value) => onChange("workRate", value)}
+            onApplyToYear={() => onRequestApplyToYear("workRate")}
+          />
           {ABSENCE_SEGMENTS.map(({ key, icon: Icon, softClass }) => (
             <InputRow
+              grouped
               icon={Icon}
               iconClass={softClass}
               key={key}
               label={t.fields[key]}
               value={entry[key]}
-              max={stats.contracted}
+              max={limits.absenceMax[key]}
               unit={t.units.day}
               onChange={(value) => onChange(key, value)}
               onApplyToYear={() => onRequestApplyToYear(key)}

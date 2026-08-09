@@ -1,20 +1,17 @@
 import { ChartNoAxesColumnIncreasing } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { ActionMenu } from "./ActionMenu";
-import { t } from "../i18n/translate";
+import { t } from "../i18n/fr";
 import type { Zone } from "../types";
 
 export type ViewTab = "monthly" | "annual";
 
 type Props = {
   tab: ViewTab;
-  actionsOpen: boolean;
   years: number[];
   startYear: number;
   zone: Zone;
   onTabChange: (tab: ViewTab) => void;
-  onActionsToggle: () => void;
-  onActionsClose: () => void;
   onFiscalYearChange: (year: number) => void;
   onImport: (event: ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
@@ -25,13 +22,10 @@ type Props = {
 /** Render the application chrome and keep navigation separate from data orchestration. */
 export function AppHeader({
   tab,
-  actionsOpen,
   years,
   startYear,
   zone,
   onTabChange,
-  onActionsToggle,
-  onActionsClose,
   onFiscalYearChange,
   onImport,
   onExport,
@@ -39,8 +33,8 @@ export function AppHeader({
   onClear,
 }: Props) {
   return (
-    <div className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-xl sm:rounded-t-[2rem] sm:px-6 sm:pt-5">
-      <header className="flex items-center justify-between gap-3">
+    <>
+      <header className="flex items-center justify-between gap-3 px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:pt-5">
         <div className="flex min-w-0 items-center gap-3">
           <span
             className="hidden size-11 shrink-0 place-items-center rounded-2xl bg-slate-950 text-white shadow-sm sm:grid"
@@ -60,11 +54,8 @@ export function AppHeader({
 
         {tab === "annual" ? (
           <ActionMenu
-            open={actionsOpen}
             years={years}
             startYear={startYear}
-            onToggle={onActionsToggle}
-            onClose={onActionsClose}
             onFiscalYearChange={onFiscalYearChange}
             onImport={onImport}
             onExport={onExport}
@@ -76,24 +67,26 @@ export function AppHeader({
       </header>
 
       <nav
-        className="mt-4 grid grid-cols-2 rounded-2xl bg-slate-100 p-1"
+        className="sticky top-0 z-40 grid grid-cols-2 border-b border-slate-200/80 bg-white/95 px-4 pb-3 pt-2 backdrop-blur-xl sm:static sm:border-b-0 sm:px-6 sm:pt-1"
         aria-label={t.app.views}
       >
-        {(["monthly", "annual"] as const).map((nextTab) => (
-          <button
-            className={`h-11 rounded-xl text-sm font-extrabold transition sm:text-base ${
-              tab === nextTab
-                ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200/80"
-                : "text-slate-500 hover:text-slate-800"
-            }`}
-            key={nextTab}
-            type="button"
-            onClick={() => onTabChange(nextTab)}
-          >
-            {t.navigation[nextTab]}
-          </button>
-        ))}
+        <span className="col-span-2 grid grid-cols-2 rounded-2xl bg-slate-100 p-1">
+          {(["monthly", "annual"] as const).map((nextTab) => (
+            <button
+              className={`h-11 rounded-xl text-sm font-extrabold transition sm:text-base ${
+                tab === nextTab
+                  ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200/80"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+              key={nextTab}
+              type="button"
+              onClick={() => onTabChange(nextTab)}
+            >
+              {t.navigation[nextTab]}
+            </button>
+          ))}
+        </span>
       </nav>
-    </div>
+    </>
   );
 }

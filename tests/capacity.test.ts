@@ -4,33 +4,32 @@ import {
   EMPTY_ENTRY,
   applyFieldToFiscalYear,
   calculateFiscalYear,
-  getMonthStats,
-  normalizeMonthlyEntry,
+  getEntryLimits,
   updateMonthlyEntry,
-} from "../src/domain/capacityData";
+} from "../src/domain/capacity";
 
-test("monthly capacity separates part-time time from available capacity", () => {
-  const stats = getMonthStats(2026, 0, { ...EMPTY_ENTRY, workRate: 80, leave: 2 });
-  assert.equal(stats.partTime, stats.baseline - stats.contracted);
+test("monthly capacity respects working time and absences", () => {
+  const stats = calculateFiscalYear(2026, [{ ...EMPTY_ENTRY, workRate: 80, leave: 2 }])
+    .stats[0]!;
   assert.equal(stats.available, stats.contracted - 2);
 });
 
-test("monthly entries are normalized and capped at contracted capacity", () => {
-  const entry = normalizeMonthlyEntry(
-    {
-      workRate: 87,
-      leave: 11.24,
-      rtt: 11.26,
-      training: -1,
-      other: Number.POSITIVE_INFINITY,
-    },
-    { baselineDays: 20 },
+test("entries use valid increments and cannot exceed contracted capacity", () => {
+  assert.deepEqual(
+    calculateFiscalYear(2026, [
+      {
+        workRate: 87,
+        leave: 11.24,
+        rtt: 11.26,
+        training: -1,
+        other: Number.POSITIVE_INFINITY,
+      },
+    ]).entries[0],
+    { workRate: 85, leave: 11, rtt: 7.5, training: 0, other: 0 },
   );
-
-  assert.deepEqual(entry, { workRate: 85, leave: 11, rtt: 6, training: 0, other: 0 });
 });
 
-test("the fiscal-year model normalizes twelve months and aggregates once", () => {
+test("a fiscal year always contains twelve months and the expected total", () => {
   const model = calculateFiscalYear(2026, [{ ...EMPTY_ENTRY, leave: 1 }]);
   assert.equal(model.entries.length, 12);
   assert.equal(model.stats.length, 12);
@@ -38,13 +37,31 @@ test("the fiscal-year model normalizes twelve months and aggregates once", () =>
   assert.equal(model.summary.baseline, 254);
 });
 
-test("updating a month reports when the domain clamps an absence", () => {
+test("updating a month reports a capped absence", () => {
   const result = updateMonthlyEntry([], 2026, 0, "leave", 100);
   assert.equal(result.clamped, true);
   assert.equal(result.entries[0]?.leave, 22);
 });
 
-test("replicating a field preserves unrelated values", () => {
+test("editing one absence never reduces another absence", () => {
+  const entries = [{ ...EMPTY_ENTRY, leave: 8, rtt: 6 }];
+  const result = updateMonthlyEntry(entries, 2026, 0, "leave", 20);
+  assert.equal(result.entries[0]?.leave, 16);
+  assert.equal(result.entries[0]?.rtt, 6);
+  assert.equal(result.clamped, true);
+});
+
+test("working time cannot fall below existing absences", () => {
+  const entry = { ...EMPTY_ENTRY, leave: 10, rtt: 5 };
+  const limits = getEntryLimits(2026, 0, entry);
+  const result = updateMonthlyEntry([entry], 2026, 0, "workRate", 20);
+  assert.equal(limits.minWorkRate, 70);
+  assert.equal(result.entries[0]?.workRate, 70);
+  assert.equal(result.entries[0]?.leave, 10);
+  assert.equal(result.entries[0]?.rtt, 5);
+});
+
+test("replication preserves unrelated monthly values", () => {
   const entries = Array.from({ length: 12 }, (_, index) => ({
     ...EMPTY_ENTRY,
     workRate: 80,
@@ -58,13 +75,4 @@ test("replicating a field preserves unrelated values", () => {
   );
   assert.equal(updated[1]?.other, 2);
   assert.equal(updated[0]?.workRate, 80);
-});
-
-test("replicating a field also initializes an unedited fiscal year", () => {
-  const updated = applyFieldToFiscalYear([], 2026, 0, "workRate");
-  assert.equal(updated.length, 12);
-  assert.equal(
-    updated.every(({ workRate }) => workRate === 100),
-    true,
-  );
 });

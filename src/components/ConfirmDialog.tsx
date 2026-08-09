@@ -1,6 +1,6 @@
 import { AlertTriangle, X, type LucideIcon } from "lucide-react";
 import { useEffect, useId, useRef } from "react";
-import { t } from "../i18n/translate";
+import { t } from "../i18n/fr";
 
 type Props = {
   open: boolean;
@@ -25,8 +25,6 @@ export function ConfirmDialog({
   onConfirm,
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const cancelRef = useRef<HTMLButtonElement>(null);
-  const previousFocus = useRef<HTMLElement | null>(null);
   const titleId = useId();
   const descriptionId = useId();
 
@@ -34,19 +32,8 @@ export function ConfirmDialog({
     const dialog = dialogRef.current;
     if (!dialog) return;
 
-    if (!open) {
-      if (dialog.open) dialog.close();
-      previousFocus.current?.focus();
-      previousFocus.current = null;
-      return;
-    }
-
-    if (!previousFocus.current) {
-      previousFocus.current =
-        document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    }
-    if (!dialog.open) dialog.showModal();
-    cancelRef.current?.focus();
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
   }, [open]);
 
   const isDanger = tone === "danger";
@@ -58,60 +45,58 @@ export function ConfirmDialog({
       aria-modal="true"
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
-      onCancel={(event) => {
-        event.preventDefault();
-        onCancel();
-      }}
+      onCancel={onCancel}
     >
-      <div className="flex items-start justify-between gap-4">
-        <span
-          className={`grid size-11 shrink-0 place-items-center rounded-2xl ${
-            isDanger ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"
-          }`}
-        >
-          <Icon className="size-5" aria-hidden="true" />
-        </span>
-        <button
-          className="grid size-9 place-items-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
-          type="button"
-          onClick={onCancel}
-          aria-label={t.dialogs.close}
-        >
-          <X className="size-4" aria-hidden="true" />
-        </button>
-      </div>
+      <form method="dialog">
+        <div className="flex items-start justify-between gap-4">
+          <span
+            className={`grid size-11 shrink-0 place-items-center rounded-2xl ${
+              isDanger ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"
+            }`}
+          >
+            <Icon className="size-5" aria-hidden="true" />
+          </span>
+          <button
+            className="grid size-9 place-items-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
+            value="cancel"
+            onClick={onCancel}
+            aria-label={t.dialogs.close}
+          >
+            <X className="size-4" aria-hidden="true" />
+          </button>
+        </div>
 
-      <h2 id={titleId} className="mt-4 text-lg font-black tracking-tight">
-        {title}
-      </h2>
-      <p
-        id={descriptionId}
-        className="mt-2 text-sm font-medium leading-relaxed text-slate-600"
-      >
-        {description}
-      </p>
+        <h2 id={titleId} className="mt-4 text-lg font-black tracking-tight">
+          {title}
+        </h2>
+        <p
+          id={descriptionId}
+          className="mt-2 text-sm font-medium leading-relaxed text-slate-600"
+        >
+          {description}
+        </p>
 
-      <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <button
-          className="h-11 rounded-xl px-4 text-sm font-extrabold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-4 focus:ring-blue-100"
-          type="button"
-          onClick={onCancel}
-          ref={cancelRef}
-        >
-          {t.dialogs.cancel}
-        </button>
-        <button
-          className={`h-11 rounded-xl px-4 text-sm font-extrabold text-white shadow-sm transition focus:outline-none ${
-            isDanger
-              ? "bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-100"
-              : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-100"
-          }`}
-          type="button"
-          onClick={onConfirm}
-        >
-          {confirmLabel}
-        </button>
-      </div>
+        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button
+            className="h-11 rounded-xl px-4 text-sm font-extrabold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-4 focus:ring-blue-100"
+            value="cancel"
+            onClick={onCancel}
+          >
+            {t.dialogs.cancel}
+          </button>
+          <button
+            className={`h-11 rounded-xl px-4 text-sm font-extrabold text-white shadow-sm transition focus:outline-none ${
+              isDanger
+                ? "bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-100"
+                : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-100"
+            }`}
+            value="confirm"
+            onClick={onConfirm}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </form>
     </dialog>
   );
 }

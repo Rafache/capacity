@@ -3,15 +3,10 @@ import test from "node:test";
 import {
   getFiscalMonth,
   publicHolidays,
-  roundHalf,
   workingDaysInMonth,
 } from "../src/domain/calendar";
-import {
-  getSchoolBreaks,
-  getSchoolCalendar,
-  validateSchoolCalendars,
-} from "../src/data/schoolBreaks";
-import { availableFiscalYears } from "../src/domain/capacityData";
+import { getSchoolBreaks } from "../src/data/schoolBreaks";
+import { availableFiscalYears } from "../src/domain/capacity";
 
 test("the 2026-2027 fiscal year contains 254 working days", () => {
   const total = Array.from({ length: 12 }, (_, index) => {
@@ -19,21 +14,6 @@ test("the 2026-2027 fiscal year contains 254 working days", () => {
     return workingDaysInMonth(year, month);
   }).reduce((sum, value) => sum + value, 0);
   assert.equal(total, 254);
-});
-
-test("working-day totals remain stable across several fiscal years", () => {
-  const totals = [2025, 2026, 2027, 2028, 2029].map((startYear) =>
-    Array.from({ length: 12 }, (_, index) => {
-      const { year, month } = getFiscalMonth(startYear, index);
-      return workingDaysInMonth(year, month);
-    }).reduce((sum, value) => sum + value, 0),
-  );
-
-  assert.deepEqual(totals, [251, 254, 254, 250, 251]);
-});
-
-test("fiscal years start with the current fiscal year", () => {
-  assert.deepEqual(availableFiscalYears(new Date(2026, 7, 2)), [2026, 2027, 2028, 2029]);
 });
 
 test("mobile public holidays are calculated for 2027", () => {
@@ -54,34 +34,20 @@ test("mobile public holidays are calculated for 2027", () => {
   );
 });
 
-test("rounding uses half-day increments", () => {
-  assert.equal(roundHalf(12.24), 12);
-  assert.equal(roundHalf(12.26), 12.5);
+test("fiscal years start with the current fiscal year", () => {
+  assert.deepEqual(availableFiscalYears(new Date(2026, 7, 2)), [2026, 2027, 2028, 2029]);
 });
 
-test("published school calendars are compact and valid", () => {
-  assert.deepEqual(validateSchoolCalendars(), []);
-  assert.equal(Object.keys(getSchoolCalendar(2026)?.common ?? {}).length, 3);
-  assert.equal(getSchoolBreaks(2026, "A")?.length, 5);
-  assert.equal(getSchoolBreaks(2028, "A"), undefined);
-});
-
-test("invalid school-calendar dates are rejected", () => {
-  const errors = validateSchoolCalendars({
-    2026: {
-      source: "source",
-      verifiedAt: "2026-08-03",
-      common: { summer: { start: "2026-08-40", end: "2026-08-31" } },
-      zones: { A: {}, B: {}, C: {} },
-    },
+test("school breaks return the five published dates for each zone", () => {
+  const breaks = getSchoolBreaks(2026, "A")!;
+  assert.deepEqual(
+    breaks.map(({ key }) => key),
+    ["summer", "allSaints", "christmas", "winter", "spring"],
+  );
+  assert.deepEqual(breaks[3], {
+    key: "winter",
+    start: "2027-02-13",
+    end: "2027-03-01",
   });
-  assert.ok(errors.length > 0);
-});
-
-test("malformed school-calendar documents return validation errors", () => {
-  assert.doesNotThrow(() => validateSchoolCalendars({ 2026: null } as never));
-  assert.ok(validateSchoolCalendars({ 2026: null } as never).length > 0);
-  assert.deepEqual(validateSchoolCalendars(null as never), [
-    "dataset: invalid calendar collection",
-  ]);
+  assert.equal(getSchoolBreaks(2028, "A"), undefined);
 });

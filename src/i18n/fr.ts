@@ -1,6 +1,4 @@
-import type { TranslationCatalog } from "./types";
-
-export const fr = {
+export const t = {
   app: {
     name: "Ma capacité",
     ariaLabel: "Gestion de capacité",
@@ -11,10 +9,10 @@ export const fr = {
     annual: "Annuelle",
     previousMonth: "Mois précédent",
     nextMonth: "Mois suivant",
+    chooseMonth: "Choisir le mois",
   },
   actions: {
     openMenu: "Ouvrir le menu des actions",
-    closeMenu: "Fermer le menu des actions",
     menuLabel: "Actions",
     fiscalYear: "Année fiscale",
     schoolBreaks: "Vacances scolaires",
@@ -33,20 +31,27 @@ export const fr = {
     other: "Autres",
   },
   segments: {
-    available: "Disponible",
+    available: "Capacité",
     leave: "Congés payés",
     rtt: "RTT",
     training: "Formations",
     other: "Autres",
   },
+  table: {
+    workRate: "Temps de travail",
+    available: "Capacité",
+    leave: "CP",
+    rtt: "RTT",
+    training: "Formation",
+    other: "Autres",
+  },
   months: {
     month: "Mois",
     days: "Capacité par mois",
+    inDays: "en jours",
     total: "Total",
     title: "Capacité mensuelle en jours",
-    ariaLabel: "Capacité mensuelle en jours",
     open: "Ouvrir",
-    dayUnit: "j",
   },
   summary: {
     month: "Synthèse du mois",
@@ -56,10 +61,12 @@ export const fr = {
     capacity: "Capacité",
     monthlyBalance: "Équilibre mensuel",
     monthlyBalanceDescription: "Capacité disponible et absences par mois",
+    annualDistribution: "Répartition annuelle",
+    annualDistributionDescription:
+      "Répartition de la capacité et des absences sur l’année",
     distribution: "Répartition",
     calendarDetails: "Jours fériés et vacances scolaires",
     publicHolidays: "Jours fériés",
-    schoolBreaks: "Vacances",
     noCalendarEvents: "Aucun jour férié ni vacances scolaires ce mois-ci.",
     calendarUnpublished:
       "Les dates scolaires de cette année ne sont pas encore publiées.",
@@ -87,14 +94,9 @@ export const fr = {
     applyConfirm: "Répliquer sur l’année",
   },
   notices: {
-    repaired:
-      "Des données locales ont été corrigées pour respecter les limites de capacité.",
     storageUnavailable:
       "Le stockage local est indisponible. Vos modifications ne pourront pas être enregistrées.",
-    storageSaveUnavailable:
-      "Le stockage local est indisponible. Vos modifications ne peuvent pas être enregistrées.",
-    absenceClamped:
-      "Les absences ont été plafonnées aux jours prévus par votre temps de travail.",
+    absenceClamped: "La valeur a été limitée à la capacité restante du mois.",
     exportComplete: "Export terminé.",
     importComplete: "Import terminé : 12 mois ont été chargés.",
     dataCleared: "Les données locales ont été effacées.",
@@ -107,12 +109,7 @@ export const fr = {
     },
   },
   errors: {
-    fileTooLarge: "Le fichier CSV dépasse la taille maximale autorisée.",
-    invalidFormat: "Le format CSV est invalide.",
-    invalidColumns: "Les colonnes CSV sont invalides ou incomplètes.",
-    invalidMonths: "Le fichier CSV doit contenir exactement 12 mois.",
-    invalidValue: "Le fichier CSV contient une valeur invalide.",
-    importFailed: "Import impossible.",
+    invalidCsv: "Le fichier CSV est invalide.",
   },
   holidays: {
     newYear: "Jour de l’An",
@@ -129,13 +126,13 @@ export const fr = {
   },
   schoolBreakNames: {
     summer: "Vacances d’été",
-    allSaints: "Toussaint",
-    christmas: "Noël",
-    winter: "Hiver",
-    spring: "Printemps",
+    allSaints: "Vacances de la Toussaint",
+    christmas: "Vacances de Noël",
+    winter: "Vacances d’hiver",
+    spring: "Vacances de printemps",
   },
   units: {
     day: "j",
     percent: "%",
   },
-} satisfies TranslationCatalog;
+} as const;
