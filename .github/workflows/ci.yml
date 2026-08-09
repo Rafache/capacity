@@ -61,41 +61,6 @@ jobs:
           grep -q '="/assets/' dist/index.html
           ! grep -q '/capacity/' dist/index.html
 
-      - name: CI summary
-        if: always()
-        env:
-          INSTALL_OUTCOME: ${{ steps.install.outcome }}
-          FORMAT_OUTCOME: ${{ steps.format.outcome }}
-          LINT_OUTCOME: ${{ steps.lint.outcome }}
-          TYPECHECK_OUTCOME: ${{ steps.typecheck.outcome }}
-          TESTS_OUTCOME: ${{ steps.tests.outcome }}
-          BUILD_OUTCOME: ${{ steps.build.outcome }}
-          ASSETS_OUTCOME: ${{ steps.assets.outcome }}
-        run: |
-          status() {
-            case "$1" in
-              success) echo "✅ Passed" ;;
-              failure) echo "❌ Failed" ;;
-              cancelled) echo "🚫 Cancelled" ;;
-              skipped|"") echo "⏭️ Skipped" ;;
-              *) echo "ℹ️ $1" ;;
-            esac
-          }
-
-          {
-            echo "## CI summary"
-            echo
-            echo "| Check | Result |"
-            echo "| --- | --- |"
-            echo "| Install dependencies | $(status "$INSTALL_OUTCOME") |"
-            echo "| Formatting | $(status "$FORMAT_OUTCOME") |"
-            echo "| ESLint | $(status "$LINT_OUTCOME") |"
-            echo "| TypeScript | $(status "$TYPECHECK_OUTCOME") |"
-            echo "| Tests | $(status "$TESTS_OUTCOME") |"
-            echo "| Production build | $(status "$BUILD_OUTCOME") |"
-            echo "| Production asset paths | $(status "$ASSETS_OUTCOME") |"
-          } >> "$GITHUB_STEP_SUMMARY"
-
       - name: Annotate failures
         if: always()
         env:
