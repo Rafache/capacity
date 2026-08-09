@@ -17,7 +17,7 @@
 
 ## Related issue
 
-<!-- Use `Closes #123` when this pull request fully resolves an issue. -->
+<!-- Use `Closes #123` when this pull request fully resolves an issue, or `Refs #123` when it is only related. -->
 
 ## User impact
 
@@ -45,5 +45,7 @@
 ## Final checklist
 
 - [ ] This pull request has one coherent objective.
+- [ ] Final commits follow the Conventional Commits rules in `CONTRIBUTING.md`.
+- [ ] Branch history has been cleaned of temporary or fixup commits before merge.
 - [ ] Code and documentation follow the repository conventions.
 - [ ] No personal data, credentials, or secrets are included.
