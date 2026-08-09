@@ -15,17 +15,74 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
+  quality:
+    name: Quality
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
           cache: npm
-      - run: npm ci
-      - run: npm run check
+
+      - name: Install dependencies
+        id: install
+        run: npm ci
+
+      - name: Format
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: npm run format:check
+
+      - name: Lint
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: npm run lint
+
+      - name: Typecheck
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: npm run typecheck
+
+      - name: Build
+        id: build
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: npm run build
+
       - name: Verify production asset paths
+        if: ${{ always() && steps.install.outcome == 'success' && steps.build.outcome == 'success' }}
         run: |
           grep -q '="/assets/' dist/index.html
           ! grep -q '/capacity/' dist/index.html
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install dependencies
+        id: install
+        run: npm ci
+
+      - name: Run tests
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        run: >
+          node --import tsx --test
+          --test-reporter=spec
+          --test-reporter=junit
+          --test-reporter-destination=stdout
+          --test-reporter-destination=junit.xml
+          tests/*.test.ts
+
+      - name: Upload JUnit report
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: junit-report
+          path: junit.xml
+          if-no-files-found: warn
+          retention-days: 7
