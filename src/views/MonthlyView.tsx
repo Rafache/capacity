@@ -35,7 +35,7 @@ type CalendarItem = {
   key: string;
   dateTime?: string;
   label: string;
-  detail: string;
+  detail?: string;
 };
 
 type CalendarSection = {
@@ -82,8 +82,10 @@ function CalendarDetails({
                       aria-hidden="true"
                     />
                     <span className="min-w-0">
-                      {dateTime ? <time dateTime={dateTime}>{label}</time> : label}{" "}
-                      <span className="font-semibold text-slate-900">({detail})</span>
+                      {dateTime ? <time dateTime={dateTime}>{label}</time> : label}
+                      {detail ? (
+                        <span className="font-semibold text-slate-900"> ({detail})</span>
+                      ) : null}
                     </span>
                   </li>
                 ))}
@@ -142,14 +144,13 @@ export function MonthlyView({
     schoolBreaks?.length
       ? {
           key: "school-breaks",
-          title: t.summary.schoolBreaks,
+          title: `${t.summary.schoolBreaks} (zone ${zone})`,
           icon: CalendarRange,
           iconClass: "text-blue-600",
           items: schoolBreaks.map(({ key, start, end }) => ({
             key,
             label:
               t.schoolBreakNames[key] + " du " + formatSchoolBreakDateRange(start, end),
-            detail: "Zone " + zone,
           })),
         }
       : null,
