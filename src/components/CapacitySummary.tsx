@@ -40,12 +40,14 @@ function CapacityBar({ values }: Pick<Props, "values">) {
             key={key}
             style={{ width: `${percentage}%` }}
           >
-            <span
-              aria-hidden="true"
-              className="truncate whitespace-nowrap px-0.5 text-[8px] font-black leading-none text-white sm:text-[9px]"
-            >
-              {Math.round(percentage)}%
-            </span>
+            {percentage >= 7 ? (
+              <span
+                aria-hidden="true"
+                className="truncate whitespace-nowrap px-0.5 text-[8px] font-black leading-none text-white sm:text-[9px]"
+              >
+                {Math.round(percentage)}%
+              </span>
+            ) : null}
           </span>
         );
       })}
@@ -80,10 +82,10 @@ export function CapacitySummary({ title, baseline, absences, available, values }
 
   return (
     <section
-      className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-5 text-white shadow-[0_20px_50px_rgba(15,23,42,0.24)] sm:p-6"
+      className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-4 text-white shadow-[0_20px_50px_rgba(15,23,42,0.24)] sm:p-5"
       aria-label={title}
     >
-      <h2 className="mb-5 text-xl font-black">{title}</h2>
+      <h2 className="mb-3 text-xl font-black sm:mb-4">{title}</h2>
 
       <div className="grid grid-cols-3 divide-x divide-white/15">
         {metrics.map(({ icon: Icon, label, value, classes, labelClasses }) => (
