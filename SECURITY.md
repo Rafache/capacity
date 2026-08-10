@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-This project is a static browser application. Security fixes are applied to the latest state of \`main\` and the latest deployed version.
+This project is a static browser application. Security fixes are applied to the latest state of `main` and the latest deployed version.
 
 ## Reporting a vulnerability
 
@@ -27,4 +27,4 @@ I will acknowledge valid reports as soon as practical and coordinate disclosure 
 
 The application has no backend, authentication, account system, analytics or server-side data store. Reports about the static client, build and deployment configuration, dependencies, and repository workflows are in scope.
 
-Do not include real personal data in a report. Browser \`localStorage\` is not encrypted and must not contain secrets or sensitive information.
+Do not include real personal data in a report. Browser `localStorage` is not encrypted and must not contain secrets or sensitive information.
