@@ -6,9 +6,10 @@ A small browser-only application for planning developer capacity over a July-to-
 
 ## Screenshots
 
-| Monthly view | Annual view |
-|:---:|:---:|
-| <img src="docs/screenshots/monthly-view.jpeg" alt="Monthly capacity view" width="360"> | <img src="docs/screenshots/annual-view.jpeg" alt="Annual capacity view" width="360"> |
+<p align="center">
+  <img src="docs/screenshots/monthly-view.jpeg" alt="Monthly capacity view" width="360">
+  <img src="docs/screenshots/annual-view.jpeg" alt="Annual capacity view" width="360">
+</p>
 
 ## Features
 
