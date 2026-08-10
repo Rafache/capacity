@@ -4,6 +4,12 @@ A small browser-only application for planning developer capacity over a July-to-
 
 [Open the application](https://capacity.chem1.fr/) · [Contributing](CONTRIBUTING.md)
 
+## Screenshots
+
+| Monthly view | Annual view |
+|:---:|:---:|
+| <img src="docs/screenshots/monthly-view.jpeg" alt="Monthly capacity view" width="360"> | <img src="docs/screenshots/annual-view.jpeg" alt="Annual capacity view" width="360"> |
+
 ## Features
 
 - Monthly and annual capacity views.
