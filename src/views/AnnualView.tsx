@@ -7,7 +7,7 @@ import { formatMonthName, formatNumber } from "../i18n/formatters";
 import { t } from "../i18n/fr";
 import type { CapacityTotals, Entry, MonthStats } from "../types";
 
-const TABLE_SEGMENTS = ["available", "training", "leave", "rtt", "other"].map((key) =>
+const TABLE_SEGMENTS = ["training", "leave", "rtt", "other", "available"].map((key) =>
   CAPACITY_SEGMENTS.find((segment) => segment.key === key)!,
 );
 
@@ -52,7 +52,7 @@ export function AnnualView({
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-center">
                 <th
-                  className="sticky left-0 z-10 w-14 bg-slate-50 px-1.5 py-2 text-left text-[8px] font-black uppercase tracking-wide text-slate-400 sm:w-24 sm:px-3 sm:text-[10px]"
+                  className="sticky left-0 z-10 w-20 bg-slate-50 px-1.5 py-2 text-left text-[8px] font-black uppercase tracking-wide text-slate-400 sm:w-24 sm:px-3 sm:text-[10px]"
                   scope="col"
                 >
                   {t.months.month}
@@ -97,7 +97,7 @@ export function AnnualView({
             </thead>
             <tbody>
               {stats.map((item, index) => {
-                const month = formatMonthName(index, "short");
+                const month = formatMonthName(index, "long");
                 const isCurrent = currentMonthIndex === index;
                 const workRate = entries[index]?.workRate ?? 100;
                 const rowBackground = isCurrent ? "bg-blue-50/60" : "bg-white";
@@ -121,7 +121,7 @@ export function AnnualView({
                       className={`sticky left-0 z-10 px-1.5 py-2 text-left sm:px-3 sm:py-2.5 ${rowBackground}`}
                       scope="row"
                     >
-                      <span className="block truncate whitespace-nowrap text-[10px] font-black leading-none text-slate-950 sm:text-xs">
+                      <span className="block whitespace-nowrap text-[10px] font-black leading-none text-slate-950 sm:text-xs">
                         {month}
                       </span>
                     </th>
