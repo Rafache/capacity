@@ -124,14 +124,3 @@ jobs:
             pages deploy dist
             --project-name=capacity
             --branch=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
-
-      - name: Publish deployment link
-        env:
-          DEPLOYMENT_URL: ${{ github.event_name == 'pull_request' && steps.deploy.outputs.pages-deployment-alias-url || 'https://capacity.chem1.fr/' }}
-        run: |
-          test -n "$DEPLOYMENT_URL"
-          {
-            echo "### Cloudflare deployment"
-            echo
-            echo "[Open deployment]($DEPLOYMENT_URL)"
-          } >> "$GITHUB_STEP_SUMMARY"
