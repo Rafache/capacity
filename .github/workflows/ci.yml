@@ -99,6 +99,7 @@ jobs:
       contents: read
       deployments: write
       issues: write
+      pull-requests: write
     environment:
       name: ${{ github.event_name == 'pull_request' && format('preview/pr-{0}', github.event.pull_request.number) || 'production' }}
       url: ${{ github.event_name == 'pull_request' && steps.deploy.outputs.pages-deployment-alias-url || 'https://capacity.chem1.fr/' }}
@@ -150,7 +151,7 @@ jobs:
               `[Open preview](${previewUrl})`,
               "",
               "_Updated automatically for each commit of this pull request._",
-            ].join("\\n");
+            ].join("\n");
 
             const { owner, repo } = context.repo;
             const comments = await github.paginate(
