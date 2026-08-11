@@ -91,7 +91,7 @@ jobs:
           retention-days: 7
 
   deploy:
-    name: Deploy to Cloudflare Pages
+    name: deploy
     needs: [quality, tests]
     if: ${{ needs.quality.result == 'success' && needs.tests.result == 'success' && (github.event_name != 'pull_request' || (github.event.pull_request.user.login == 'Rafache' && github.event.pull_request.head.repo.full_name == github.repository)) }}
     runs-on: ubuntu-latest
