@@ -1,6 +1,6 @@
 # Deployment
 
-Production is served by Cloudflare Pages at https://capacity.chem1.fr/.
+Production is served by Cloudflare Pages at https://kapa6t.pages.dev/.
 
 The canonical deployment path is GitHub Actions in `.github/workflows/ci.yml`. The workflow runs formatting, lint, type checks, tests and the production build before deploying with the Cloudflare Wrangler action.
 
