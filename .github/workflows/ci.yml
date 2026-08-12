@@ -120,7 +120,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Direct Upload: production has no --branch; PRs deploy a branch preview.
           command: >-
             pages deploy dist
             --project-name=capacity
-            --branch=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+            ${{ github.event_name == 'pull_request' && format('--branch={0}', github.head_ref) || '' }}
