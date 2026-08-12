@@ -1,32 +1,28 @@
-import { getFiscalMonth } from "./calendar";
-import { calculateFiscalYear } from "./capacity";
-import type { Entry, MonthStats } from "../types";
+import { getFiscalMonth } from './calendar';
+import { calculateFiscalYear } from './capacity';
+import type { Entry, MonthStats } from '../types';
 
-const FORMAT = "# capacity;version=3";
-const HEADERS = "month;workRate;available;paidLeave;rtt;training;other";
+const FORMAT = '# capacity;version=3';
+const HEADERS = 'month;workRate;available;paidLeave;rtt;training;other';
 
 function expectedMonth(startYear: number, index: number) {
   const { year, month } = getFiscalMonth(startYear, index);
-  return `${year}-${String(month + 1).padStart(2, "0")}`;
+  return `${year}-${String(month + 1).padStart(2, '0')}`;
 }
 
 function csvValue(value: string) {
   if (!value.startsWith('"')) return value;
-  if (!value.endsWith('"')) throw new Error("Invalid CSV");
+  if (!value.endsWith('"')) throw new Error('Invalid CSV');
   return value.slice(1, -1).replaceAll('""', '"');
 }
 
 function numberValue(value: string) {
   const number = Number(csvValue(value));
-  if (!Number.isFinite(number)) throw new Error("Invalid CSV");
+  if (!Number.isFinite(number)) throw new Error('Invalid CSV');
   return number;
 }
 
-export function exportCapacityCsv(
-  startYear: number,
-  entries: Entry[],
-  stats: MonthStats[],
-) {
+export function exportCapacityCsv(startYear: number, entries: Entry[], stats: MonthStats[]) {
   const rows = entries.map((entry, index) =>
     [
       expectedMonth(startYear, index),
@@ -38,24 +34,24 @@ export function exportCapacityCsv(
       entry.other,
     ]
       .map((value) => `"${value}"`)
-      .join(";"),
+      .join(';'),
   );
-  return `\uFEFF${[FORMAT, HEADERS, ...rows].join("\n")}`;
+  return `\uFEFF${[FORMAT, HEADERS, ...rows].join('\n')}`;
 }
 
 export function importCapacityCsv(text: string, startYear: number) {
   const lines = text
-    .replace(/^\uFEFF/, "")
+    .replace(/^\uFEFF/, '')
     .trimEnd()
     .split(/\r?\n/);
   if (lines.length !== 14 || lines[0] !== FORMAT || lines[1] !== HEADERS) {
-    throw new Error("Invalid CSV");
+    throw new Error('Invalid CSV');
   }
 
   const entries = lines.slice(2).map((line, index) => {
-    const values = line.split(";");
+    const values = line.split(';');
     if (values.length !== 7 || csvValue(values[0]!) !== expectedMonth(startYear, index)) {
-      throw new Error("Invalid CSV");
+      throw new Error('Invalid CSV');
     }
     const numbers = values.slice(1).map(numberValue);
     return {

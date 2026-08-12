@@ -1,6 +1,6 @@
-import { CopyPlus, type LucideIcon } from "lucide-react";
-import { formatNumber } from "../i18n/formatters";
-import { t } from "../i18n/fr";
+import { CopyPlus, type LucideIcon } from 'lucide-react';
+import { formatNumber } from '../i18n/formatters';
+import { t } from '../i18n/fr';
 
 export function InputRow({
   icon: Icon,
@@ -30,17 +30,17 @@ export function InputRow({
   const formattedValue = formatNumber(value);
 
   const changeValue = (raw: string) => {
-    const parsed = Number(raw.replace(",", "."));
+    const parsed = Number(raw.replace(',', '.'));
     if (!Number.isFinite(parsed)) return;
     const snapped = Math.round(parsed / step) * step;
     onChange(Math.min(max, Math.max(min, Math.round(snapped * 100) / 100)));
   };
 
   const controlClass =
-    "grid size-8 place-items-center text-lg font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent sm:size-10 sm:text-xl";
+    'grid size-8 place-items-center text-lg font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent sm:size-10 sm:text-xl';
   const containerClass = grouped
-    ? "flex min-w-0 items-center gap-2 px-2.5 py-2.5 sm:gap-3 sm:px-4 sm:py-3"
-    : "flex min-w-0 items-center gap-2 rounded-xl border border-slate-200/80 bg-white p-2.5 shadow-sm transition hover:border-slate-300 sm:gap-3 sm:rounded-2xl sm:p-4";
+    ? 'flex min-w-0 items-center gap-2 px-2.5 py-2.5 sm:gap-3 sm:px-4 sm:py-3'
+    : 'flex min-w-0 items-center gap-2 rounded-xl border border-slate-200/80 bg-white p-2.5 shadow-sm transition hover:border-slate-300 sm:gap-3 sm:rounded-2xl sm:p-4';
 
   return (
     <div className={containerClass}>
@@ -74,9 +74,7 @@ export function InputRow({
               aria-label={`${label} ${t.inputs.valueIn} ${unit === t.units.percent ? t.inputs.valueInPercent : t.inputs.valueInDays}`}
               onChange={(event) => changeValue(event.target.value)}
             />
-            <small className="shrink-0 text-xs font-black text-slate-950 sm:text-sm">
-              {unit}
-            </small>
+            <small className="shrink-0 text-xs font-black text-slate-950 sm:text-sm">{unit}</small>
           </span>
           <button
             className={controlClass}

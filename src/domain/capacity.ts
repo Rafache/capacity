@@ -1,4 +1,4 @@
-import { getFiscalMonth, roundHalf, workingDaysInMonth } from "./calendar";
+import { getFiscalMonth, roundHalf, workingDaysInMonth } from './calendar';
 import type {
   AbsenceKey,
   CapacityData,
@@ -7,10 +7,10 @@ import type {
   EntryNumericKey,
   MonthStats,
   Zone,
-} from "../types";
+} from '../types';
 
-const ABSENCE_FIELDS = ["leave", "rtt", "training", "other"] as const;
-const TOTAL_FIELDS = ["baseline", "available", ...ABSENCE_FIELDS] as const;
+const ABSENCE_FIELDS = ['leave', 'rtt', 'training', 'other'] as const;
+const TOTAL_FIELDS = ['baseline', 'available', ...ABSENCE_FIELDS] as const;
 
 export const ENTRY_RULES = {
   workRate: { min: 20, max: 100, step: 5 },
@@ -26,7 +26,7 @@ export const EMPTY_ENTRY: Entry = {
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function normalizeNumber(
@@ -36,7 +36,7 @@ function normalizeNumber(
   maximum: number,
   step: number,
 ) {
-  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
   return Math.min(maximum, Math.max(minimum, Math.round(value / step) * step));
 }
 
@@ -45,9 +45,7 @@ function baselineDays(startYear: number, index: number) {
   return workingDaysInMonth(year, month);
 }
 
-export function getAbsenceTotal(
-  value: Pick<Entry, "leave" | "rtt" | "training" | "other">,
-) {
+export function getAbsenceTotal(value: Pick<Entry, 'leave' | 'rtt' | 'training' | 'other'>) {
   return ABSENCE_FIELDS.reduce((total, field) => total + value[field], 0);
 }
 
@@ -85,14 +83,8 @@ function yearBaselines(startYear: number) {
   return Array.from({ length: 12 }, (_, index) => baselineDays(startYear, index));
 }
 
-function normalizeYear(
-  startYear: number,
-  source: unknown[],
-  baselines = yearBaselines(startYear),
-) {
-  return Array.from({ length: 12 }, (_, index) =>
-    normalizeEntry(source[index], baselines[index]),
-  );
+function normalizeYear(startYear: number, source: unknown[], baselines = yearBaselines(startYear)) {
+  return Array.from({ length: 12 }, (_, index) => normalizeEntry(source[index], baselines[index]));
 }
 
 function monthStats(baseline: number, entry: Entry): MonthStats {
@@ -113,9 +105,7 @@ export function getEntryLimits(startYear: number, index: number, entry: Entry) {
   const absenceTotal = getAbsenceTotal(entry);
   const contracted = roundHalf(baseline * (entry.workRate / ENTRY_RULES.workRate.max));
   const requiredRate =
-    baseline > 0
-      ? (absenceTotal / baseline) * ENTRY_RULES.workRate.max
-      : ENTRY_RULES.workRate.min;
+    baseline > 0 ? (absenceTotal / baseline) * ENTRY_RULES.workRate.max : ENTRY_RULES.workRate.min;
   const minWorkRate = Math.min(
     ENTRY_RULES.workRate.max,
     Math.max(
@@ -147,7 +137,7 @@ function updateNormalizedEntry(
 ) {
   const limits = getEntryLimits(startYear, index, entry);
   const nextValue =
-    field === "workRate"
+    field === 'workRate'
       ? normalizeNumber(
           value,
           entry.workRate,
@@ -227,6 +217,6 @@ export function availableFiscalYears(today = new Date()) {
   return Array.from({ length: 4 }, (_, index) => current + index);
 }
 
-export function emptyData(zone: Zone = "C"): CapacityData {
+export function emptyData(zone: Zone = 'C'): CapacityData {
   return { version: 3 as const, zone, entries: {} };
 }

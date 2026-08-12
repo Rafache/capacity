@@ -9,6 +9,7 @@
 ## Validation
 
 - [ ] CI passes.
+- [ ] `npm run check` passes locally.
 - [ ] Relevant behavior has been checked locally.
 - [ ] Cloudflare preview has been checked for UI or build changes.
 - [ ] `localStorage` and CSV compatibility have been considered when relevant.

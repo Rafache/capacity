@@ -5,20 +5,20 @@ import {
   Clock3,
   Sun,
   type LucideIcon,
-} from "lucide-react";
-import { getFiscalMonth, publicHolidays } from "../domain/calendar";
-import { ENTRY_RULES, getAbsenceTotal, getEntryLimits } from "../domain/capacity";
-import { getSchoolBreaks } from "../data/schoolBreaks";
-import { CapacitySummary } from "../components/CapacitySummary";
-import { ABSENCE_SEGMENTS } from "../components/capacitySegments";
-import { InputRow } from "../components/InputRow";
+} from 'lucide-react';
+import { getFiscalMonth, publicHolidays } from '../domain/calendar';
+import { ENTRY_RULES, getAbsenceTotal, getEntryLimits } from '../domain/capacity';
+import { getSchoolBreaks } from '../data/schoolBreaks';
+import { CapacitySummary } from '../components/CapacitySummary';
+import { ABSENCE_SEGMENTS } from '../components/capacitySegments';
+import { InputRow } from '../components/InputRow';
 import {
   formatHolidayDateLabel,
   formatMonthName,
   formatSchoolBreakDateRange,
-} from "../i18n/formatters";
-import { t } from "../i18n/fr";
-import type { Entry, EntryNumericKey, MonthStats, Zone } from "../types";
+} from '../i18n/formatters';
+import { t } from '../i18n/fr';
+import type { Entry, EntryNumericKey, MonthStats, Zone } from '../types';
 
 type Props = {
   startYear: number;
@@ -71,7 +71,7 @@ function CalendarDetails({
           {sections.map(({ key, title, icon: Icon, iconClass, items }) => (
             <div className="min-w-0" key={key}>
               <h3 className="flex items-center gap-1.5 text-xs font-black text-slate-950 sm:text-sm">
-                <Icon className={"size-3.5 " + iconClass} aria-hidden="true" />
+                <Icon className={'size-3.5 ' + iconClass} aria-hidden="true" />
                 {title}
               </h3>
               <ul className="mt-1.5 grid gap-1.5 text-[11px] leading-snug text-slate-600 sm:text-sm">
@@ -94,9 +94,7 @@ function CalendarDetails({
           ))}
         </div>
       ) : (
-        <p className="mt-3 text-[11px] font-medium text-slate-500 sm:text-sm">
-          {emptyMessage}
-        </p>
+        <p className="mt-3 text-[11px] font-medium text-slate-500 sm:text-sm">{emptyMessage}</p>
       )}
     </section>
   );
@@ -121,18 +119,16 @@ export function MonthlyView({
       Date.parse(`${item.start}T00:00:00Z`) <= monthEnd &&
       Date.parse(`${item.end}T00:00:00Z`) >= monthStart,
   );
-  const isFrench = document.documentElement.lang.toLowerCase().startsWith("fr");
-  const holidays = publicHolidays(year).filter(
-    ({ date }) => date.getUTCMonth() === month,
-  );
+  const isFrench = document.documentElement.lang.toLowerCase().startsWith('fr');
+  const holidays = publicHolidays(year).filter(({ date }) => date.getUTCMonth() === month);
 
   const calendarSections: Array<CalendarSection | null> = [
     holidays.length
       ? {
-          key: "holidays",
+          key: 'holidays',
           title: t.summary.publicHolidays,
           icon: Sun,
-          iconClass: "text-amber-600",
+          iconClass: 'text-amber-600',
           items: holidays.map(({ key, date }) => ({
             key,
             dateTime: date.toISOString().slice(0, 10),
@@ -143,14 +139,13 @@ export function MonthlyView({
       : null,
     schoolBreaks?.length
       ? {
-          key: "school-breaks",
+          key: 'school-breaks',
           title: `${t.summary.schoolBreaks} (zone ${zone})`,
           icon: CalendarRange,
-          iconClass: "text-blue-600",
+          iconClass: 'text-blue-600',
           items: schoolBreaks.map(({ key, start, end }) => ({
             key,
-            label:
-              t.schoolBreakNames[key] + " du " + formatSchoolBreakDateRange(start, end),
+            label: t.schoolBreakNames[key] + ' du ' + formatSchoolBreakDateRange(start, end),
           })),
         }
       : null,
@@ -162,7 +157,7 @@ export function MonthlyView({
 
   const absenceTotal = getAbsenceTotal(stats);
   const limits = getEntryLimits(startYear, monthIndex, entry);
-  const monthLabel = `${formatMonthName(monthIndex, "long")} ${year}`;
+  const monthLabel = `${formatMonthName(monthIndex, 'long')} ${year}`;
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -190,7 +185,7 @@ export function MonthlyView({
               const fiscalMonth = getFiscalMonth(startYear, index);
               return (
                 <option key={index} value={index}>
-                  {formatMonthName(index, "long")} {fiscalMonth.year}
+                  {formatMonthName(index, 'long')} {fiscalMonth.year}
                 </option>
               );
             })}
@@ -226,8 +221,8 @@ export function MonthlyView({
             max={ENTRY_RULES.workRate.max}
             step={ENTRY_RULES.workRate.step}
             unit={t.units.percent}
-            onChange={(value) => onChange("workRate", value)}
-            onApplyToYear={() => onRequestApplyToYear("workRate")}
+            onChange={(value) => onChange('workRate', value)}
+            onApplyToYear={() => onRequestApplyToYear('workRate')}
           />
           {ABSENCE_SEGMENTS.map(({ key, icon: Icon, softClass }) => (
             <InputRow
@@ -251,9 +246,7 @@ export function MonthlyView({
       {isFrench ? (
         <CalendarDetails
           sections={visibleCalendarSections}
-          emptyMessage={
-            calendarBreaks ? t.summary.noCalendarEvents : t.summary.calendarUnpublished
-          }
+          emptyMessage={calendarBreaks ? t.summary.noCalendarEvents : t.summary.calendarUnpublished}
         />
       ) : null}
     </div>

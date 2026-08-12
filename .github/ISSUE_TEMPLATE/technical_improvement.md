@@ -1,9 +1,9 @@
 ---
 name: Technical improvement
 about: Propose refactoring, performance, security, tooling or CI work
-title: "[P1] "
-labels: ""
-assignees: ""
+title: '[P1] '
+labels: ''
+assignees: ''
 ---
 
 ## Problem

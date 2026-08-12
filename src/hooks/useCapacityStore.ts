@@ -1,14 +1,10 @@
-import { useState } from "react";
-import {
-  applyFieldToFiscalYear,
-  emptyData,
-  updateMonthlyEntry,
-} from "../domain/capacity";
-import { clearData, loadData, saveData } from "../domain/storage";
-import type { CapacityData, Entry, EntryNumericKey, Zone } from "../types";
+import { useState } from 'react';
+import { applyFieldToFiscalYear, emptyData, updateMonthlyEntry } from '../domain/capacity';
+import { clearData, loadData, saveData } from '../domain/storage';
+import type { CapacityData, Entry, EntryNumericKey, Zone } from '../types';
 
 function readInitialState() {
-  return typeof window === "undefined"
+  return typeof window === 'undefined'
     ? { data: emptyData(), storageAvailable: true }
     : loadData(window.localStorage);
 }
@@ -19,7 +15,7 @@ export function useCapacityStore() {
 
   const commit = (data: CapacityData) => {
     setState((previous) => ({ ...previous, data }));
-    return typeof window === "undefined" || saveData(window.localStorage, data);
+    return typeof window === 'undefined' || saveData(window.localStorage, data);
   };
 
   const replaceYear = (startYear: number, entries: Entry[]) => {
@@ -64,7 +60,7 @@ export function useCapacityStore() {
   const setZone = (zone: Zone) => commit({ ...state.data, zone });
 
   const clear = () => {
-    const removed = typeof window === "undefined" || clearData(window.localStorage);
+    const removed = typeof window === 'undefined' || clearData(window.localStorage);
     setState((previous) => ({ ...previous, data: emptyData() }));
     return removed;
   };

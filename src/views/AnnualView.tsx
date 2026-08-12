@@ -1,13 +1,13 @@
-import { CalendarDays, Clock3 } from "lucide-react";
-import { CapacityEvolutionChart } from "../components/CapacityEvolutionChart";
-import { CapacitySummary } from "../components/CapacitySummary";
-import { CAPACITY_SEGMENTS } from "../components/capacitySegments";
-import { getAbsenceTotal } from "../domain/capacity";
-import { formatMonthName, formatNumber } from "../i18n/formatters";
-import { t } from "../i18n/fr";
-import type { CapacityTotals, Entry, MonthStats } from "../types";
+import { CalendarDays, Clock3 } from 'lucide-react';
+import { CapacityEvolutionChart } from '../components/CapacityEvolutionChart';
+import { CapacitySummary } from '../components/CapacitySummary';
+import { CAPACITY_SEGMENTS } from '../components/capacitySegments';
+import { getAbsenceTotal } from '../domain/capacity';
+import { formatMonthName, formatNumber } from '../i18n/formatters';
+import { t } from '../i18n/fr';
+import type { CapacityTotals, Entry, MonthStats } from '../types';
 
-const TABLE_SEGMENTS = ["training", "leave", "rtt", "other", "available"].map((key) =>
+const TABLE_SEGMENTS = ['training', 'leave', 'rtt', 'other', 'available'].map((key) =>
   CAPACITY_SEGMENTS.find((segment) => segment.key === key)!,
 );
 
@@ -19,13 +19,7 @@ type Props = {
   onMonthOpen: (index: number) => void;
 };
 
-export function AnnualView({
-  entries,
-  stats,
-  summary,
-  currentMonthIndex,
-  onMonthOpen,
-}: Props) {
+export function AnnualView({ entries, stats, summary, currentMonthIndex, onMonthOpen }: Props) {
   return (
     <div className="space-y-3 sm:space-y-5">
       <CapacitySummary
@@ -97,10 +91,10 @@ export function AnnualView({
             </thead>
             <tbody>
               {stats.map((item, index) => {
-                const month = formatMonthName(index, "long");
+                const month = formatMonthName(index, 'long');
                 const isCurrent = currentMonthIndex === index;
                 const workRate = entries[index]?.workRate ?? 100;
-                const rowBackground = isCurrent ? "bg-blue-50/60" : "bg-white";
+                const rowBackground = isCurrent ? 'bg-blue-50/60' : 'bg-white';
 
                 return (
                   <tr
@@ -111,7 +105,7 @@ export function AnnualView({
                     aria-label={`${t.months.open} ${month}`}
                     onClick={() => onMonthOpen(index)}
                     onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
+                      if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
                         onMonthOpen(index);
                       }
@@ -134,9 +128,7 @@ export function AnnualView({
                     {TABLE_SEGMENTS.map((segment) => {
                       const value = item[segment.key];
                       const display =
-                        segment.key !== "available" && value === 0
-                          ? "—"
-                          : formatNumber(value);
+                        segment.key !== 'available' && value === 0 ? '—' : formatNumber(value);
                       return (
                         <td
                           className={`min-w-0 whitespace-nowrap px-0.5 text-center text-[9px] font-extrabold leading-none sm:text-xs ${segment.textClass}`}

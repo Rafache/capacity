@@ -1,24 +1,24 @@
-import { getFiscalMonth } from "../domain/calendar";
+import { getFiscalMonth } from '../domain/calendar';
 
-type MonthStyle = "short" | "long";
-const locale = "fr-FR";
+type MonthStyle = 'short' | 'long';
+const locale = 'fr-FR';
 const numberFormatter = new Intl.NumberFormat(locale, {
   maximumFractionDigits: 1,
 });
 const monthFormatters = {
-  short: new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" }),
-  long: new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" }),
+  short: new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' }),
+  long: new Intl.DateTimeFormat(locale, { month: 'long', timeZone: 'UTC' }),
 };
 const holidayDateLabelFormatter = new Intl.DateTimeFormat(locale, {
-  weekday: "short",
-  day: "numeric",
-  month: "long",
-  timeZone: "UTC",
+  weekday: 'short',
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'UTC',
 });
 const schoolBreakDatePartFormatter = new Intl.DateTimeFormat(locale, {
-  day: "numeric",
-  month: "long",
-  timeZone: "UTC",
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'UTC',
 });
 
 export function formatNumber(value: number) {

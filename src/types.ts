@@ -1,23 +1,23 @@
-export type Zone = "A" | "B" | "C";
+export type Zone = 'A' | 'B' | 'C';
 
-export type AbsenceKey = "leave" | "rtt" | "training" | "other";
+export type AbsenceKey = 'leave' | 'rtt' | 'training' | 'other';
 
-export type SegmentKey = "available" | AbsenceKey;
+export type SegmentKey = 'available' | AbsenceKey;
 
-export type BreakKey = "summer" | "allSaints" | "christmas" | "winter" | "spring";
+export type BreakKey = 'summer' | 'allSaints' | 'christmas' | 'winter' | 'spring';
 
 export type HolidayKey =
-  | "newYear"
-  | "easterMonday"
-  | "labourDay"
-  | "victoryDay"
-  | "ascension"
-  | "whitMonday"
-  | "nationalDay"
-  | "assumption"
-  | "allSaints"
-  | "armistice"
-  | "christmas";
+  | 'newYear'
+  | 'easterMonday'
+  | 'labourDay'
+  | 'victoryDay'
+  | 'ascension'
+  | 'whitMonday'
+  | 'nationalDay'
+  | 'assumption'
+  | 'allSaints'
+  | 'armistice'
+  | 'christmas';
 
 export type Entry = {
   workRate: number;
@@ -27,7 +27,7 @@ export type Entry = {
   other: number;
 };
 
-export type EntryNumericKey = "workRate" | AbsenceKey;
+export type EntryNumericKey = 'workRate' | AbsenceKey;
 
 export type CapacityTotals = {
   baseline: number;

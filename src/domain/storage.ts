@@ -1,17 +1,17 @@
-import { emptyData } from "./capacity";
-import type { CapacityData } from "../types";
+import { emptyData } from './capacity';
+import type { CapacityData } from '../types';
 
-const STORAGE_KEY = "ma-capacite-v3";
+const STORAGE_KEY = 'ma-capacite-v3';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function isCurrentData(value: unknown): value is CapacityData {
   return (
     isRecord(value) &&
     value.version === 3 &&
-    (value.zone === "A" || value.zone === "B" || value.zone === "C") &&
+    (value.zone === 'A' || value.zone === 'B' || value.zone === 'C') &&
     isRecord(value.entries) &&
     Object.entries(value.entries).every(
       ([year, entries]) => /^\d{4}$/.test(year) && Array.isArray(entries),

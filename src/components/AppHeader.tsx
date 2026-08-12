@@ -1,10 +1,10 @@
-import { ChartNoAxesColumnIncreasing } from "lucide-react";
-import type { ChangeEvent } from "react";
-import { ActionMenu } from "./ActionMenu";
-import { t } from "../i18n/fr";
-import type { Zone } from "../types";
+import { ChartNoAxesColumnIncreasing } from 'lucide-react';
+import type { ChangeEvent } from 'react';
+import { ActionMenu } from './ActionMenu';
+import { t } from '../i18n/fr';
+import type { Zone } from '../types';
 
-export type ViewTab = "monthly" | "annual";
+export type ViewTab = 'monthly' | 'annual';
 
 type Props = {
   tab: ViewTab;
@@ -52,7 +52,7 @@ export function AppHeader({
           </h1>
         </div>
 
-        {tab === "annual" ? (
+        {tab === 'annual' ? (
           <ActionMenu
             years={years}
             startYear={startYear}
@@ -71,12 +71,12 @@ export function AppHeader({
         aria-label={t.app.views}
       >
         <span className="col-span-2 grid grid-cols-2 rounded-2xl bg-slate-100 p-1">
-          {(["monthly", "annual"] as const).map((nextTab) => (
+          {(['monthly', 'annual'] as const).map((nextTab) => (
             <button
               className={`h-11 rounded-xl text-sm font-extrabold transition sm:text-base ${
                 tab === nextTab
-                  ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200/80"
-                  : "text-slate-500 hover:text-slate-800"
+                  ? 'bg-white text-slate-950 shadow-sm ring-1 ring-slate-200/80'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
               key={nextTab}
               type="button"

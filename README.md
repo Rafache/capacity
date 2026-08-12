@@ -55,6 +55,8 @@ Cloudflare Pages deploys `main` and creates previews for pull requests. The appl
 
 Browser security and cache headers are defined in `public/_headers`.
 
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the workflow and required secret names.
+
 ## License
 
 Licensed under the [MIT License](LICENSE).
