@@ -131,6 +131,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: >-
             pages deploy dist
-            --project-name=capacity
+            --project-name=kapa6t
             --commit-dirty=true
             ${{ github.event_name == 'pull_request' && format('--branch={0}', github.head_ref) || '' }}
