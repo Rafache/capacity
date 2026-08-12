@@ -2,7 +2,7 @@
 
 A small browser-only application for planning developer capacity over a July-to-June fiscal year.
 
-[Open the application](https://capacity.chem1.fr/) · [Contributing](CONTRIBUTING.md)
+[Open the application](https://kapa6t.pages.dev/) · [Contributing](CONTRIBUTING.md)
 
 ## Screenshots
 
