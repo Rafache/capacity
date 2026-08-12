@@ -1,10 +1,10 @@
-import js from "@eslint/js";
-import jsxA11y from "eslint-plugin-jsx-a11y";
-import reactHooks from "eslint-plugin-react-hooks";
-import tseslint from "typescript-eslint";
+import js from '@eslint/js';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import reactHooks from 'eslint-plugin-react-hooks';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ["dist", "node_modules"] },
+  { ignores: ['dist', 'node_modules'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   reactHooks.configs.flat.recommended,

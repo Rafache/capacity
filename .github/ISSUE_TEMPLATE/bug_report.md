@@ -1,9 +1,9 @@
 ---
 name: Bug report
 about: Report a reproducible problem
-title: "[P1] "
-labels: "bug"
-assignees: ""
+title: '[P1] '
+labels: 'bug'
+assignees: ''
 ---
 
 ## Description

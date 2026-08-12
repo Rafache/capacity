@@ -1,6 +1,6 @@
-import { AlertTriangle, X, type LucideIcon } from "lucide-react";
-import { useEffect, useId, useRef } from "react";
-import { t } from "../i18n/fr";
+import { AlertTriangle, X, type LucideIcon } from 'lucide-react';
+import { useEffect, useId, useRef } from 'react';
+import { t } from '../i18n/fr';
 
 type Props = {
   open: boolean;
@@ -8,7 +8,7 @@ type Props = {
   description: string;
   confirmLabel: string;
   icon?: LucideIcon;
-  tone?: "danger" | "primary";
+  tone?: 'danger' | 'primary';
   onCancel: () => void;
   onConfirm: () => void;
 };
@@ -20,7 +20,7 @@ export function ConfirmDialog({
   description,
   confirmLabel,
   icon: Icon = AlertTriangle,
-  tone = "danger",
+  tone = 'danger',
   onCancel,
   onConfirm,
 }: Props) {
@@ -36,7 +36,7 @@ export function ConfirmDialog({
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
-  const isDanger = tone === "danger";
+  const isDanger = tone === 'danger';
 
   return (
     <dialog
@@ -51,7 +51,7 @@ export function ConfirmDialog({
         <div className="flex items-start justify-between gap-4">
           <span
             className={`grid size-11 shrink-0 place-items-center rounded-2xl ${
-              isDanger ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"
+              isDanger ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
             }`}
           >
             <Icon className="size-5" aria-hidden="true" />
@@ -69,10 +69,7 @@ export function ConfirmDialog({
         <h2 id={titleId} className="mt-4 text-lg font-black tracking-tight">
           {title}
         </h2>
-        <p
-          id={descriptionId}
-          className="mt-2 text-sm font-medium leading-relaxed text-slate-600"
-        >
+        <p id={descriptionId} className="mt-2 text-sm font-medium leading-relaxed text-slate-600">
           {description}
         </p>
 
@@ -87,8 +84,8 @@ export function ConfirmDialog({
           <button
             className={`h-11 rounded-xl px-4 text-sm font-extrabold text-white shadow-sm transition focus:outline-none ${
               isDanger
-                ? "bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-100"
-                : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-100"
+                ? 'bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-100'
+                : 'bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-100'
             }`}
             value="confirm"
             onClick={onConfirm}

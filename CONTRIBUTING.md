@@ -89,9 +89,7 @@ Development commits may be temporary, but clean the branch before merge. Fold `W
 
 Keep multiple commits when they represent distinct changes worth preserving. Each final commit must be understandable on its own and follow the commit convention above.
 
-- Prefer **Rebase and merge** for several clean, logical commits.
-- Use **Squash and merge** for one logical change or disposable intermediate history.
-- Avoid merge commits on `main` unless there is a specific reason to preserve one.
+Use **Rebase and merge**; it is the only enabled merge method. Preserve several commits only when they are clean, logical and useful independently. Squash disposable intermediate commits locally before merge.
 
 The pull request template contains the final checklist. CI must be green before merge.
 

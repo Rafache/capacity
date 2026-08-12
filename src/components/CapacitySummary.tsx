@@ -1,8 +1,8 @@
-import { CalendarDays, CalendarX2, Gauge } from "lucide-react";
-import { CAPACITY_SEGMENTS } from "./capacitySegments";
-import { formatNumber } from "../i18n/formatters";
-import { t } from "../i18n/fr";
-import type { SegmentKey } from "../types";
+import { CalendarDays, CalendarX2, Gauge } from 'lucide-react';
+import { CAPACITY_SEGMENTS } from './capacitySegments';
+import { formatNumber } from '../i18n/formatters';
+import { t } from '../i18n/fr';
+import type { SegmentKey } from '../types';
 
 type Props = {
   title: string;
@@ -12,7 +12,7 @@ type Props = {
   values: Record<SegmentKey, number>;
 };
 
-function CapacityBar({ values }: Pick<Props, "values">) {
+function CapacityBar({ values }: Pick<Props, 'values'>) {
   const segments = CAPACITY_SEGMENTS.map(({ key, barClass }) => ({
     key,
     barClass,
@@ -21,7 +21,7 @@ function CapacityBar({ values }: Pick<Props, "values">) {
   const total = segments.reduce((sum, segment) => sum + segment.value, 0);
   const description = segments
     .map(({ key, value }) => `${t.segments[key]} : ${formatNumber(value)} ${t.units.day}`)
-    .join(", ");
+    .join(', ');
 
   return (
     <span
@@ -61,22 +61,22 @@ export function CapacitySummary({ title, baseline, absences, available, values }
       icon: CalendarDays,
       label: t.summary.workingDays,
       value: baseline,
-      classes: "text-white",
-      labelClasses: "text-slate-400",
+      classes: 'text-white',
+      labelClasses: 'text-slate-400',
     },
     {
       icon: CalendarX2,
       label: t.summary.absences,
       value: absences,
-      classes: "text-red-300",
-      labelClasses: "text-red-300",
+      classes: 'text-red-300',
+      labelClasses: 'text-red-300',
     },
     {
       icon: Gauge,
       label: t.summary.capacity,
       value: available,
-      classes: "text-emerald-300",
-      labelClasses: "text-emerald-300",
+      classes: 'text-emerald-300',
+      labelClasses: 'text-emerald-300',
     },
   ];
 

@@ -1,9 +1,9 @@
 ---
 name: Feature request
 about: Suggest a user-facing improvement
-title: "[P1] "
-labels: "enhancement"
-assignees: ""
+title: '[P1] '
+labels: 'enhancement'
+assignees: ''
 ---
 
 ## Problem

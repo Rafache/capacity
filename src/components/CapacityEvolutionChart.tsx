@@ -1,7 +1,7 @@
-import { ABSENCE_SEGMENTS } from "./capacitySegments";
-import { formatMonthName, formatNumber } from "../i18n/formatters";
-import { t } from "../i18n/fr";
-import type { MonthStats } from "../types";
+import { ABSENCE_SEGMENTS } from './capacitySegments';
+import { formatMonthName, formatNumber } from '../i18n/formatters';
+import { t } from '../i18n/fr';
+import type { MonthStats } from '../types';
 
 type Props = {
   stats: MonthStats[];
@@ -49,7 +49,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
         aria-label={t.summary.monthlyBalance}
       >
         {stats.map((item, index) => {
-          const month = formatMonthName(index, "short");
+          const month = formatMonthName(index, 'short');
           const absenceTotalForMonth = absenceTotals[index] ?? 0;
           const availableHeight = (item.available / scale) * 100;
           const absenceHeight = (absenceTotalForMonth / scale) * 100;
@@ -82,9 +82,7 @@ export function CapacityEvolutionChart({ stats }: Props) {
                     {ABSENCE_SEGMENTS.map((segment) => {
                       const value = item[segment.key];
                       const segmentHeight =
-                        absenceTotalForMonth > 0
-                          ? (value / absenceTotalForMonth) * 100
-                          : 0;
+                        absenceTotalForMonth > 0 ? (value / absenceTotalForMonth) * 100 : 0;
                       const canShowValue = value >= 2 && segmentHeight >= 18;
 
                       return (

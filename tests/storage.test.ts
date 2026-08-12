@@ -1,7 +1,7 @@
-import assert from "node:assert/strict";
-import test from "node:test";
-import { clearData, loadData, saveData } from "../src/domain/storage";
-import { emptyData, EMPTY_ENTRY } from "../src/domain/capacity";
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { clearData, loadData, saveData } from '../src/domain/storage';
+import { emptyData, EMPTY_ENTRY } from '../src/domain/capacity';
 
 function memoryStorage(initial: Record<string, string> = {}) {
   const values = new Map(Object.entries(initial));
@@ -12,36 +12,36 @@ function memoryStorage(initial: Record<string, string> = {}) {
   } as unknown as Storage;
 }
 
-test("legacy and incompatible local data are ignored", () => {
+test('legacy and incompatible local data are ignored', () => {
   const storage = memoryStorage({
-    "ma-capacite-v3": JSON.stringify({
+    'ma-capacite-v3': JSON.stringify({
       version: 2,
-      zone: "B",
+      zone: 'B',
       entries: { 2026: [{ ...EMPTY_ENTRY, leave: 2 }] },
     }),
-    "ma-capacite-v2": JSON.stringify({ version: 2, zone: "B", entries: {} }),
+    'ma-capacite-v2': JSON.stringify({ version: 2, zone: 'B', entries: {} }),
   });
   const loaded = loadData(storage);
   assert.equal(loaded.storageAvailable, true);
   assert.deepEqual(loaded.data, emptyData());
 });
 
-test("malformed local data is ignored", () => {
-  const loaded = loadData(memoryStorage({ "ma-capacite-v3": "invalid json" }));
+test('malformed local data is ignored', () => {
+  const loaded = loadData(memoryStorage({ 'ma-capacite-v3': 'invalid json' }));
   assert.equal(loaded.storageAvailable, true);
   assert.deepEqual(loaded.data, emptyData());
 });
 
-test("storage failures never break the application", () => {
+test('storage failures never break the application', () => {
   const unavailable = {
     getItem() {
-      throw new Error("unavailable");
+      throw new Error('unavailable');
     },
     setItem() {
-      throw new Error("unavailable");
+      throw new Error('unavailable');
     },
     removeItem() {
-      throw new Error("unavailable");
+      throw new Error('unavailable');
     },
   } as unknown as Storage;
   assert.equal(loadData(unavailable).storageAvailable, false);
@@ -49,9 +49,9 @@ test("storage failures never break the application", () => {
   assert.equal(clearData(unavailable), false);
 });
 
-test("current data can be saved, loaded and cleared", () => {
+test('current data can be saved, loaded and cleared', () => {
   const storage = memoryStorage();
-  const data = { version: 3 as const, zone: "A" as const, entries: {} };
+  const data = { version: 3 as const, zone: 'A' as const, entries: {} };
   assert.equal(saveData(storage, data), true);
   assert.deepEqual(loadData(storage).data, data);
   assert.equal(clearData(storage), true);

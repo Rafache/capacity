@@ -5,8 +5,8 @@ import {
   Coffee,
   GraduationCap,
   type LucideIcon,
-} from "lucide-react";
-import type { AbsenceKey, SegmentKey } from "../types";
+} from 'lucide-react';
+import type { AbsenceKey, SegmentKey } from '../types';
 
 type CapacitySegment<Key extends SegmentKey = SegmentKey> = {
   key: Key;
@@ -18,42 +18,42 @@ type CapacitySegment<Key extends SegmentKey = SegmentKey> = {
 
 export const ABSENCE_SEGMENTS: CapacitySegment<AbsenceKey>[] = [
   {
-    key: "leave",
+    key: 'leave',
     icon: CalendarRange,
-    textClass: "text-capacity-leave",
-    softClass: "bg-capacity-leave-soft text-capacity-leave",
-    barClass: "bg-capacity-leave",
+    textClass: 'text-capacity-leave',
+    softClass: 'bg-capacity-leave-soft text-capacity-leave',
+    barClass: 'bg-capacity-leave',
   },
   {
-    key: "rtt",
+    key: 'rtt',
     icon: Coffee,
-    textClass: "text-capacity-rtt",
-    softClass: "bg-capacity-rtt-soft text-capacity-rtt",
-    barClass: "bg-capacity-rtt",
+    textClass: 'text-capacity-rtt',
+    softClass: 'bg-capacity-rtt-soft text-capacity-rtt',
+    barClass: 'bg-capacity-rtt',
   },
   {
-    key: "training",
+    key: 'training',
     icon: GraduationCap,
-    textClass: "text-capacity-training",
-    softClass: "bg-capacity-training-soft text-capacity-training",
-    barClass: "bg-capacity-training",
+    textClass: 'text-capacity-training',
+    softClass: 'bg-capacity-training-soft text-capacity-training',
+    barClass: 'bg-capacity-training',
   },
   {
-    key: "other",
+    key: 'other',
     icon: BriefcaseBusiness,
-    textClass: "text-capacity-other",
-    softClass: "bg-capacity-other-soft text-capacity-other",
-    barClass: "bg-capacity-other",
+    textClass: 'text-capacity-other',
+    softClass: 'bg-capacity-other-soft text-capacity-other',
+    barClass: 'bg-capacity-other',
   },
 ];
 
 export const CAPACITY_SEGMENTS: CapacitySegment[] = [
   {
-    key: "available",
+    key: 'available',
     icon: CircleCheckBig,
-    textClass: "text-capacity-available",
-    softClass: "bg-capacity-available-soft text-capacity-available",
-    barClass: "bg-capacity-available",
+    textClass: 'text-capacity-available',
+    softClass: 'bg-capacity-available-soft text-capacity-available',
+    barClass: 'bg-capacity-available',
   },
   ...ABSENCE_SEGMENTS,
 ];

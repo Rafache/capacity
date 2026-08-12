@@ -1,7 +1,7 @@
-import { CalendarRange, Download, MoreVertical, Trash2, Upload } from "lucide-react";
-import { useId, useRef, type ChangeEvent } from "react";
-import { t } from "../i18n/fr";
-import type { Zone } from "../types";
+import { CalendarRange, Download, MoreVertical, Trash2, Upload } from 'lucide-react';
+import { useId, useRef, type ChangeEvent } from 'react';
+import { t } from '../i18n/fr';
+import type { Zone } from '../types';
 
 type Props = {
   years: number[];
@@ -15,7 +15,7 @@ type Props = {
 };
 
 const itemClass =
-  "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-200";
+  'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-200';
 
 export function ActionMenu({
   years,
@@ -62,9 +62,7 @@ export function ActionMenu({
           <select
             className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-8 text-sm font-extrabold text-slate-900 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             value={startYear}
-            onChange={(event) =>
-              runAction(() => onFiscalYearChange(Number(event.target.value)))
-            }
+            onChange={(event) => runAction(() => onFiscalYearChange(Number(event.target.value)))}
           >
             {years.map((year) => (
               <option key={year} value={year}>
@@ -83,16 +81,13 @@ export function ActionMenu({
         <p className="mt-2 px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
           {t.actions.schoolBreaks}
         </p>
-        <div
-          className="grid grid-cols-3 gap-1 px-1 pb-1"
-          aria-label={t.actions.schoolZone}
-        >
-          {(["A", "B", "C"] as const).map((schoolZone) => (
+        <div className="grid grid-cols-3 gap-1 px-1 pb-1" aria-label={t.actions.schoolZone}>
+          {(['A', 'B', 'C'] as const).map((schoolZone) => (
             <button
               className={`rounded-xl px-2 py-2 text-xs font-extrabold transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
                 zone === schoolZone
-                  ? "bg-slate-950 text-white"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                  ? 'bg-slate-950 text-white'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
               }`}
               key={schoolZone}
               type="button"

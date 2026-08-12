@@ -1,4 +1,4 @@
-import type { HolidayKey } from "../types";
+import type { HolidayKey } from '../types';
 
 type FiscalMonth = {
   month: number;
@@ -46,17 +46,17 @@ function easterSunday(year: number) {
 export function publicHolidays(year: number): PublicHoliday[] {
   const easter = easterSunday(year);
   return [
-    { key: "newYear", date: dateUTC(year, 0, 1) },
-    { key: "easterMonday", date: addDays(easter, 1) },
-    { key: "labourDay", date: dateUTC(year, 4, 1) },
-    { key: "victoryDay", date: dateUTC(year, 4, 8) },
-    { key: "ascension", date: addDays(easter, 39) },
-    { key: "whitMonday", date: addDays(easter, 50) },
-    { key: "nationalDay", date: dateUTC(year, 6, 14) },
-    { key: "assumption", date: dateUTC(year, 7, 15) },
-    { key: "allSaints", date: dateUTC(year, 10, 1) },
-    { key: "armistice", date: dateUTC(year, 10, 11) },
-    { key: "christmas", date: dateUTC(year, 11, 25) },
+    { key: 'newYear', date: dateUTC(year, 0, 1) },
+    { key: 'easterMonday', date: addDays(easter, 1) },
+    { key: 'labourDay', date: dateUTC(year, 4, 1) },
+    { key: 'victoryDay', date: dateUTC(year, 4, 8) },
+    { key: 'ascension', date: addDays(easter, 39) },
+    { key: 'whitMonday', date: addDays(easter, 50) },
+    { key: 'nationalDay', date: dateUTC(year, 6, 14) },
+    { key: 'assumption', date: dateUTC(year, 7, 15) },
+    { key: 'allSaints', date: dateUTC(year, 10, 1) },
+    { key: 'armistice', date: dateUTC(year, 10, 11) },
+    { key: 'christmas', date: dateUTC(year, 11, 25) },
   ];
 }
 
@@ -75,8 +75,7 @@ export function workingDaysInMonth(year: number, month: number) {
   }
 
   const holidays = publicHolidays(year).filter(
-    ({ date }) =>
-      date.getUTCMonth() === month && date.getUTCDay() !== 0 && date.getUTCDay() !== 6,
+    ({ date }) => date.getUTCMonth() === month && date.getUTCDay() !== 0 && date.getUTCDay() !== 6,
   ).length;
   return count - holidays;
 }
