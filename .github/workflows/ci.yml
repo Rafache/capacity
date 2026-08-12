@@ -106,7 +106,7 @@ jobs:
       deployments: write
     environment:
       name: ${{ github.event_name == 'pull_request' && format('preview/pr-{0}', github.event.pull_request.number) || 'production' }}
-      url: ${{ github.event_name == 'pull_request' && steps.deploy.outputs.pages-deployment-alias-url || 'https://capacity.chem1.fr/' }}
+      url: ${{ github.event_name == 'pull_request' && steps.deploy.outputs.pages-deployment-alias-url || 'https://kapa6t.pages.dev/' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
