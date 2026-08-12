@@ -25,3 +25,9 @@ npm ci
 npm run build
 npm run preview
 ```
+
+## Install on iPhone
+
+Open the production URL in Safari, use **Share**, then **Add to Home Screen**. The site provides a
+web app manifest, standalone display metadata and a dedicated 180 × 180 Apple touch icon. It does
+not install an offline cache; saved capacity data remains managed by the browser.
