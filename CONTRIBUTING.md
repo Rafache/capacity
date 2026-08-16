@@ -26,6 +26,24 @@ npm run dev
 
 5. For UI or build changes, verify the Cloudflare pull-request preview and the relevant behavior on mobile and desktop.
 
+### Manual Cloudflare preview
+
+Use the local development server for normal development:
+
+```bash
+npm run dev
+```
+
+When an externally accessible preview is useful, for example from a remote devbox or a phone, run:
+
+```bash
+npm run preview
+```
+
+This command builds the current checkout and deploys `dist` to the Cloudflare Pages project `kapa6t` using the current Git branch as the preview branch. Wrangler must already be authenticated in the environment running the command.
+
+`npm run preview` is for temporary branch previews only. Production deployment remains handled by CI from `main`, and pull requests continue to receive their normal CI-managed Cloudflare preview.
+
 ## Code conventions
 
 - Code, identifiers, tests, comments, JSDoc, issues and pull requests are written in English.
