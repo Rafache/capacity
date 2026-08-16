@@ -134,6 +134,6 @@ jobs:
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             args+=(--branch="${{ github.head_ref }}")
           fi
-          output=$(npx --yes wrangler@4.81.0 "${args[@]}" 2>&1 | tee /dev/stderr)
+          output=$(npm exec --yes --package=wrangler@4.81.0 -- wrangler "${args[@]}" 2>&1 | tee /dev/stderr)
           url=$(printf '%s\n' "$output" | grep -Eo 'https://[^[:space:]]+\.pages\.dev' | tail -1)
           echo "pages-deployment-alias-url=$url" >> "$GITHUB_OUTPUT"
