@@ -125,12 +125,15 @@ jobs:
 
       - name: Deploy with Wrangler
         id: deploy
-        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: >-
-            pages deploy dist
-            --project-name=kapa6t
-            --commit-dirty=true
-            ${{ github.event_name == 'pull_request' && format('--branch={0}', github.head_ref) || '' }}
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          args=(pages deploy dist --project-name=kapa6t --commit-dirty=true)
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            args+=(--branch="${{ github.head_ref }}")
+          fi
+          output=$(npx --yes wrangler@4.81.0 "${args[@]}" 2>&1 | tee /dev/stderr)
+          url=$(printf '%s\n' "$output" | grep -Eo 'https://[^[:space:]]+\.pages\.dev' | tail -1)
+          echo "pages-deployment-alias-url=$url" >> "$GITHUB_OUTPUT"
