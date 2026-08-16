@@ -41,14 +41,14 @@ npm run build
 npm run preview
 ```
 
-When an externally accessible Cloudflare preview is useful, for example from a remote devbox or a phone, set the Cloudflare Pages project name in the environment and run:
+For a manual Cloudflare deployment, build first and then deploy:
 
 ```bash
-export CLOUDFLARE_PROJECT_NAME=kapa6t
+npm run build
 npm run deploy
 ```
 
-`npm run deploy` builds the current checkout and deploys `dist` to the Cloudflare Pages project defined by `CLOUDFLARE_PROJECT_NAME`, using the current Git branch as the preview branch. It uses the Wrangler version pinned in `devDependencies`, so no global Wrangler installation is required. Cloudflare authentication must already be available in the environment running the command.
+`npm run deploy` uploads the existing `dist` directory to the Cloudflare Pages project defined by `CLOUDFLARE_PROJECT_NAME`, using the current Git branch as the preview branch. The environment variable should be configured once in the development environment rather than exported manually for every deployment. Wrangler is pinned in `devDependencies`, so no global installation is required. Cloudflare authentication must already be available in the environment running the command.
 
 GitHub Actions reads the same project name from the repository variable `CLOUDFLARE_PROJECT_NAME`. Production deployment remains handled by CI from `main`, and pull requests continue to receive their normal CI-managed Cloudflare preview.
 
