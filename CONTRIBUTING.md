@@ -26,6 +26,32 @@ npm run dev
 
 5. For UI or build changes, verify the Cloudflare pull-request preview and the relevant behavior on mobile and desktop.
 
+### Preview and manual deployment
+
+Use the local development server for normal development:
+
+```bash
+npm run dev
+```
+
+To serve the production build locally with Vite:
+
+```bash
+npm run build
+npm run preview
+```
+
+For a manual Cloudflare deployment, build first and then deploy:
+
+```bash
+npm run build
+npm run deploy
+```
+
+`npm run deploy` uploads the existing `dist` directory to the Cloudflare Pages project defined by `CLOUDFLARE_PROJECT_NAME`, using the current Git branch as the preview branch. The environment variable should be configured once in the development environment rather than exported manually for every deployment. Wrangler is pinned in `devDependencies`, so no global installation is required. Cloudflare authentication must already be available in the environment running the command.
+
+GitHub Actions reads the same project name from the repository variable `CLOUDFLARE_PROJECT_NAME`. Production deployment remains handled by CI from `main`, and pull requests continue to receive their normal CI-managed Cloudflare preview.
+
 ## Code conventions
 
 - Code, identifiers, tests, comments, JSDoc, issues and pull requests are written in English.
