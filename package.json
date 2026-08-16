@@ -9,7 +9,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name=kapa6t --branch=$(git branch --show-current)",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=$CLOUDFLARE_PROJECT_NAME --branch=$(git branch --show-current)",
     "test": "node --import tsx --test tests/*.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
